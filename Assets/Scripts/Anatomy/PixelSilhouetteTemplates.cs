@@ -10,16 +10,27 @@ namespace EarthRogueOrigins.PixelCreatures
     /// </summary>
     public static class PixelSilhouetteTemplates
     {
-        // Each profile is y in normalized [-1,1] at seven x sample positions.
+        // Each profile is y in normalized [-1,1] at authored x stations.
         // Top is deliberately asymmetric: shoulder humps and jaw read at tiny scale.
-        static readonly float[] BroadHeadTop={-.16f,.35f,.79f,.98f,.93f,.69f,.33f};
-        static readonly float[] BroadHeadBottom={-.40f,-.71f,-.93f,-1f,-.91f,-.77f,-.54f};
-        static readonly float[] WedgeHeadTop={-.43f,-.30f,.18f,.63f,.91f,.84f,.68f};
-        static readonly float[] WedgeHeadBottom={-.46f,-.65f,-.79f,-.97f,-.93f,-.77f,-.56f};
-        static readonly float[] LongHeadTop={-.35f,.04f,.44f,.83f,.91f,.79f,.50f};
-        static readonly float[] LongHeadBottom={-.51f,-.64f,-.81f,-.94f,-.95f,-.83f,-.60f};
-        static readonly float[] RoundHeadTop={-.31f,.34f,.78f,.98f,.98f,.73f,.23f};
-        static readonly float[] RoundHeadBottom={-.48f,-.78f,-.96f,-1f,-.89f,-.68f,-.39f};
+        // Thirteen author-controlled stations give the snout, raised brow,
+        // cheek bulge and rear-neck connection different rhythms. These
+        // profiles are original hand-authored numeric masks, not image samples.
+        static readonly float[] BroadHeadTop={
+            -.22f,-.15f,.05f,.40f,.65f,.83f,1f,1f,.95f,.90f,.78f,.62f,.44f};
+        static readonly float[] BroadHeadBottom={
+            -.37f,-.51f,-.62f,-.79f,-.90f,-.97f,-1f,-.96f,-.89f,-.82f,-.76f,-.68f,-.52f};
+        static readonly float[] WedgeHeadTop={
+            -.48f,-.39f,-.31f,-.14f,.15f,.48f,.73f,.90f,.95f,.91f,.84f,.74f,.59f};
+        static readonly float[] WedgeHeadBottom={
+            -.49f,-.57f,-.63f,-.73f,-.82f,-.89f,-.97f,-.97f,-.93f,-.86f,-.78f,-.67f,-.54f};
+        static readonly float[] LongHeadTop={
+            -.37f,-.33f,-.27f,-.17f,.08f,.41f,.72f,.89f,.98f,.97f,.90f,.76f,.49f};
+        static readonly float[] LongHeadBottom={
+            -.48f,-.53f,-.61f,-.67f,-.74f,-.82f,-.90f,-.96f,-.98f,-.95f,-.85f,-.72f,-.53f};
+        static readonly float[] RoundHeadTop={
+            -.32f,-.07f,.30f,.62f,.85f,.97f,1f,1f,.98f,.89f,.76f,.52f,.22f};
+        static readonly float[] RoundHeadBottom={
+            -.44f,-.61f,-.78f,-.87f,-.96f,-1f,-1f,-.97f,-.87f,-.77f,-.64f,-.51f,-.39f};
         static readonly float[] TorsoTop={.23f,.55f,.83f,.99f,.96f,.78f,.51f};
         static readonly float[] TorsoBottom={-.22f,-.64f,-.92f,-1f,-.91f,-.74f,-.44f};
         static readonly float[] StockyTop={.46f,.76f,.96f,1f,.98f,.90f,.65f};
