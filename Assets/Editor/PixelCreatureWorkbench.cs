@@ -85,6 +85,20 @@ namespace EarthRogueOrigins.Editor
             recipe.baseColor=(Color32)EditorGUILayout.ColorField("Base pigment",recipe.baseColor);
             recipe.secondaryColor=(Color32)EditorGUILayout.ColorField("Secondary pigment",recipe.secondaryColor);
             recipe.accentColor=(Color32)EditorGUILayout.ColorField("Accent",recipe.accentColor);
+            if(!string.IsNullOrWhiteSpace(recipe.id))
+            {
+                try
+                {
+                    var proposed=ScientificNameGenerator.Describe(
+                        recipe,(int)recipe.archetype+1);
+                    EditorGUILayout.LabelField("Proposed binomial",proposed.Binomial);
+                    EditorGUILayout.HelpBox(
+                        "This is a morphology-based proposed name. A population's "+
+                        "canonical scientific name is registered once by EcosystemWorld "+
+                        "and inherited by its descendants.",MessageType.None);
+                }
+                catch(ArgumentException){/* Recipe editor is mid-edit. */}
+            }
             if(EditorGUI.EndChangeCheck())RepaintPreview();
             GUILayout.Space(10);
             if(preview!=null)
@@ -135,6 +149,10 @@ namespace EarthRogueOrigins.Editor
                    !EditorUtility.DisplayDialog("Existing asset","Overwrite "+safe+"?","Overwrite","Cancel"))
                     return;
                 File.WriteAllText(recipeFile,JsonUtility.ToJson(recipe,true));
+                var proposedSpecies=ScientificNameGenerator.Describe(
+                    recipe,(int)recipe.archetype+1);
+                File.WriteAllText(folder+"/proposed_taxon.json",
+                    JsonUtility.ToJson(proposedSpecies,true));
                 var all=PixelCreaturePainter.Render(recipe);
                 try{File.WriteAllBytes(folder+"/assembled.png",all.EncodeToPNG());}
                 finally{DestroyImmediate(all);}
