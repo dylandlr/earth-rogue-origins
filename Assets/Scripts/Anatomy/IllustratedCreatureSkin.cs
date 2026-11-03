@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EarthRogueOrigins.Anatomy
@@ -15,6 +16,7 @@ namespace EarthRogueOrigins.Anatomy
         [SerializeField] CreatureArtLibrary art;
         ArticulatedCreatureView rig;
         GameObject skinRoot;
+        readonly List<GameObject> createdParts = new List<GameObject>();
         bool initialized;
 
         public bool IsIllustrated { get { return initialized; } }
@@ -23,12 +25,7 @@ namespace EarthRogueOrigins.Anatomy
         {
             rig=GetComponent<ArticulatedCreatureView>();
             if(rig==null || rig.Phenotype==null)throw new InvalidOperationException("Initialize anatomy rig before applying art.");
-            if(skinRoot!=null)
-            {
-                if(Application.isPlaying)Destroy(skinRoot);
-                else DestroyImmediate(skinRoot);
-                skinRoot=null;
-            }
+            ClearParts();
             rig.SetPrimitiveVisible(true);
             initialized=false;
             art=library;
@@ -97,11 +94,12 @@ namespace EarthRogueOrigins.Anatomy
             return true;
         }
 
-        static SpriteRenderer RenderPart(string name, Sprite sprite,Transform parent,
+        SpriteRenderer RenderPart(string name, Sprite sprite,Transform parent,
             Vector3 localPosition,float width,float height,int sortOrder,Color tint)
         {
             if(sprite==null)return null;
             var obj=new GameObject(name);
+            createdParts.Add(obj);
             obj.transform.SetParent(parent,false);
             obj.transform.localPosition=localPosition;
             var bounds=sprite.bounds.size;
@@ -116,10 +114,27 @@ namespace EarthRogueOrigins.Anatomy
             return renderer;
         }
 
+        void ClearParts()
+        {
+            foreach(var part in createdParts)
+            {
+                if(part==null)continue;
+                if(Application.isPlaying)Destroy(part);
+                else DestroyImmediate(part);
+            }
+            createdParts.Clear();
+            if(skinRoot!=null)
+            {
+                if(Application.isPlaying)Destroy(skinRoot);
+                else DestroyImmediate(skinRoot);
+                skinRoot=null;
+            }
+            initialized=false;
+        }
+
         void OnDestroy()
         {
-            // Generated parts are GameObjects parented under existing rig joints.
-            // Unity will destroy them with the organism root.
+            ClearParts();
         }
     }
 }
