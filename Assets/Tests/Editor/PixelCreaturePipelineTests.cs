@@ -139,6 +139,64 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void HeroArchetypesHaveDistinctControlledOutputs()
+        {
+            var keys=new System.Collections.Generic.HashSet<string>();
+            foreach(CreatureArchetype family in Enum.GetValues(typeof(CreatureArchetype)))
+            {
+                var hero=PixelArtDirection.Hero(family,462);
+                hero.Validate();
+                var pixels=PixelCreaturePainter.RenderPixels(hero);
+                int visible=0;
+                ulong hash=14695981039346656037UL;
+                unchecked
+                {
+                    foreach(var color in pixels)
+                    {
+                        if(color.a!=0)visible++;
+                        hash^=color.r;hash*=1099511628211UL;
+                        hash^=color.g;hash*=1099511628211UL;
+                        hash^=color.b;hash*=1099511628211UL;
+                        hash^=color.a;hash*=1099511628211UL;
+                    }
+                }
+                Assert.Greater(visible,100,family.ToString());
+                Assert.IsTrue(keys.Add(hash.ToString()),"Duplicate hero artwork: "+family);
+            }
+            Assert.AreEqual(8,keys.Count);
+        }
+
+        [Test]
+        public void PaletteRampsHaveOrderedLightness()
+        {
+            foreach(CreaturePalette palette in Enum.GetValues(typeof(CreaturePalette)))
+            {
+                var ramp=PixelArtDirection.Ramp(palette);
+                Func<Color32,float> value=c=>c.r*.2126f+c.g*.7152f+c.b*.0722f;
+                Assert.Less(value(ramp.ink),value(ramp.shadow));
+                Assert.Less(value(ramp.shadow),value(ramp.mid));
+                Assert.Less(value(ramp.mid),value(ramp.light));
+                Assert.Less(value(ramp.light),value(ramp.highlight));
+            }
+        }
+
+        [Test]
+        public void MarkingDensityChangesPixelsWithoutChangingBodyPlan()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,1924);
+            recipe.pattern=MarkingPattern.MottledBack;
+            recipe.spots=0f;
+            var before=PixelCreaturePainter.RenderPixels(recipe);
+            recipe.spots=1f;
+            var after=PixelCreaturePainter.RenderPixels(recipe);
+            int changed=0;
+            for(int i=0;i<before.Length;i++)
+                if(!before[i].Equals(after[i]))changed++;
+            Assert.Greater(changed,0);
+            Assert.AreEqual(CreaturePlan.Tetrapod,recipe.plan);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
