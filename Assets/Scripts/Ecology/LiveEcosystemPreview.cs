@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using EarthRogueOrigins.Ecology;
+using EarthRogueOrigins.Anatomy;
+using EarthRogueOrigins.Evolution;
 
 namespace EarthRogueOrigins.Preview
 {
@@ -17,6 +19,9 @@ namespace EarthRogueOrigins.Preview
         public float secondsPerTick = .2f;
         public Sprite[] forestTiles, mudTiles, waterTiles, rockTiles, floodplainTiles;
         public Sprite[] organismSprites;
+        public bool useAnatomicalSprites = true;
+        readonly List<Sprite> createdSprites = new List<Sprite>();
+        readonly List<Texture2D> createdTextures = new List<Texture2D>();
         public Camera worldCamera;
 
         EcosystemWorld world;
@@ -36,6 +41,9 @@ namespace EarthRogueOrigins.Preview
         void Restart()
         {
             foreach(var o in createdObjects)if(o!=null)Destroy(o);
+            foreach(var sprite in createdSprites)if(sprite!=null)Destroy(sprite);
+            foreach(var texture in createdTextures)if(texture!=null)Destroy(texture);
+            createdSprites.Clear();createdTextures.Clear();
             createdObjects.Clear();creatureRenderers.Clear();
             world=new EcosystemWorld(worldWidth,worldHeight,seed);
             for(int y=0;y<worldHeight;y++)
@@ -137,7 +145,17 @@ namespace EarthRogueOrigins.Preview
                     creatureRenderers[c.id]=renderer;
                     createdObjects.Add(go);
                 }
-                if(organismSprites!=null && organismSprites.Length>0)
+                if(renderer.sprite==null && useAnatomicalSprites && c.development!=null)
+                {
+                    var genome=new DiploidGenome();
+                    Array.Copy(c.genes,genome.alleles,Math.Min(c.genes.Length,genome.alleles.Length));
+                    var phenotype=Development.Express(c.development,genome);
+                    var sprite=AnatomySpriteBaker.BakeSprite(phenotype,c.id+seed*17);
+                    createdSprites.Add(sprite);
+                    createdTextures.Add(sprite.texture);
+                    renderer.sprite=sprite;
+                }
+                else if(renderer.sprite==null && organismSprites!=null && organismSprites.Length>0)
                 {
                     int index=Mathf.Clamp(Mathf.RoundToInt(c.Trait(1)*5),0,5);
                     renderer.sprite=organismSprites[(index+Mathf.Max(0,c.speciesId-1)*6)%organismSprites.Length];
@@ -145,7 +163,7 @@ namespace EarthRogueOrigins.Preview
                 renderer.color=c.diet==DietKind.Predator?new Color(1,.68f,.6f):
                     c.diet==DietKind.Detritivore?new Color(.9f,.85f,1f):Color.white;
                 renderer.transform.position=new Vector3(c.position.x,c.position.y,-.03f);
-                renderer.transform.localScale=Vector3.one*.78f;
+                renderer.transform.localScale=Vector3.one*(useAnatomicalSprites?1f:.78f);
             }
             var expired=new List<int>();
             foreach(var pair in creatureRenderers)
