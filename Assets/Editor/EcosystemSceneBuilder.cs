@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace EarthRogueOrigins.Editor
         public static void BuildScene()
         {
             const string scenePath="Assets/Scenes/EcosystemLab.unity";
+            Directory.CreateDirectory("Assets/Scenes");
             // Generate source sprites first so the saved scene contains direct sprite references.
             ProceduralArtGenerator.Generate();
             var illustratedLibrary=IllustratedPartsGenerator.Generate();
