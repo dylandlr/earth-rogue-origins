@@ -147,10 +147,14 @@ namespace EarthRogueOrigins.Ecology
                 if (!c.Alive) dead.Add(c);
             }
 
+            // Capture all deaths, including animals killed by a predator after
+            // their own turn has already executed in this simulation tick.
+            dead.Clear();
+            foreach (var c in creatures)
+                if (!c.Alive) dead.Add(c);
             // Events are applied after the iteration to avoid invalidating enumerators.
             foreach (var c in dead)
             {
-                if (!creatures.Contains(c)) continue;
                 var tile=Cell(Mathf.FloorToInt(c.position.x),Mathf.FloorToInt(c.position.y));
                 tile.detritus=Mathf.Min(100,tile.detritus+15f);
                 deaths++;
