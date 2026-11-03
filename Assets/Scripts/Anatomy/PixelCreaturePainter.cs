@@ -230,34 +230,56 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     else
                     {
-                        int thickness=d.style==PartStyle.Slender?Mathf.Max(4,w/3):
-                            d.style==PartStyle.Robust?Mathf.Max(7,w/2+2):Mathf.Max(5,w/2);
-                        int plantedX=x+d.mirrorGroup;
-                        Line(c,x,y,plantedX+2,y-h+3,c.ink,thickness);
-                        Line(c,x,y,plantedX+2,y-h+3,r.baseColor,Mathf.Max(2,thickness-3));
-                        // A broad, flattened three-toe contact foot provides a
-                        // distinct planted silhouette instead of a straight cap.
-                        int ground=y-h+1;
-                        int footX=plantedX;
-                        int toeSpread=d.style==PartStyle.Webbed?9:
+                        bool farSide=d.drawOrder<2;
+                        bool foreleg=d.slot==PartSlot.ForeLeg;
+                        var shape=PixelLimbSilhouette.Build(
+                            x,y,h,d.style,d.mirrorGroup,foreleg,farSide);
+                        // The far leg is darker and narrower. Near legs use a
+                        // shaded shoulder and an independently bent shin.
+                        Color32 skin=farSide?palette.shadow:r.baseColor;
+                        Color32 underside=farSide?palette.ink:palette.shadow;
+                        Polygon(c,PixelLimbSilhouette.UpperPolygon(shape),c.ink);
+                        Polygon(c,PixelLimbSilhouette.LowerPolygon(shape),c.ink);
+                        // Inset material follows knee and ankle directions,
+                        // avoiding the single straight limb-bar silhouette.
+                        Line(c,shape.root.x,shape.root.y,
+                            shape.knee.x,shape.knee.y,skin,
+                            Mathf.Max(2,shape.upperRadius*2-3));
+                        Line(c,shape.knee.x,shape.knee.y,
+                            shape.ankle.x,shape.ankle.y,underside,
+                            Mathf.Max(2,shape.lowerRadius*2-2));
+                        if(!farSide)
+                        {
+                            Line(c,shape.root.x-1,shape.root.y+1,
+                                shape.knee.x-1,shape.knee.y+2,
+                                palette.light,2);
+                            c.Put(shape.knee.x-1,shape.knee.y+1,r.baseColor);
+                        }
+                        int ground=shape.ankle.y-2;
+                        int footX=shape.ankle.x;
+                        int toeSpread=d.style==PartStyle.Webbed?8:
                             d.style==PartStyle.Robust?7:5;
-                        Ellipse(c,footX-1,ground,5,3,c.ink);
-                        Line(c,footX-toeSpread,ground-1,footX+toeSpread,ground-1,c.ink,3);
-                        Line(c,footX-toeSpread+2,ground,footX+toeSpread-1,ground,light,1);
+                        // Three distinct digit clusters taper toward the
+                        // ground and stay connected to the ankle.
+                        Ellipse(c,footX,ground+1,toeSpread-2,3,c.ink);
+                        Ellipse(c,footX,ground+2,
+                            Mathf.Max(2,toeSpread-4),2,skin);
                         var toes=PixelDetailGrammar.FootToes(footX,ground,d.style);
                         foreach(var toe in toes)
                         {
                             Line(c,footX,ground+1,toe.x,toe.y,c.ink,2);
-                            c.Put(toe.x,toe.y+1,palette.highlight);
+                            c.Put(toe.x,toe.y+1,
+                                farSide?palette.shadow:palette.highlight);
                         }
                         if(d.style==PartStyle.Webbed)
                         {
                             Polygon(c,new[]{
                                 new Vector2Int(footX-toeSpread,ground+1),
                                 new Vector2Int(footX+toeSpread,ground+1),
-                                new Vector2Int(footX,ground+7)
+                                new Vector2Int(footX,ground+5)
                             },palette.shadow);
-                            Line(c,footX-toeSpread+2,ground+2,footX+toeSpread-2,ground+2,
+                            Line(c,footX-toeSpread+2,ground+2,
+                                footX+toeSpread-2,ground+2,
                                 palette.light,1);
                         }
                     }
