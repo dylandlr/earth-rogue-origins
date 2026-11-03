@@ -67,6 +67,8 @@ namespace EarthRogueOrigins.Ecology
             if(creature==null)throw new ArgumentNullException(nameof(creature));
             return GetSpecies(creature.speciesId).Binomial;
         }
+        public readonly SpeciationSettings speciationSettings=new SpeciationSettings();
+        readonly SpeciationDetector speciationDetector=new SpeciationDetector();
         readonly System.Random random;
         readonly List<EvolvingCreature> newborns = new List<EvolvingCreature>();
         readonly List<EvolvingCreature> dead = new List<EvolvingCreature>();
@@ -210,9 +212,76 @@ namespace EarthRogueOrigins.Ecology
                 creatures.AddRange(newborns);
                 births += newborns.Count;
             }
+            if(speciationSettings.enabled &&
+               speciationSettings.evaluationInterval>0 &&
+               tick%speciationSettings.evaluationInterval==0)
+                CheckSpeciation();
             if (tick % 100 == 0)
                 events.Add("Tick "+tick+": "+creatures.Count+" organisms, "+births+" births, "+deaths+" deaths.");
             if (events.Count > 100) events.RemoveRange(0,events.Count-100);
+        }
+
+        /// <summary>
+        /// Promotion changes only taxonomy, never physiology. The high-x
+        /// population retains its actual genome, position, pedigree and diet.
+        /// Previous names and ancestors remain in the catalog.
+        /// </summary>
+        void CheckSpeciation()
+        {
+            // Snapshot IDs to avoid modifying the catalog during enumeration.
+            var speciesIds=new List<int>(speciesCatalog.Keys);
+            foreach(int parentId in speciesIds)
+            {
+                var evidence=speciationDetector.Observe(
+                    parentId,creatures,speciationSettings);
+                if(evidence==null ||
+                   evidence.observations<speciationSettings.requiredConsecutiveWindows)
+                    continue;
+                var candidates=new HashSet<int>(evidence.candidateIndividualIds);
+                EvolvingCreature founder=null;
+                foreach(var c in creatures)
+                    if(candidates.Contains(c.id) &&
+                       (founder==null || c.id<founder.id))
+                        founder=c;
+                if(founder==null)continue;
+                int childId=0;
+                foreach(var id in speciesCatalog.Keys)
+                    childId=Math.Max(childId,id+1);
+                var phenotype=Development.Express(
+                    founder.development,ToGenome(founder.genes));
+                var recipe=PixelRecipeAdapter.FromDevelopment(
+                    founder.development,phenotype,
+                    unchecked(seed*37+childId));
+                var taxon=ScientificNameGenerator.Describe(recipe,childId);
+                taxon.parentSpeciesId=parentId;
+                taxon.foundedTick=tick;
+                taxon.foundingGeneticDistance=evidence.geneticDistance;
+                taxon.foundingGeographicGap=evidence.geographicGap;
+                while(NameUsed(taxon.Binomial))
+                    taxon=ScientificNameGenerator.Distinguish(taxon,childId);
+                speciesCatalog.Add(childId,taxon);
+                foreach(var c in creatures)
+                    if(c.speciesId==parentId&&candidates.Contains(c.id))
+                        c.speciesId=childId;
+                // Both populations must retain at least the configured
+                // viable count. The evaluator has already checked this.
+                events.Add("Tick "+tick+": divergence observed: "+
+                    taxon.Binomial+" branched from "+
+                    speciesCatalog[parentId].Binomial+
+                    " (distance="+evidence.geneticDistance.ToString("F3",
+                        System.Globalization.CultureInfo.InvariantCulture)+
+                    ", gap="+evidence.geographicGap.ToString("F2",
+                        System.Globalization.CultureInfo.InvariantCulture)+
+                    ", windows="+evidence.observations+").");
+                speciationDetector.Clear();
+            }
+        }
+
+        bool NameUsed(string name)
+        {
+            foreach(var t in speciesCatalog.Values)
+                if(t.Binomial==name)return true;
+            return false;
         }
 
         void UpdateEnvironment(float dt)
