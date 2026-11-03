@@ -91,7 +91,7 @@ namespace EarthRogueOrigins.Anatomy
         {
             if(g==null)throw new ArgumentNullException(nameof(g));
             if(g.bodyPlan!=0)throw new NotSupportedException("Only tetrapod body plan is available.");
-            float speed=physiology==null?.5f:physiology.Phenotype(Locus.Speed);
+            float speed=physiology == null ? .5f : physiology.Phenotype(Locus.Speed);
             float armor=physiology==null?.5f:physiology.Phenotype(Locus.Armor);
             var p=new AnatomicalPhenotype{bodyPlan=g.bodyPlan};
             p.trunkLength=Mathf.Lerp(.65f,1.35f,g.Get(BodyGene.TrunkLength));
