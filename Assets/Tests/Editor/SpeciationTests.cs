@@ -99,6 +99,36 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void ReplacedCohortCannotInheritAnOldSpeciationStreak()
+        {
+            var detector=new SpeciationDetector();
+            var population=MakeSeparatedPopulation();
+            Assert.AreEqual(1,detector.Observe(4,population,Settings()).observations);
+            Assert.AreEqual(2,detector.Observe(4,population,Settings()).observations);
+            // Same location and identical genotype: only individual identity
+            // changed, so geographic centroid checks alone would falsely pass.
+            for(int i=5;i<population.Count;i++)
+                population[i].id+=1000;
+            var evidence=detector.Observe(4,population,Settings());
+            Assert.NotNull(evidence);
+            Assert.AreEqual(1,evidence.observations);
+            Assert.AreEqual(1f,evidence.retainedCohortFraction);
+        }
+
+        [Test]
+        public void MinorPopulationTurnoverPreservesIsolationEvidence()
+        {
+            var detector=new SpeciationDetector();
+            var population=MakeSeparatedPopulation();
+            Assert.AreEqual(1,detector.Observe(4,population,Settings()).observations);
+            population[9].id=1999; // Four of five remain from previous cohort.
+            var evidence=detector.Observe(4,population,Settings());
+            Assert.NotNull(evidence);
+            Assert.AreEqual(2,evidence.observations);
+            Assert.That(evidence.retainedCohortFraction,Is.EqualTo(.8f).Within(.001f));
+        }
+
+        [Test]
         public void WorldRecordsBranchWithoutDiscardingPedigreesOrRenamingParent()
         {
             var world=new EcosystemWorld(32,12,2718);
