@@ -6,7 +6,8 @@
 - [x] Expose archetype/palette/marking selection in Unity Composer
 - [x] Add tests for distinct archetype renders, palette order and pigment variation
 - [ ] Run Unity compile, Edit Mode tests and export actual rendered contact sheets
-- [ ] Replace placeholder primitive head/trunk masks with carefully authored pixel silhouettes
+- [x] Replace primitive head/trunk ellipses with authored 7-point contour profiles
+- [ ] Add masked shoulder, neck and tail-root blending to remove remaining composition seams
 - [ ] Perform side-by-side quality acceptance against the recreated sprite reference
 
 ## Milestone 1B: Original composable pixel-art asset system
