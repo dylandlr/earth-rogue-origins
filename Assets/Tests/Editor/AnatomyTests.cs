@@ -11,11 +11,11 @@ namespace EarthRogueOrigins.Tests
         [Test]
         public void FoundersAndChildrenAreReproducible()
         {
-            var a=DevelopmentalGenome.Founder(new Random(612));
-            var b=DevelopmentalGenome.Founder(new Random(612));
+            var a=DevelopmentalGenome.Founder(new System.Random(612));
+            var b=DevelopmentalGenome.Founder(new System.Random(612));
             CollectionAssert.AreEqual(a.regulatory,b.regulatory);
-            var child1=DevelopmentalGenome.Child(a,b,new Random(9));
-            var child2=DevelopmentalGenome.Child(a,b,new Random(9));
+            var child1=DevelopmentalGenome.Child(a,b,new System.Random(9));
+            var child2=DevelopmentalGenome.Child(a,b,new System.Random(9));
             CollectionAssert.AreEqual(child1.regulatory,child2.regulatory);
         }
 
@@ -24,7 +24,7 @@ namespace EarthRogueOrigins.Tests
         {
             for(int seed=0;seed<100;seed++)
             {
-                var genome=DevelopmentalGenome.Founder(new Random(seed));
+                var genome=DevelopmentalGenome.Founder(new System.Random(seed));
                 var phenotype=Development.Express(genome);
                 Assert.IsTrue(Development.IsValid(phenotype),"Seed "+seed);
                 Assert.Greater(phenotype.head.x,phenotype.tailRoot.x);
@@ -35,7 +35,7 @@ namespace EarthRogueOrigins.Tests
         [Test]
         public void DorsalArmorFollowsBackCurve()
         {
-            var g=DevelopmentalGenome.Founder(new Random(24));
+            var g=DevelopmentalGenome.Founder(new System.Random(24));
             g.regulatory[(int)BodyGene.ArmorCoverage]=1f;
             var p=Development.Express(g);
             Assert.AreEqual(17,p.dorsalSurface.Length);
@@ -47,7 +47,7 @@ namespace EarthRogueOrigins.Tests
         [Test]
         public void LargeAquaticFinImprovesSwimmingButCostsMass()
         {
-            var g=DevelopmentalGenome.Founder(new Random(9));
+            var g=DevelopmentalGenome.Founder(new System.Random(9));
             g.regulatory[(int)BodyGene.TailFin]=0f;
             var baseForm=Development.Express(g);
             g.regulatory[(int)BodyGene.TailFin]=1f;
@@ -59,7 +59,7 @@ namespace EarthRogueOrigins.Tests
         [Test]
         public void ArmorIncreasesDefenseAndUpkeep()
         {
-            var g=DevelopmentalGenome.Founder(new Random(9));
+            var g=DevelopmentalGenome.Founder(new System.Random(9));
             g.regulatory[(int)BodyGene.ArmorCoverage]=0f;
             var low=Development.Express(g);
             g.regulatory[(int)BodyGene.ArmorCoverage]=1f;
@@ -71,7 +71,7 @@ namespace EarthRogueOrigins.Tests
         [Test]
         public void RasterizedCreatureHasVisiblePixelsAndSafeDimensions()
         {
-            var p=Development.Express(DevelopmentalGenome.Founder(new Random(12)));
+            var p=Development.Express(DevelopmentalGenome.Founder(new System.Random(12)));
             var texture=AnatomySpriteBaker.Bake(p,99);
             try
             {
@@ -90,7 +90,7 @@ namespace EarthRogueOrigins.Tests
         [Test]
         public void InheritedAnatomyStaysWithinGenomeBounds()
         {
-            var random=new Random(1);
+            var random=new System.Random(1);
             var a=DevelopmentalGenome.Founder(random);
             var b=DevelopmentalGenome.Founder(random);
             for(int i=0;i<200;i++)
