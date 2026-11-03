@@ -1,3 +1,9 @@
+## Species taxonomy v2.1
+
+Creatures now receive fictional Latin-style scientific names from the traits of the first founder of each simulated species. The name belongs to a `speciesId`, not an individual: offspring retain their parent's species name, and normal variation does not trigger a rename. The Ecosystem Lab displays names and live populations; starter asset exports contain `species.json`, and the Creator workbench displays proposed names.
+
+A new [face contour verification workflow](Docs/SCIENTIFIC_TAXONOMY_AND_FACE_AUDIT_V21.md) checks that eyes, mouth and nostrils remain within the 13-station head silhouette. Run `scripts/verify-face-contours.ps1 -UnityEditor "<path-to-Unity.exe>"` on Windows for the authoritative C# render. Unity compilation and automated Editor test execution remain pending.
+
 # Earth: Rogue Origins
 
 **A 2.5D prehistoric evolution, ecology, roguelike, and colony simulator built in Unity.**
