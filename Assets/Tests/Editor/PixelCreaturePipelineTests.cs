@@ -399,6 +399,46 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void MottlingAndFootTemplatesStayWithinLogicalCanvas()
+        {
+            foreach(CreatureArchetype archetype in Enum.GetValues(typeof(CreatureArchetype)))
+            {
+                var recipe=PixelArtDirection.Hero(archetype,1018);
+                var pixels=PixelCreaturePainter.RenderPixels(recipe);
+                Assert.AreEqual(128*96,pixels.Length);
+                var marks=PixelDetailGrammar.DorsalMottle(recipe,63,50,60,27);
+                foreach(var mark in marks)
+                {
+                    Assert.That(mark.x,Is.InRange(0,127));
+                    Assert.That(mark.y,Is.InRange(0,95));
+                    Assert.That(mark.radius,Is.InRange(1,3));
+                }
+                foreach(var toe in PixelDetailGrammar.FootToes(44,31,recipe.limbStyle))
+                {
+                    Assert.That(toe.x,Is.InRange(0,127));
+                    Assert.That(toe.y,Is.InRange(0,95));
+                }
+            }
+        }
+
+        [Test]
+        public void FleshyTailRemainsDeterministicAcrossAllPoseFrames()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,981);
+            for(int phase=0;phase<PixelCreaturePoses.Frames;phase++)
+            {
+                var first=PixelCreaturePainter.RenderPixels(r,phase,true);
+                var second=PixelCreaturePainter.RenderPixels(r,phase,true);
+                CollectionAssert.AreEqual(first,second);
+                int visibleTail=0;
+                for(int y=42;y<=68;y++)
+                for(int x=98;x<125;x++)
+                    if(first[y*128+x].a>0)visibleTail++;
+                Assert.Greater(visibleTail,8);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
