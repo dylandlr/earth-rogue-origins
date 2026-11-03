@@ -566,6 +566,106 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void TorsoContourIsAsymmetricAndInBoundsAcrossStyles()
+        {
+            foreach(PartStyle style in new[]{PartStyle.Rounded,
+                PartStyle.Robust,PartStyle.Slender})
+            {
+                float[] top,bottom;
+                PixelSilhouetteTemplates.Profile(
+                    PartSlot.Trunk,style,out top,out bottom);
+                Assert.GreaterOrEqual(top.Length,13);
+                Assert.AreEqual(top.Length,bottom.Length);
+                // Anatomical dorsal rise and sloped rump must differ
+                // on the left and right, unlike a mirrored ellipse.
+                Assert.AreNotEqual(top[2],top[top.Length-3]);
+                for(int i=0;i<=100;i++)
+                {
+                    float u=i/100f;
+                    float hi=PixelSilhouetteTemplates.Sample(top,u);
+                    float lo=PixelSilhouetteTemplates.Sample(bottom,u);
+                    Assert.Greater(hi,lo,style.ToString());
+                    Assert.That(hi,Is.InRange(-1f,1f));
+                    Assert.That(lo,Is.InRange(-1f,1f));
+                }
+            }
+        }
+
+        [Test]
+        public void LimbTailAndNeckAttachmentsTrackInheritedTrunkLength()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+            r.legLength=.5f;
+            int earlierRearX=-1,earlierRootX=-1;
+            foreach(float length in new[]{0f,.25f,.5f,.75f,1f})
+            foreach(float depth in new[]{0f,.5f,1f})
+            {
+                r.trunkLength=length;r.trunkDepth=depth;
+                var parts=PixelCreatureDevelopment.Layout(r);
+                PixelPartDescriptor trunk=null,head=null,neck=null,
+                    tail=null,tailRoot=null,fore=null,rear=null;
+                foreach(var p in parts)
+                {
+                    if(p.slot==PartSlot.Trunk)trunk=p;
+                    if(p.slot==PartSlot.Head)head=p;
+                    if(p.slot==PartSlot.NeckBlend)neck=p;
+                    if(p.slot==PartSlot.TailRootBlend)tailRoot=p;
+                    if(p.slot==PartSlot.Tail)tail=p;
+                    if(p.slot==PartSlot.ForeLeg&&p.drawOrder==9)fore=p;
+                    if(p.slot==PartSlot.HindLeg&&p.drawOrder==9)rear=p;
+                }
+                Assert.NotNull(trunk);Assert.NotNull(head);
+                Assert.NotNull(neck);Assert.NotNull(tailRoot);
+                Assert.NotNull(tail);Assert.NotNull(fore);Assert.NotNull(rear);
+                int left=trunk.anchor.x-trunk.extent.x/2;
+                int right=trunk.anchor.x+trunk.extent.x/2;
+                Assert.That(fore.anchor.x,Is.InRange(left,right));
+                Assert.That(rear.anchor.x,Is.InRange(left,right));
+                Assert.Greater(rear.anchor.x,fore.anchor.x);
+                Assert.That(tailRoot.anchor.x,Is.InRange(right-5,right+1));
+                Assert.Greater(tail.anchor.x,tailRoot.anchor.x);
+                int headRight=head.anchor.x+head.extent.x/2;
+                Assert.LessOrEqual(neck.anchor.x-neck.extent.x/2,headRight+1);
+                Assert.GreaterOrEqual(neck.anchor.x+neck.extent.x/2,left-1);
+                // Same inherited torso length must position the hip and
+                // tail consistently regardless of depth changes.
+                if(depth==0f && earlierRearX>=0)
+                {
+                    Assert.GreaterOrEqual(rear.anchor.x,earlierRearX);
+                    Assert.GreaterOrEqual(tailRoot.anchor.x,earlierRootX);
+                }
+                if(depth==0f)
+                {
+                    earlierRearX=rear.anchor.x;earlierRootX=tailRoot.anchor.x;
+                }
+                var pixels=PixelCreaturePainter.RenderPixels(r);
+                int painted=0;
+                foreach(var pixel in pixels)if(pixel.a>0)painted++;
+                Assert.Greater(painted,250);
+            }
+        }
+
+        [Test]
+        public void FaceRemainsAboveNeckAndLimbOcclusionLayers()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,47);
+            var parts=PixelCreatureDevelopment.Layout(r);
+            int eyeOrder=-1,faceOrder=-1,headOrder=-1,neckOrder=-1,hipOrder=-1;
+            foreach(var p in parts)
+            {
+                if(p.slot==PartSlot.Eye)eyeOrder=p.drawOrder;
+                if(p.slot==PartSlot.FaceDetails)faceOrder=p.drawOrder;
+                if(p.slot==PartSlot.Head)headOrder=p.drawOrder;
+                if(p.slot==PartSlot.NeckBlend)neckOrder=p.drawOrder;
+                if(p.slot==PartSlot.HipBlend)hipOrder=p.drawOrder;
+            }
+            Assert.Less(neckOrder,headOrder);
+            Assert.Less(headOrder,faceOrder);
+            Assert.Less(faceOrder,eyeOrder);
+            Assert.Less(hipOrder,eyeOrder);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
