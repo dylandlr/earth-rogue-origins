@@ -29,6 +29,7 @@ namespace EarthRogueOrigins.Ecology
         public int observations;
         public int leftCount,rightCount;
         public float geographicGap,centroidSeparation,geneticDistance;
+        public Vector2 leftCentroid,rightCentroid;
         public int[] candidateIndividualIds;
     }
 
@@ -116,6 +117,12 @@ namespace EarthRogueOrigins.Ecology
 
             SpeciationEvidence previous;
             streaks.TryGetValue(speciesId,out previous);
+            // Reject a different cohort substituting for the original one:
+            // multiple distinct gaps do not constitute persistent isolation.
+            if(previous!=null &&
+               (Vector2.Distance(previous.leftCentroid,leftCenter)>3.5f ||
+                Vector2.Distance(previous.rightCentroid,rightCenter)>3.5f))
+                previous=null;
             var result=new SpeciationEvidence{
                 parentSpeciesId=speciesId,
                 observations=previous==null?1:previous.observations+1,
@@ -123,6 +130,7 @@ namespace EarthRogueOrigins.Ecology
                 geographicGap=bestGap,
                 centroidSeparation=centroidDistance,
                 geneticDistance=difference,
+                leftCentroid=leftCenter,rightCentroid=rightCenter,
                 candidateIndividualIds=new int[group.Count-cut]
             };
             for(int i=cut;i<group.Count;i++)
