@@ -38,7 +38,8 @@ namespace EarthRogueOrigins.Editor
                     "Assets/Art/Generated/Creatures/tetrapod_"+i.ToString("00")+".png");
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene,scenePath);
-            EditorUtility.DisplayDialog("Ecosystem Lab Ready",
+            if (!Application.isBatchMode)
+                EditorUtility.DisplayDialog("Ecosystem Lab Ready",
                 "Generated 64 prototype tiles and creature sprites, illustrated anatomical parts, and EcosystemLab.unity. Open the scene and press Play."+
                 "\nControls are shown at the upper-left.", "OK");
         }
