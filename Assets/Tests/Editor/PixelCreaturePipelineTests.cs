@@ -463,6 +463,18 @@ namespace EarthRogueOrigins.Tests
                     head.anchor.x,head.anchor.y,head.extent.x,head.extent.y);
                 Assert.AreEqual(marks.eye,eye.anchor);
                 foreach(var point in new[]{marks.eye,marks.nostril,
+                    marks.mouthStart,marks.mouthEnd})
+                {
+                    float u=(point.x-(head.anchor.x-head.extent.x/2))/
+                        (float)Mathf.Max(1,head.extent.x);
+                    float v=(point.y-head.anchor.y)*2f/
+                        Mathf.Max(1,head.extent.y);
+                    Assert.IsTrue(PixelSilhouetteTemplates.Contains(
+                        PartSlot.Head,style,u,v),
+                        "Floating facial feature at "+point+" / "+style+
+                        " / head size "+size);
+                }
+                foreach(var point in new[]{marks.eye,marks.nostril,
                     marks.mouthStart,marks.mouthEnd,marks.cheek})
                 {
                     Assert.That(point.x,Is.InRange(0,127));
