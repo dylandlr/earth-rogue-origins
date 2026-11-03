@@ -65,8 +65,9 @@ namespace EarthRogueOrigins.PixelCreatures
                 if(d.style==PartStyle.Slender)h=Mathf.Max(11,h-6);
                 if(d.style==PartStyle.Robust)h+=5;
             }
-            var dark=Shade(r.baseColor,.64f);
-            var light=Shade(r.baseColor,1.24f);
+            var palette=PixelArtDirection.Ramp(r.palette);
+            var dark=palette.shadow;
+            var light=palette.light;
             switch(d.slot)
             {
                 case PartSlot.Trunk:
@@ -228,21 +229,51 @@ namespace EarthRogueOrigins.PixelCreatures
                     break;
 
                 case PartSlot.Markings:
-                    // Draw within a well-defined elliptical skin mask.
-                    var rng=new System.Random(unchecked(r.seed*7919+23));
-                    int count=Mathf.RoundToInt(r.spots*28);
-                    for(int i=0;i<count;i++)
-                    {
-                        int px=x-w/2+4+rng.Next(Mathf.Max(1,w-8));
-                        int py=y-h/2+3+rng.Next(Mathf.Max(1,h-6));
-                        float dx=(px-x)/(float)Mathf.Max(1,w/2-3);
-                        float dy=(py-y)/(float)Mathf.Max(1,h/2-3);
-                        if(dx*dx+dy*dy>=.84f)continue;
-                        int radius=1+rng.Next(3);
-                        Ellipse(c,px,py,radius,radius,r.secondaryColor);
-                        if(radius>=2)Dot(c,px-1,py+1,1,Shade(r.secondaryColor,1.24f));
-                    }
+                    DrawMarkings(c,x,y,w,h,r,palette);
                     break;
+            }
+        }
+
+        static void DrawMarkings(Canvas c,int x,int y,int w,int h,
+            PixelCreatureRecipe r,PixelColorRamp palette)
+        {
+            if(r.pattern==MarkingPattern.None || r.spots<=.01f)return;
+            var rng=new System.Random(unchecked(r.seed*7919+23));
+            if(r.pattern==MarkingPattern.DorsalStripe)
+            {
+                int start=x-w/2+7,end=x+w/2-7;
+                for(int px=start;px<=end;px++)
+                {
+                    float t=(px-start)/(float)Mathf.Max(1,end-start);
+                    int py=y+Mathf.RoundToInt(Mathf.Sin(t*Mathf.PI)*h*.21f);
+                    Line(c,px,py,px,py+Mathf.RoundToInt(1+r.spots*3),palette.pattern,1);
+                }
+                return;
+            }
+            if(r.pattern==MarkingPattern.TailBands)
+            {
+                for(int i=1;i<=5;i++)
+                {
+                    int px=x-w/2+i*w/6;
+                    int halfHeight=Mathf.RoundToInt((h*.28f)*Mathf.Sin(Mathf.PI*i/6f));
+                    Line(c,px,y-halfHeight,px+1,y+halfHeight,palette.pattern,2);
+                }
+                return;
+            }
+            int count=Mathf.RoundToInt(r.spots*(r.pattern==MarkingPattern.Sparse?9:28));
+            for(int i=0;i<count;i++)
+            {
+                int px=x-w/2+5+rng.Next(Mathf.Max(1,w-10));
+                int py=y-h/2+4+rng.Next(Mathf.Max(1,h-8));
+                float dx=(px-x)/(float)Mathf.Max(1,w/2-4);
+                float dy=(py-y)/(float)Mathf.Max(1,h/2-4);
+                if(dx*dx+dy*dy>.72f)continue;
+                if(r.pattern==MarkingPattern.MottledBack && py<y)continue;
+                if(r.pattern==MarkingPattern.SideFreckles && (py<y-h*.28f || py>y+h*.18f))
+                    continue;
+                int radius=r.pattern==MarkingPattern.SideFreckles?1:1+rng.Next(3);
+                Ellipse(c,px,py,radius,radius,palette.pattern);
+                if(radius>=2)Dot(c,px-1,py+1,1,palette.light);
             }
         }
 
