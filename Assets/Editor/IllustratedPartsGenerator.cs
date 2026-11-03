@@ -90,17 +90,17 @@ namespace EarthRogueOrigins.Editor
                 importer.alphaIsTransparency=true;
                 importer.SaveAndReimport();
             }
-            library.torso=SpriteAt(0);
-            library.torsoHighlight=SpriteAt(1);
-            library.head=SpriteAt(2);
-            library.eye=SpriteAt(3);
-            library.forelimb=SpriteAt(4);
-            library.hindlimb=SpriteAt(5);
-            library.foot=SpriteAt(6);
-            library.tail=SpriteAt(7);
-            library.tailFin=SpriteAt(8);
-            library.armorPlate=SpriteAt(9);
-            library.groundShadow=SpriteAt(10);
+            if(overwrite || library.torso==null)library.torso=SpriteAt(0);
+            if(overwrite || library.torsoHighlight==null)library.torsoHighlight=SpriteAt(1);
+            if(overwrite || library.head==null)library.head=SpriteAt(2);
+            if(overwrite || library.eye==null)library.eye=SpriteAt(3);
+            if(overwrite || library.forelimb==null)library.forelimb=SpriteAt(4);
+            if(overwrite || library.hindlimb==null)library.hindlimb=SpriteAt(5);
+            if(overwrite || library.foot==null)library.foot=SpriteAt(6);
+            if(overwrite || library.tail==null)library.tail=SpriteAt(7);
+            if(overwrite || library.tailFin==null)library.tailFin=SpriteAt(8);
+            if(overwrite || library.armorPlate==null)library.armorPlate=SpriteAt(9);
+            if(overwrite || library.groundShadow==null)library.groundShadow=SpriteAt(10);
             EditorUtility.SetDirty(library);
             AssetDatabase.SaveAssets();
             Debug.Log("Illustrated anatomical starter library created at "+libraryPath);
