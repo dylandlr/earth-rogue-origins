@@ -3,7 +3,8 @@
   "rootNamespace": "EarthRogueOrigins.Tests",
   "references": [
     "EarthRogueOrigins.Evolution",
-    "EarthRogueOrigins.Ecology"
+    "EarthRogueOrigins.Ecology",
+    "EarthRogueOrigins.Anatomy"
   ],
   "includePlatforms": [
     "Editor"
