@@ -270,6 +270,79 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void AnimatedFramesAreDeterministicAndNotAllIdentical()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,731);
+            var neutral=PixelCreaturePainter.RenderPixels(r,0,false);
+            int changedFrames=0;
+            for(int frame=0;frame<PixelCreaturePoses.Frames;frame++)
+            {
+                var walk=PixelCreaturePainter.RenderPixels(r,frame,false);
+                var repeat=PixelCreaturePainter.RenderPixels(r,frame,false);
+                CollectionAssert.AreEqual(walk,repeat);
+                int different=0;
+                for(int i=0;i<walk.Length;i++)
+                    if(!walk[i].Equals(neutral[i]))different++;
+                if(different>0)changedFrames++;
+            }
+            Assert.GreaterOrEqual(changedFrames,2);
+        }
+
+        [Test]
+        public void AnimatedLayerCompositingMatchesFinalImage()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.ArmoredCrawler,812);
+            var parts=PixelCreaturePoses.Layout(r,3,true);
+            Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
+            var result=new Color32[PixelCreaturePainter.Width*PixelCreaturePainter.Height];
+            for(int i=0;i<parts.Length;i++)
+            {
+                var layer=PixelCreaturePainter.RenderLayerPixels(r,i,3,true);
+                for(int j=0;j<result.Length;j++)
+                    if(layer[j].a>0)result[j]=layer[j];
+            }
+            CollectionAssert.AreEqual(PixelCreaturePainter.RenderPixels(r,3,true),result);
+        }
+
+        [Test]
+        public void TetrapodSilhouetteHasSingleDominantConnectedBody()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,710);
+            foreach(int frame in new[]{0,1,2,3})
+            {
+                var pixels=PixelCreaturePainter.RenderPixels(r,frame,false);
+                int width=PixelCreaturePainter.Width,height=PixelCreaturePainter.Height;
+                int count=0,maxComponent=0;
+                var seen=new bool[pixels.Length];
+                var queue=new int[pixels.Length];
+                for(int index=0;index<pixels.Length;index++)
+                {
+                    if(pixels[index].a==0||seen[index])continue;
+                    int first=0,last=0;
+                    seen[index]=true;queue[last++]=index;
+                    while(first<last)
+                    {
+                        int current=queue[first++];
+                        int x=current%width,y=current/width;
+                        int[] neighbor={
+                            x>0?current-1:-1,x<width-1?current+1:-1,
+                            y>0?current-width:-1,y<height-1?current+width:-1};
+                        foreach(int next in neighbor)
+                            if(next>=0&&!seen[next]&&pixels[next].a>0)
+                            {
+                                seen[next]=true;queue[last++]=next;
+                            }
+                    }
+                    count+=last;
+                    maxComponent=Math.Max(maxComponent,last);
+                }
+                Assert.Greater(count,200);
+                Assert.Greater((float)maxComponent/count,.85f,
+                    "Disconnected visible anatomy at frame "+frame);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
