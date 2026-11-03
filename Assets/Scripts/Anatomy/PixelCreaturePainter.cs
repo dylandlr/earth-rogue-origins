@@ -20,12 +20,7 @@ namespace EarthRogueOrigins.PixelCreatures
         {
             recipe.Validate();
             Color32[] pixels=RenderPixels(recipe);
-            var texture=new Texture2D(Width,Height,TextureFormat.RGBA32,false);
-            texture.filterMode=FilterMode.Point;
-            texture.wrapMode=TextureWrapMode.Clamp;
-            texture.SetPixels32(pixels);
-            texture.Apply(false,false);
-            return texture;
+            return TextureFromPixels(pixels);
         }
 
         public static Color32[] RenderPixels(PixelCreatureRecipe recipe)
@@ -37,6 +32,29 @@ namespace EarthRogueOrigins.PixelCreatures
             foreach(var part in parts)
                 DrawPart(c,part,recipe);
             return c.pixels;
+        }
+
+        public static Color32[] RenderLayerPixels(PixelCreatureRecipe recipe,int partIndex)
+        {
+            recipe.Validate();
+            var parts=PixelCreatureDevelopment.Layout(recipe);
+            Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
+            if(partIndex<0 || partIndex>=parts.Length)throw new ArgumentOutOfRangeException(nameof(partIndex));
+            var canvas=new Canvas();
+            DrawPart(canvas,parts[partIndex],recipe);
+            return canvas.pixels;
+        }
+
+        public static Texture2D TextureFromPixels(Color32[] data)
+        {
+            if(data==null || data.Length!=Width*Height)
+                throw new ArgumentException("Expected 128x96 RGBA pixel layer.");
+            var texture=new Texture2D(Width,Height,TextureFormat.RGBA32,false);
+            texture.filterMode=FilterMode.Point;
+            texture.wrapMode=TextureWrapMode.Clamp;
+            texture.SetPixels32(data);
+            texture.Apply(false,false);
+            return texture;
         }
 
         static void DrawPart(Canvas c,PixelPartDescriptor d,PixelCreatureRecipe r)
