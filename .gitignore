@@ -8,3 +8,7 @@ UserSettings/
 .vs/
 *.csproj
 *.sln
+
+# Generated validation and experimental artifacts
+ValidationResults/
+ExperimentResults/
