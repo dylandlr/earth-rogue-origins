@@ -27,26 +27,23 @@ namespace EarthRogueOrigins.PixelCreatures
                     extent=src.extent,drawOrder=src.drawOrder,
                     mirrorGroup=src.mirrorGroup
                 };
-                int x=p.anchor.x,y=p.anchor.y;
+                // Preserve joint root position. The pose offset is applied to
+                // each appendage's distal end by the painter, never by moving
+                // the attachment anchor away from the body.
                 if(p.slot==PartSlot.ForeLeg || p.slot==PartSlot.HindLeg)
                 {
-                    // Reuse the exact attachment origin; displacement is
-                    // restricted to a short silhouette-safe step.
                     int sign=p.slot==PartSlot.ForeLeg?1:-1;
-                    int stride=phase==1?2:phase==2?0:-2;
-                    int lift=phase==2?2:0;
-                    if(swimming){stride=phase==1?1:phase==3?-1:0;lift=0;}
-                    x+=stride*sign;
-                    y+=lift;
+                    int stride=phase==1?3:phase==2?0:-3;
+                    if(swimming)stride=phase==1?2:phase==3?-2:0;
+                    p.mirrorGroup=stride*sign;
                 }
-                else if(p.slot==PartSlot.Tail || 
+                else if(p.slot==PartSlot.Tail ||
                         (p.slot==PartSlot.Fin && recipe.plan==CreaturePlan.Fish &&
                          p.anchor.x>95))
                 {
-                    int wave=phase==1?2:phase==3?-2:0;
-                    y+=wave*(swimming?2:1);
+                    int wave=phase==1?3:phase==3?-3:0;
+                    p.mirrorGroup=wave*(swimming?2:1);
                 }
-                p.anchor=new Vector2Int(x,y);
                 parts[i]=p;
             }
             return parts;
