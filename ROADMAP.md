@@ -1,3 +1,12 @@
+## Visual fidelity v2.0 — authored head masks
+- [x] Replace rectangular contour fill with mask-based 1px silhouette outlines
+- [x] Author thirteen-station asymmetrical profiles for four head types
+- [x] Keep inherited size deformation, shading and independent face layers
+- [x] Add contour ordering and boxed-edge regression tests
+- [ ] Execute Unity Editor test suite and C# contact sheet
+- [ ] Tune cheek, mouth, eye, neck and body transitions to new head profiles against approved art
+- [ ] Accept at 32 / 64 / 96 pixel gameplay sizes before wider procedural expansion
+
 ## Creature Face Fidelity v1.9
 - [x] Inherit eye placement from authored head morphology
 - [x] Add composable cheek, mouth, nostril and eye highlight details
