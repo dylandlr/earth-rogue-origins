@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using EarthRogueOrigins.Anatomy;
+using EarthRogueOrigins.Evolution;
 
 namespace EarthRogueOrigins.Ecology
 {
@@ -25,6 +27,7 @@ namespace EarthRogueOrigins.Ecology
         public Vector2 position;
         public float energy = 70, health = 100, age, cooldown;
         public float[] genes = new float[12]; // six diploid loci
+        public DevelopmentalGenome development;
         public bool Alive { get { return health > 0; } }
         public float Trait(int locus) { return Mathf.Clamp01((genes[2*locus] + genes[2*locus+1])*0.5f); }
     }
@@ -95,6 +98,7 @@ namespace EarthRogueOrigins.Ecology
                 diet=diet, speciesId=speciesId, age=3f };
             for (int i=0; i<c.genes.Length; i++)
                 c.genes[i] = .25f+(float)random.NextDouble()*.5f;
+            c.development=DevelopmentalGenome.Founder(random);
             creatures.Add(c);
             return c;
         }
@@ -121,6 +125,12 @@ namespace EarthRogueOrigins.Ecology
                 Vector2 target = FindTarget(c);
                 var delta = target-c.position;
                 float movementSpeed = 1.05f+c.Trait(0)*2f;
+                if(c.development!=null)
+                {
+                    var phenotype=Development.Express(c.development,ToGenome(c.genes));
+                    movementSpeed=tile.terrain==TerrainKind.Water?phenotype.swimmingSpeed:phenotype.terrestrialSpeed;
+                    metabolic*=phenotype.upkeep;
+                }
                 float terrainPenalty = tile.terrain == TerrainKind.Water ? .5f : 1f;
                 Vector2 movement = delta.sqrMagnitude > .05f
                     ? delta.normalized*Mathf.Min(delta.magnitude, movementSpeed*terrainPenalty*dt) : Vector2.zero;
@@ -232,7 +242,10 @@ namespace EarthRogueOrigins.Ecology
                 if(d<distance){victim=other;distance=d;}
             }
             if(victim==null)return;
-            float damage=(6f+attacker.Trait(0)*6f)*(1f-victim.Trait(1)*.7f)*dt;
+            float defense=victim.Trait(1)*.7f;
+            if(victim.development!=null)
+                defense=Development.Express(victim.development,ToGenome(victim.genes)).defense*.7f;
+            float damage=(6f+attacker.Trait(0)*6f)*(1f-defense)*dt;
             victim.health-=damage;
             if(!victim.Alive) attacker.energy=Mathf.Min(100,attacker.energy+45f);
         }
@@ -261,6 +274,7 @@ namespace EarthRogueOrigins.Ecology
                 child.genes[i]=Mutate(parent.genes[i+random.Next(2)]);
                 child.genes[i+1]=Mutate(mate.genes[i+random.Next(2)]);
             }
+            child.development=DevelopmentalGenome.Child(parent.development,mate.development,random);
             newborns.Add(child);
         }
 
@@ -273,6 +287,13 @@ namespace EarthRogueOrigins.Ecology
         Vector2 Clamp(Vector2 p)
         {
             return new Vector2(Mathf.Clamp(p.x,.01f,width-.01f),Mathf.Clamp(p.y,.01f,height-.01f));
+        }
+
+        static DiploidGenome ToGenome(float[] genes)
+        {
+            var genome=new DiploidGenome();
+            Array.Copy(genes,genome.alleles,Math.Min(genes.Length,genome.alleles.Length));
+            return genome;
         }
 
         public EcosystemSnapshot Snapshot()
