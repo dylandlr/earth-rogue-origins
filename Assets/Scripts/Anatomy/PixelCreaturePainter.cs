@@ -26,7 +26,7 @@ namespace EarthRogueOrigins.PixelCreatures
         public static Color32[] RenderPixels(PixelCreatureRecipe recipe)
         {
             recipe.Validate();
-            var c=new Canvas();
+            var c=new Canvas(PixelArtDirection.Ramp(recipe.palette).ink);
             var parts=PixelCreatureDevelopment.Layout(recipe);
             Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
             foreach(var part in parts)
@@ -40,7 +40,7 @@ namespace EarthRogueOrigins.PixelCreatures
             var parts=PixelCreatureDevelopment.Layout(recipe);
             Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
             if(partIndex<0 || partIndex>=parts.Length)throw new ArgumentOutOfRangeException(nameof(partIndex));
-            var canvas=new Canvas();
+            var canvas=new Canvas(PixelArtDirection.Ramp(recipe.palette).ink);
             DrawPart(canvas,parts[partIndex],recipe);
             return canvas.pixels;
         }
@@ -71,7 +71,7 @@ namespace EarthRogueOrigins.PixelCreatures
             switch(d.slot)
             {
                 case PartSlot.Trunk:
-                    Ellipse(c,x,y,w/2+2,h/2+2,Ink);
+                    Ellipse(c,x,y,w/2+2,h/2+2,c.ink);
                     Ellipse(c,x,y,w/2,h/2,dark);
                     Ellipse(c,x,y+2,w/2-2,Mathf.Max(2,h/2-3),r.baseColor);
                     Ellipse(c,x-5,y+Mathf.Max(2,h/5),Mathf.Max(3,w/3),
@@ -85,7 +85,7 @@ namespace EarthRogueOrigins.PixelCreatures
                             int sy=y;
                             int height=Mathf.RoundToInt(h*.35f+
                                 Mathf.Sin(Mathf.PI*i/segments)*h*.23f);
-                            Line(c,sx,sy-height,sx+1,sy+height,Ink,1);
+                            Line(c,sx,sy-height,sx+1,sy+height,c.ink,1);
                             Line(c,sx+2,sy-height+3,sx+2,sy-2,
                                 Shade(r.accentColor,.9f),1);
                         }
@@ -99,7 +99,7 @@ namespace EarthRogueOrigins.PixelCreatures
                             new Vector2Int(x-w/2-3,y-2),new Vector2Int(x+w/2,y+h/2),
                             new Vector2Int(x+w/2+3,y-h/2),
                             new Vector2Int(x-w/2-3,y-h/4)
-                        },Ink);
+                        },c.ink);
                         Polygon(c,new[]{
                             new Vector2Int(x-w/2,y-1),new Vector2Int(x+w/2-2,y+h/2-2),
                             new Vector2Int(x+w/2,y-h/2+2),
@@ -109,7 +109,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     else
                     {
                         int extension=d.style==PartStyle.LongSnout?9:0;
-                        Ellipse(c,x-extension/2,y,w/2+2+extension/2,h/2+2,Ink);
+                        Ellipse(c,x-extension/2,y,w/2+2+extension/2,h/2+2,c.ink);
                         Ellipse(c,x-extension/2,y,w/2+extension/2,h/2,r.baseColor);
                     }
                     Ellipse(c,x-2,y+3,Mathf.Max(3,w/3),Mathf.Max(2,h/5),light);
@@ -118,13 +118,13 @@ namespace EarthRogueOrigins.PixelCreatures
                     {
                         Ellipse(c,x-w/3-(d.style==PartStyle.LongSnout?5:0),y-1,
                             Mathf.Max(4,w/3),Mathf.Max(3,h/4),r.baseColor);
-                        Line(c,x-w/2-4-(d.style==PartStyle.LongSnout?8:0),y-4,x-w/3,y-4,Ink,2);
+                        Line(c,x-w/2-4-(d.style==PartStyle.LongSnout?8:0),y-4,x-w/3,y-4,c.ink,2);
                         Line(c,x-w/2-3,y-6,x-w/3+2,y-6,EyeWhite,1);
                     }
                     break;
 
                 case PartSlot.Eye:
-                    Ellipse(c,x,y,Mathf.Max(2,w/2+1),Mathf.Max(2,h/2+1),Ink);
+                    Ellipse(c,x,y,Mathf.Max(2,w/2+1),Mathf.Max(2,h/2+1),c.ink);
                     Dot(c,x,y,Mathf.Max(1,Mathf.RoundToInt(r.eyeSize*2)),Black);
                     Dot(c,x-1,y+1,1,EyeWhite);
                     break;
@@ -138,8 +138,8 @@ namespace EarthRogueOrigins.PixelCreatures
                             int shift=i*8-8;
                             int knee=x+shift+(d.slot==PartSlot.HindLeg?3:-3);
                             int foot=knee+(i%2==0?7:-8);
-                            Line(c,x+shift,y,knee,y-h/2,Ink,4);
-                            Line(c,knee,y-h/2,foot,y-h,Ink,3);
+                            Line(c,x+shift,y,knee,y-h/2,c.ink,4);
+                            Line(c,knee,y-h/2,foot,y-h,c.ink,3);
                             Line(c,x+shift,y+1,knee,y-h/2+1,r.secondaryColor,2);
                         }
                     }
@@ -147,9 +147,9 @@ namespace EarthRogueOrigins.PixelCreatures
                     {
                         int thickness=d.style==PartStyle.Slender?Mathf.Max(4,w/3):
                             d.style==PartStyle.Robust?Mathf.Max(7,w/2+2):Mathf.Max(5,w/2);
-                        Line(c,x,y,x+2,y-h+3,Ink,thickness);
+                        Line(c,x,y,x+2,y-h+3,c.ink,thickness);
                         Line(c,x,y,x+2,y-h+3,r.baseColor,Mathf.Max(2,thickness-3));
-                        Line(c,x+2,y-h+3,x-4,y-h,Ink,4);
+                        Line(c,x+2,y-h+3,x-4,y-h,c.ink,4);
                         Line(c,x+2,y-h+4,x-3,y-h+1,light,2);
                         if(d.style==PartStyle.Webbed)
                             Polygon(c,new[]{
@@ -166,7 +166,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         Polygon(c,new[]{
                             new Vector2Int(x-w/2-2,y+3),new Vector2Int(x+w/2,y+7),
                             new Vector2Int(x+w/2,y-7),new Vector2Int(x-w/2-2,y-3)
-                        },Ink);
+                        },c.ink);
                         Polygon(c,new[]{
                             new Vector2Int(x-w/2,y+2),new Vector2Int(x+w/2-2,y+5),
                             new Vector2Int(x+w/2-2,y-5),new Vector2Int(x-w/2,y-2)
@@ -187,7 +187,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         Polygon(c,new[]{
                             new Vector2Int(x-w/2-5,y+7),new Vector2Int(x+w/2,y+9),
                             new Vector2Int(x+w/2+2,y-3),new Vector2Int(x-w/2+5,y-5)
-                        },Ink);
+                        },c.ink);
                         Polygon(c,new[]{
                             new Vector2Int(x-w/2-3,y+5),new Vector2Int(x+w/2-2,y+7),
                             new Vector2Int(x+w/2,y-1),new Vector2Int(x-w/2+5,y-3)
@@ -200,7 +200,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         new Vector2Int(x-w/2,y),new Vector2Int(x+w/2,y+h/2),
                         new Vector2Int(x+w/2-3,y),
                         new Vector2Int(x+w/2,y-h/2)
-                    },Ink);
+                    },c.ink);
                     Polygon(c,new[]{
                         new Vector2Int(x-w/2+3,y),new Vector2Int(x+w/2-3,y+h/2-3),
                         new Vector2Int(x+w/2-5,y),
@@ -220,7 +220,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         Polygon(c,new[]{
                             new Vector2Int(ax-4,ay),new Vector2Int(ax-1,ay+4+Mathf.RoundToInt(r.armor*5)),
                             new Vector2Int(ax+4,ay)
-                        },Ink);
+                        },c.ink);
                         Polygon(c,new[]{
                             new Vector2Int(ax-2,ay+1),new Vector2Int(ax-1,ay+3+Mathf.RoundToInt(r.armor*4)),
                             new Vector2Int(ax+2,ay+1)
@@ -291,7 +291,12 @@ namespace EarthRogueOrigins.PixelCreatures
         sealed class Canvas
         {
             public readonly Color32[] pixels=new Color32[Width*Height];
-            public Canvas(){for(int i=0;i<pixels.Length;i++)pixels[i]=Clear;}
+            public readonly Color32 ink;
+            public Canvas(Color32 contour)
+            {
+                ink=contour;
+                for(int i=0;i<pixels.Length;i++)pixels[i]=Clear;
+            }
             public void Put(int x,int y,Color32 c)
             {
                 if(x>=0&&x<Width&&y>=0&&y<Height)pixels[y*Width+x]=c;
@@ -301,8 +306,8 @@ namespace EarthRogueOrigins.PixelCreatures
                 if(x<0||x>=Width||y<0||y>=Height)return;
                 int index=y*Width+x;
                 var existing=pixels[index];
-                if(existing.a==0 || (existing.r==Ink.r && existing.g==Ink.g &&
-                    existing.b==Ink.b))return;
+                if(existing.a==0 || (existing.r==ink.r && existing.g==ink.g &&
+                    existing.b==ink.b))return;
                 pixels[index]=color;
             }
         }
