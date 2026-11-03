@@ -246,7 +246,8 @@ namespace EarthRogueOrigins.PixelCreatures
                 {
                     float t=(px-start)/(float)Mathf.Max(1,end-start);
                     int py=y+Mathf.RoundToInt(Mathf.Sin(t*Mathf.PI)*h*.21f);
-                    Line(c,px,py,px,py+Mathf.RoundToInt(1+r.spots*3),palette.pattern,1);
+                    for(int dy=0;dy<=Mathf.RoundToInt(1+r.spots*3);dy++)
+                        c.MarkBody(px,py+dy,palette.pattern);
                 }
                 return;
             }
@@ -256,7 +257,8 @@ namespace EarthRogueOrigins.PixelCreatures
                 {
                     int px=x-w/2+i*w/6;
                     int halfHeight=Mathf.RoundToInt((h*.28f)*Mathf.Sin(Mathf.PI*i/6f));
-                    Line(c,px,y-halfHeight,px+1,y+halfHeight,palette.pattern,2);
+                    for(int yy=y-halfHeight;yy<=y+halfHeight;yy++)
+                        c.MarkBody(px+(yy%2==0?0:1),yy,palette.pattern);
                 }
                 return;
             }
@@ -272,8 +274,11 @@ namespace EarthRogueOrigins.PixelCreatures
                 if(r.pattern==MarkingPattern.SideFreckles && (py<y-h*.28f || py>y+h*.18f))
                     continue;
                 int radius=r.pattern==MarkingPattern.SideFreckles?1:1+rng.Next(3);
-                Ellipse(c,px,py,radius,radius,palette.pattern);
-                if(radius>=2)Dot(c,px-1,py+1,1,palette.light);
+                for(int dy=-radius;dy<=radius;dy++)
+                for(int dx=-radius;dx<=radius;dx++)
+                    if(dx*dx+dy*dy<=radius*radius)
+                        c.MarkBody(px+dx,py+dy,palette.pattern);
+                if(radius>=2)c.MarkBody(px-1,py+1,palette.light);
             }
         }
 
@@ -290,6 +295,15 @@ namespace EarthRogueOrigins.PixelCreatures
             public void Put(int x,int y,Color32 c)
             {
                 if(x>=0&&x<Width&&y>=0&&y<Height)pixels[y*Width+x]=c;
+            }
+            public void MarkBody(int x,int y,Color32 color)
+            {
+                if(x<0||x>=Width||y<0||y>=Height)return;
+                int index=y*Width+x;
+                var existing=pixels[index];
+                if(existing.a==0 || (existing.r==Ink.r && existing.g==Ink.g &&
+                    existing.b==Ink.b))return;
+                pixels[index]=color;
             }
         }
         static void Dot(Canvas c,int x,int y,int r,Color32 color){Ellipse(c,x,y,r,r,color);}
