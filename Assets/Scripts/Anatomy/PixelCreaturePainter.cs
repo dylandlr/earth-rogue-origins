@@ -144,12 +144,26 @@ namespace EarthRogueOrigins.PixelCreatures
                     // Organic cheek and raised brow preserve character at 32 px.
                     Ellipse(c,x-2,y+Mathf.Max(2,h/5),Mathf.Max(3,w/3),
                         Mathf.Max(2,h/6),palette.light);
+                    break;
+
+                case PartSlot.FaceDetails:
+                    var face=PixelFaceGrammar.Landmarks(r.plan,d.style,x,y,w,h);
+                    // Subtle dark cheek crescent follows the jaw's attachment.
+                    Ellipse(c,face.cheek.x,face.cheek.y,
+                        face.cheekRadius+1,face.jawDepth+1,palette.shadow);
+                    Ellipse(c,face.cheek.x-1,face.cheek.y+1,
+                        face.cheekRadius,face.jawDepth,r.baseColor);
                     if(r.plan!=CreaturePlan.Arthropod)
                     {
-                        int snout=d.style==PartStyle.LongSnout?7:3;
-                        // Overlapping jaw pixels hide the head/snout seam.
-                        Line(c,x-w/2-snout,y-3,x-w/2+5,y-3,c.ink,2);
-                        Line(c,x-w/2-snout+2,y-5,x-w/2+4,y-5,palette.highlight,1);
+                        // Deliberately broken lip stroke reads as a smile at
+                        // half-size and a distinct jaw at native resolution.
+                        Line(c,face.mouthStart.x,face.mouthStart.y,
+                            face.mouthEnd.x,face.mouthEnd.y,palette.ink,1);
+                        Line(c,face.mouthStart.x+1,face.mouthStart.y-2,
+                            face.mouthEnd.x-2,face.mouthEnd.y-2,
+                            palette.highlight,1);
+                        c.Put(face.nostril.x,face.nostril.y,palette.shadow);
+                        c.Put(face.nostril.x,face.nostril.y+1,palette.ink);
                     }
                     break;
 
@@ -189,9 +203,15 @@ namespace EarthRogueOrigins.PixelCreatures
                     break;
 
                 case PartSlot.Eye:
-                    Ellipse(c,x,y,Mathf.Max(2,w/2+1),Mathf.Max(2,h/2+1),c.ink);
-                    Dot(c,x,y,Mathf.Max(1,Mathf.RoundToInt(r.eyeSize*2)),Black);
-                    Dot(c,x-1,y+1,1,EyeWhite);
+                    // Small raised brow, dark socket, glossy pupil and a single
+                    // light glint: no white sclera at normal game scale.
+                    int eyeRadius=Mathf.Max(2,Mathf.RoundToInt(1+r.eyeSize*2f));
+                    Ellipse(c,x,y,eyeRadius+1,eyeRadius+1,palette.shadow);
+                    Ellipse(c,x,y,eyeRadius,eyeRadius,palette.ink);
+                    if(eyeRadius>=3)c.Put(x+1,y-1,Black);
+                    c.Put(x-1,y+1,EyeWhite);
+                    Line(c,x-eyeRadius,y+eyeRadius+1,
+                        x+eyeRadius-1,y+eyeRadius+1,palette.light,1);
                     break;
 
                 case PartSlot.ForeLeg:
