@@ -1,3 +1,15 @@
+## Species taxonomy & face contour verification v2.1
+- [x] Generate simulated binomials from founding inherited body-plan, armor, tail, snout, leg and pigment traits
+- [x] Register canonical scientific taxon once per species ID and preserve across offspring and individual mutations
+- [x] Prevent duplicate scientific names in the ecosystem species catalog
+- [x] Show scientific names and live counts in the ecosystem field guide
+- [x] Export scientific names, taxon JSON and custom-editor name proposals
+- [x] Verify facial landmark placement against actual asymmetric head contour samples
+- [x] Add 12-case Unity C# face raster audit exporter plus taxonomy/contour regression tests
+- [ ] Execute Unity build and collect C# face audit PNG + EditMode test results
+- [ ] Implement evidence-driven reproductive isolation and speciation events
+- [ ] Build phylogenetic genus trees from actual family histories, not appearance alone
+
 ## Visual fidelity v2.0 — authored head masks
 - [x] Replace rectangular contour fill with mask-based 1px silhouette outlines
 - [x] Author thirteen-station asymmetrical profiles for four head types
