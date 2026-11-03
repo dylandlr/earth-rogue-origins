@@ -1,0 +1,14 @@
+{
+  "name": "EarthRogueOrigins.Ecology",
+  "rootNamespace": "EarthRogueOrigins.Ecology",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
