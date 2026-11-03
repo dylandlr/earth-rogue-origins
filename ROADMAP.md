@@ -8,6 +8,19 @@
 - [ ] Record startup screenshot and input smoke-test result
 - [ ] Add automated Unity test runner
 
+## Milestone 1A: Anatomy-aware procedural assets (in progress)
+- [x] Add 14-control developmental genome and inheritance model
+- [x] Convert regulatory controls into anchored body geometry and morphology-derived physical costs
+- [x] Add curved dorsal armor, connected fins and shape-driven limbs to runtime sprite baker
+- [x] Connect phenotypes to live organism movement, defense and upkeep
+- [x] Bake morphology contact sheet through a Unity Editor command
+- [x] Commit deterministic anatomy tests
+- [ ] Execute Unity compilation and Edit Mode tests
+- [ ] Review generated contact sheet in Unity against approved concept artwork
+- [ ] Add hand-painted 2.5D surface materials and illustrated anatomical layers
+- [ ] Add joint-based gait and swim animations
+- [ ] Optimize phenotype sprite caching/pooling
+
 ## Milestone 1: Concept-matched playable habitat
 - [ ] Create layered illustrated terrain tileset
 - [ ] Separate animated creatures from scenery
