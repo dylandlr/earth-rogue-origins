@@ -13,6 +13,9 @@ namespace EarthRogueOrigins.PixelCreatures
         public int version = 1;
         public string id = "new_creature";
         public CreaturePlan plan = CreaturePlan.Tetrapod;
+        public CreatureArchetype archetype = CreatureArchetype.MarshCrawler;
+        public CreaturePalette palette = CreaturePalette.SwampOlive;
+        public MarkingPattern pattern = MarkingPattern.MottledBack;
         public int seed = 2046;
         public Color32 baseColor = new Color32(143,150,106,255);
         public Color32 secondaryColor = new Color32(91,103,74,255);
@@ -30,6 +33,8 @@ namespace EarthRogueOrigins.PixelCreatures
             if(string.IsNullOrWhiteSpace(id))throw new ArgumentException("Recipe id is required.");
             if(version!=1)throw new NotSupportedException("Unsupported pixel recipe version "+version);
             if(!Enum.IsDefined(typeof(CreaturePlan),plan))throw new ArgumentException("Unknown body plan.");
+            if(!Enum.IsDefined(typeof(CreaturePalette),palette) || !Enum.IsDefined(typeof(MarkingPattern),pattern) ||
+                !Enum.IsDefined(typeof(CreatureArchetype),archetype))throw new ArgumentException("Unknown art style setting.");
             foreach(float v in new[]{trunkLength,trunkDepth,headSize,legLength,tailLength,
                 finSize,armor,spots,eyeSize})
                 if(float.IsNaN(v)||float.IsInfinity(v)||v<0||v>1)
@@ -76,6 +81,9 @@ namespace EarthRogueOrigins.PixelCreatures
             child.spots=Cross(mother.spots,father.spots,rng,mutation);
             child.eyeSize=Cross(mother.eyeSize,father.eyeSize,rng,mutation);
             child.headStyle=rng.Next(2)==0?mother.headStyle:father.headStyle;
+            child.palette=rng.Next(2)==0?mother.palette:father.palette;
+            child.pattern=rng.Next(2)==0?mother.pattern:father.pattern;
+            child.archetype=rng.Next(2)==0?mother.archetype:father.archetype;
             child.trunkStyle=rng.Next(2)==0?mother.trunkStyle:father.trunkStyle;
             child.tailStyle=rng.Next(2)==0?mother.tailStyle:father.tailStyle;
             child.limbStyle=rng.Next(2)==0?mother.limbStyle:father.limbStyle;
