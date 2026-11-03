@@ -155,6 +155,8 @@ namespace EarthRogueOrigins.PixelCreatures
             int rootY=trunkY-Mathf.RoundToInt(bodyDepth*.29f);
             int tailX=bodyRight+Mathf.Max(2,tailWidth/4);
             int rootX=bodyRight-2;
+            int headRight=headX+headWidth/2;
+            int neckX=Mathf.RoundToInt((headRight+bodyLeft)*.5f)+2;
             var face=PixelFaceGrammar.Landmarks(r.plan,r.headStyle,
                 headX,headY,headWidth,bodyDepth-3);
             return new[]{
@@ -165,7 +167,7 @@ namespace EarthRogueOrigins.PixelCreatures
                 P(PartSlot.TailRootBlend,PartStyle.Rounded,rootX,51,13,11,3),
                 P(PartSlot.Markings,PartStyle.Rounded,trunkX,trunkY,bodyLength,bodyDepth,4),
                 // Neck is occluded by the head, never painted over the face.
-                P(PartSlot.NeckBlend,PartStyle.Rounded,bodyLeft+6,51,13,10,5),
+                P(PartSlot.NeckBlend,PartStyle.Rounded,neckX,51,13,10,5),
                 P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,6),
                 P(PartSlot.Head,r.headStyle,headX,headY,headWidth,bodyDepth-3,7),
                 P(PartSlot.FaceDetails,r.headStyle,headX,headY,headWidth,bodyDepth-3,8),
