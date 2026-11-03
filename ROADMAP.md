@@ -7,7 +7,10 @@
 - [x] Add tests for distinct archetype renders, palette order and pigment variation
 - [ ] Run Unity compile, Edit Mode tests and export actual rendered contact sheets
 - [x] Replace primitive head/trunk ellipses with authored 7-point contour profiles
-- [ ] Add masked shoulder, neck and tail-root blending to remove remaining composition seams
+- [x] Add composable neck/shoulder/hip concealment layers and corrected leg anchors
+- [x] Add deterministic four-frame walk/swim pixel poses and per-frame layered exports
+- [x] Add connected-silhouette and animation-compositing regression tests
+- [ ] Replace procedural blend caps with authored joint-skin and tail-root masks
 - [ ] Perform side-by-side quality acceptance against the recreated sprite reference
 
 ## Milestone 1B: Original composable pixel-art asset system
