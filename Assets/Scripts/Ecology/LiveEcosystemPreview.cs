@@ -20,6 +20,9 @@ namespace EarthRogueOrigins.Preview
         public Sprite[] forestTiles, mudTiles, waterTiles, rockTiles, floodplainTiles;
         public Sprite[] organismSprites;
         public bool useAnatomicalSprites = true;
+        public bool useArticulatedRig = true;
+        readonly Dictionary<int,ArticulatedCreatureView> articulatedViews = new Dictionary<int,ArticulatedCreatureView>();
+        Material sharedRigMaterial;
         readonly Dictionary<int,string> organismMorphs = new Dictionary<int,string>();
         readonly Dictionary<int,Vector2> previousPositions = new Dictionary<int,Vector2>();
         readonly Dictionary<int,float> traveled = new Dictionary<int,float>();
@@ -45,7 +48,7 @@ namespace EarthRogueOrigins.Preview
             foreach(var o in createdObjects)if(o!=null)Destroy(o);
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=new PhenotypeSpriteCache(64);
-            organismMorphs.Clear();previousPositions.Clear();traveled.Clear();
+            organismMorphs.Clear();previousPositions.Clear();traveled.Clear();articulatedViews.Clear();
             createdObjects.Clear();creatureRenderers.Clear();
             world=new EcosystemWorld(worldWidth,worldHeight,seed);
             for(int y=0;y<worldHeight;y++)
@@ -147,7 +150,34 @@ namespace EarthRogueOrigins.Preview
                     creatureRenderers[c.id]=renderer;
                     createdObjects.Add(go);
                 }
-                if(useAnatomicalSprites && c.development!=null)
+                if(useArticulatedRig && c.development!=null)
+                {
+                    ArticulatedCreatureView rig;
+                    if(!articulatedViews.TryGetValue(c.id,out rig))
+                    {
+                        var genome=new DiploidGenome();
+                        Array.Copy(c.genes,genome.alleles,Math.Min(c.genes.Length,genome.alleles.Length));
+                        var phenotype=Development.Express(c.development,genome);
+                        rig=renderer.gameObject.AddComponent<ArticulatedCreatureView>();
+                        if(sharedRigMaterial==null)
+                        {
+                            var shader=Shader.Find("Sprites/Default");
+                            if(shader==null)shader=Shader.Find("Unlit/Color");
+                            sharedRigMaterial=new Material(shader);
+                        }
+                        rig.Initialize(phenotype,sharedRigMaterial);
+                        articulatedViews.Add(c.id,rig);
+                        previousPositions[c.id]=c.position;
+                    }
+                    renderer.enabled=false;
+                    Vector2 old=previousPositions[c.id];
+                    float moved=Vector2.Distance(old,c.position);
+                    var tile=world.Cell(Mathf.FloorToInt(c.position.x),Mathf.FloorToInt(c.position.y));
+                    rig.SetMotion(moved,tile.terrain==TerrainKind.Water,moved>.002f,
+                        moved>.002f?c.position.x<old.x:rig.transform.localScale.x<0);
+                    previousPositions[c.id]=c.position;
+                }
+                else if(useAnatomicalSprites && c.development!=null)
                 {
                     string key;
                     if(!organismMorphs.TryGetValue(c.id,out key))
@@ -180,7 +210,8 @@ namespace EarthRogueOrigins.Preview
                 renderer.color=c.diet==DietKind.Predator?new Color(1,.68f,.6f):
                     c.diet==DietKind.Detritivore?new Color(.9f,.85f,1f):Color.white;
                 renderer.transform.position=new Vector3(c.position.x,c.position.y,-.03f);
-                renderer.transform.localScale=Vector3.one*(useAnatomicalSprites?1f:.78f);
+                if(!useArticulatedRig)
+                    renderer.transform.localScale=Vector3.one*(useAnatomicalSprites?1f:.78f);
             }
             var expired=new List<int>();
             foreach(var pair in creatureRenderers)
@@ -188,6 +219,7 @@ namespace EarthRogueOrigins.Preview
             foreach(int id in expired)
             {
                 creatureRenderers.Remove(id);
+                articulatedViews.Remove(id);
                 string key;
                 if(organismMorphs.TryGetValue(id,out key))
                 {
@@ -226,6 +258,8 @@ namespace EarthRogueOrigins.Preview
         {
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=null;
+            if(sharedRigMaterial!=null)Destroy(sharedRigMaterial);
+            sharedRigMaterial=null;
         }
 
         public EcosystemSnapshot CurrentSnapshot(){return world!=null?world.Snapshot():null;}
