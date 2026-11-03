@@ -5,6 +5,7 @@ using UnityEngine.Rendering;
 using EarthRogueOrigins.Ecology;
 using EarthRogueOrigins.Anatomy;
 using EarthRogueOrigins.Evolution;
+using EarthRogueOrigins.PixelCreatures;
 
 namespace EarthRogueOrigins.Preview
 {
@@ -23,6 +24,9 @@ namespace EarthRogueOrigins.Preview
         public Sprite[] fernProps;
         public bool useAnatomicalSprites = true;
         public bool useArticulatedRig = true;
+        [Tooltip("Render original composited 128x96 pixel-art tetrapods; overrides articulated art.")]
+        public bool usePixelCreatureSprites = true;
+        readonly Dictionary<int,Sprite> pixelSprites = new Dictionary<int,Sprite>();
         [Tooltip("When assigned, illustrated anatomical parts replace primitive rig meshes.")]
         public CreatureArtLibrary creatureArt;
         readonly Dictionary<int,ArticulatedCreatureView> articulatedViews = new Dictionary<int,ArticulatedCreatureView>();
@@ -52,6 +56,14 @@ namespace EarthRogueOrigins.Preview
             foreach(var o in createdObjects)if(o!=null)Destroy(o);
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=new PhenotypeSpriteCache(64);
+            foreach(var entry in pixelSprites)
+            {
+                if(entry.Value==null)continue;
+                Texture2D tex=entry.Value.texture;
+                Destroy(entry.Value);
+                if(tex!=null)Destroy(tex);
+            }
+            pixelSprites.Clear();
             organismMorphs.Clear();previousPositions.Clear();traveled.Clear();articulatedViews.Clear();
             createdObjects.Clear();creatureRenderers.Clear();
             world=new EcosystemWorld(worldWidth,worldHeight,seed);
@@ -182,7 +194,29 @@ namespace EarthRogueOrigins.Preview
                     creatureRenderers[c.id]=renderer;
                     createdObjects.Add(go);
                 }
-                if(useArticulatedRig && c.development!=null)
+                if(usePixelCreatureSprites && c.development!=null)
+                {
+                    Sprite pixelSprite;
+                    if(!pixelSprites.TryGetValue(c.id,out pixelSprite))
+                    {
+                        var genome=new DiploidGenome();
+                        Array.Copy(c.genes,genome.alleles,Math.Min(c.genes.Length,genome.alleles.Length));
+                        var phenotype=Development.Express(c.development,genome);
+                        var recipe=PixelRecipeAdapter.FromDevelopment(c.development,phenotype,c.id+seed*17);
+                        var texture=PixelCreaturePainter.Render(recipe);
+                        pixelSprite=Sprite.Create(texture,
+                            new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),64f);
+                        pixelSprites.Add(c.id,pixelSprite);
+                        previousPositions[c.id]=c.position;
+                    }
+                    renderer.sprite=pixelSprite;
+                    renderer.enabled=true;
+                    Vector2 old=previousPositions[c.id];
+                    if((c.position-old).sqrMagnitude>.00001f)
+                        renderer.flipX=c.position.x>old.x;
+                    previousPositions[c.id]=c.position;
+                }
+                else if(useArticulatedRig && c.development!=null)
                 {
                     ArticulatedCreatureView rig;
                     if(!articulatedViews.TryGetValue(c.id,out rig))
@@ -250,7 +284,9 @@ namespace EarthRogueOrigins.Preview
                 var sorting=renderer.GetComponent<SortingGroup>();
                 if(sorting!=null)
                     sorting.sortingOrder=1500-Mathf.FloorToInt(c.position.y*8f);
-                if(!useArticulatedRig)
+                if(usePixelCreatureSprites)
+                    renderer.transform.localScale=Vector3.one;
+                else if(!useArticulatedRig)
                     renderer.transform.localScale=Vector3.one*(useAnatomicalSprites?1f:.78f);
             }
             var expired=new List<int>();
@@ -260,6 +296,17 @@ namespace EarthRogueOrigins.Preview
             {
                 creatureRenderers.Remove(id);
                 articulatedViews.Remove(id);
+                Sprite pixelSprite;
+                if(pixelSprites.TryGetValue(id,out pixelSprite))
+                {
+                    pixelSprites.Remove(id);
+                    if(pixelSprite!=null)
+                    {
+                        Texture2D texture=pixelSprite.texture;
+                        Destroy(pixelSprite);
+                        if(texture!=null)Destroy(texture);
+                    }
+                }
                 string key;
                 if(organismMorphs.TryGetValue(id,out key))
                 {
@@ -296,6 +343,14 @@ namespace EarthRogueOrigins.Preview
 
         void OnDestroy()
         {
+            foreach(var sprite in pixelSprites.Values)
+                if(sprite!=null)
+                {
+                    var texture=sprite.texture;
+                    Destroy(sprite);
+                    if(texture!=null)Destroy(texture);
+                }
+            pixelSprites.Clear();
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=null;
             if(sharedRigMaterial!=null)Destroy(sharedRigMaterial);
