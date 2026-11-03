@@ -27,6 +27,7 @@ namespace EarthRogueOrigins.Preview
         [Tooltip("Render original composited 128x96 pixel-art tetrapods; overrides articulated art.")]
         public bool usePixelCreatureSprites = true;
         readonly Dictionary<int,Sprite[]> pixelSprites = new Dictionary<int,Sprite[]>();
+        readonly Dictionary<int,Sprite> groundShadows = new Dictionary<int,Sprite>();
         [Tooltip("When assigned, illustrated anatomical parts replace primitive rig meshes.")]
         public CreatureArtLibrary creatureArt;
         readonly Dictionary<int,ArticulatedCreatureView> articulatedViews = new Dictionary<int,ArticulatedCreatureView>();
@@ -58,6 +59,8 @@ namespace EarthRogueOrigins.Preview
             spriteCache=new PhenotypeSpriteCache(64);
             foreach(var entry in pixelSprites)DestroyPixelFrames(entry.Value);
             pixelSprites.Clear();
+            foreach(var shadow in groundShadows.Values)DestroyPixelAsset(shadow);
+            groundShadows.Clear();
             organismMorphs.Clear();previousPositions.Clear();traveled.Clear();articulatedViews.Clear();
             createdObjects.Clear();creatureRenderers.Clear();
             world=new EcosystemWorld(worldWidth,worldHeight,seed);
@@ -209,6 +212,17 @@ namespace EarthRogueOrigins.Preview
                                 new Vector2(.5f,.5f),64f);
                         }
                         pixelSprites.Add(c.id,frames);
+                        var shadowTexture=PixelCreaturePainter.TextureFromPixels(
+                            PixelCreaturePainter.RenderGroundShadowPixels(recipe));
+                        var shadowSprite=Sprite.Create(shadowTexture,
+                            new Rect(0,0,shadowTexture.width,shadowTexture.height),
+                            new Vector2(.5f,.5f),64f);
+                        groundShadows[c.id]=shadowSprite;
+                        var shadowObject=new GameObject("Contact Shadow");
+                        shadowObject.transform.SetParent(renderer.transform,false);
+                        var shadowRenderer=shadowObject.AddComponent<SpriteRenderer>();
+                        shadowRenderer.sprite=shadowSprite;
+                        shadowRenderer.sortingOrder=1;
                         previousPositions[c.id]=c.position;
                         traveled[c.id]=0f;
                     }
@@ -223,6 +237,12 @@ namespace EarthRogueOrigins.Preview
                     renderer.sprite=frames[(swim?PixelCreaturePoses.Frames:0)+frameIndex];
                     renderer.enabled=true;
                     if(moved>.002f)renderer.flipX=c.position.x>old.x;
+                    var shadowLayer=renderer.transform.Find("Contact Shadow");
+                    if(shadowLayer!=null)
+                    {
+                        var shadowRenderer=shadowLayer.GetComponent<SpriteRenderer>();
+                        if(shadowRenderer!=null)shadowRenderer.enabled=!swim;
+                    }
                     previousPositions[c.id]=c.position;
                 }
                 else if(useArticulatedRig && c.development!=null)
@@ -311,6 +331,12 @@ namespace EarthRogueOrigins.Preview
                     pixelSprites.Remove(id);
                     DestroyPixelFrames(pixelFrames);
                 }
+                Sprite shadow;
+                if(groundShadows.TryGetValue(id,out shadow))
+                {
+                    groundShadows.Remove(id);
+                    DestroyPixelAsset(shadow);
+                }
                 string key;
                 if(organismMorphs.TryGetValue(id,out key))
                 {
@@ -345,16 +371,18 @@ namespace EarthRogueOrigins.Preview
                 "SPACE pause | 1/2/3 speed | WASD pan | Wheel zoom\nP/O heat/cool | C CO2 | R reset",label);
         }
 
+        void DestroyPixelAsset(Sprite sprite)
+        {
+            if(sprite==null)return;
+            var texture=sprite.texture;
+            Destroy(sprite);
+            if(texture!=null)Destroy(texture);
+        }
+
         void DestroyPixelFrames(Sprite[] frames)
         {
             if(frames==null)return;
-            foreach(var sprite in frames)
-            {
-                if(sprite==null)continue;
-                var texture=sprite.texture;
-                Destroy(sprite);
-                if(texture!=null)Destroy(texture);
-            }
+            foreach(var sprite in frames)DestroyPixelAsset(sprite);
         }
 
         void OnDestroy()
@@ -362,6 +390,8 @@ namespace EarthRogueOrigins.Preview
             foreach(var frames in pixelSprites.Values)
                 DestroyPixelFrames(frames);
             pixelSprites.Clear();
+            foreach(var shadow in groundShadows.Values)DestroyPixelAsset(shadow);
+            groundShadows.Clear();
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=null;
             if(sharedRigMaterial!=null)Destroy(sharedRigMaterial);
