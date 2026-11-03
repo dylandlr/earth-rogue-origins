@@ -17,6 +17,7 @@ namespace EarthRogueOrigins.Editor
             // Generate source sprites first so the saved scene contains direct sprite references.
             ProceduralArtGenerator.Generate();
             CarboniferousTerrainPainter.Generate();
+            CarboniferousFoliagePainter.Generate();
             var illustratedLibrary=IllustratedPartsGenerator.Generate();
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var camObj=new GameObject("Orthographic World Camera");
@@ -35,6 +36,10 @@ namespace EarthRogueOrigins.Editor
             preview.waterTiles=LoadTiles("water");
             preview.rockTiles=LoadTiles("rock");
             preview.floodplainTiles=LoadTiles("floodplain");
+            preview.fernProps=new Sprite[8];
+            for(int i=0;i<8;i++)
+                preview.fernProps[i]=AssetDatabase.LoadAssetAtPath<Sprite>(
+                    "Assets/Art/CarboniferousFoliage/fern_"+i.ToString("00")+".png");
             preview.organismSprites=new Sprite[24];
             for(int i=0;i<24;i++)
                 preview.organismSprites[i]=AssetDatabase.LoadAssetAtPath<Sprite>(
@@ -43,7 +48,7 @@ namespace EarthRogueOrigins.Editor
             EditorSceneManager.SaveScene(scene,scenePath);
             if (!Application.isBatchMode)
                 EditorUtility.DisplayDialog("Ecosystem Lab Ready",
-                "Generated 64 prototype tiles and creature sprites, illustrated anatomical parts, and EcosystemLab.unity. Open the scene and press Play."+
+                "Generated 40 painted habitat tiles, 8 layered ferns, illustrated anatomical parts, and EcosystemLab.unity. Open the scene and press Play."+
                 "\nControls are shown at the upper-left.", "OK");
         }
 
