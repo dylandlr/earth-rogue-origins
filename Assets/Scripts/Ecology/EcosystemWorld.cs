@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using EarthRogueOrigins.Anatomy;
 using EarthRogueOrigins.Evolution;
+using EarthRogueOrigins.PixelCreatures;
 
 namespace EarthRogueOrigins.Ecology
 {
@@ -51,6 +52,21 @@ namespace EarthRogueOrigins.Ecology
         public readonly HabitatCell[] cells;
         public readonly List<EvolvingCreature> creatures = new List<EvolvingCreature>();
         public readonly List<string> events = new List<string>();
+        readonly Dictionary<int,ScientificTaxon> speciesCatalog =
+            new Dictionary<int,ScientificTaxon>();
+        public IEnumerable<ScientificTaxon> NamedSpecies { get { return speciesCatalog.Values; } }
+        public ScientificTaxon GetSpecies(int speciesId)
+        {
+            ScientificTaxon species;
+            if(!speciesCatalog.TryGetValue(speciesId,out species))
+                throw new KeyNotFoundException("Unknown simulation species ID "+speciesId);
+            return species;
+        }
+        public string ScientificName(EvolvingCreature creature)
+        {
+            if(creature==null)throw new ArgumentNullException(nameof(creature));
+            return GetSpecies(creature.speciesId).Binomial;
+        }
         readonly System.Random random;
         readonly List<EvolvingCreature> newborns = new List<EvolvingCreature>();
         readonly List<EvolvingCreature> dead = new List<EvolvingCreature>();
@@ -99,6 +115,24 @@ namespace EarthRogueOrigins.Ecology
             for (int i=0; i<c.genes.Length; i++)
                 c.genes[i] = .25f+(float)random.NextDouble()*.5f;
             c.development=DevelopmentalGenome.Founder(random);
+            if(!speciesCatalog.ContainsKey(speciesId))
+            {
+                var phenotype=Development.Express(c.development,ToGenome(c.genes));
+                var recipe=PixelRecipeAdapter.FromDevelopment(c.development,phenotype,
+                    unchecked(seed*37+speciesId));
+                var taxon=ScientificNameGenerator.Describe(recipe,speciesId);
+                // Taxonomic names are created once per species, never derived
+                // anew for each individual or subsequent mutation.
+                foreach(var existing in speciesCatalog.Values)
+                    if(existing.Binomial==taxon.Binomial)
+                    {
+                        taxon=ScientificNameGenerator.Distinguish(taxon,speciesId);
+                        break;
+                    }
+                speciesCatalog.Add(speciesId,taxon);
+                events.Add("Species "+speciesId+" established: "+taxon.Binomial+
+                    " ("+taxon.diagnosticTraits+")");
+            }
             creatures.Add(c);
             return c;
         }
