@@ -5,7 +5,7 @@ namespace EarthRogueOrigins.PixelCreatures
 {
     public enum CreaturePlan { Tetrapod, Fish, Arthropod }
     public enum PartSlot { Tail, HindLeg, ForeLeg, Trunk, Head, Eye, Armor, Fin, Markings }
-    public enum PartStyle { Rounded, Slender, Robust, Plated, Segmented, Fan, Webbed }
+    public enum PartStyle { Rounded, Slender, Robust, Plated, Segmented, Fan, Webbed, Wedge, LongSnout }
 
     [Serializable]
     public sealed class PixelCreatureRecipe
@@ -20,6 +20,7 @@ namespace EarthRogueOrigins.PixelCreatures
         public float trunkLength = .5f, trunkDepth = .5f, headSize = .5f;
         public float legLength = .5f, tailLength = .5f, finSize = .0f;
         public float armor = 0f, spots = .45f, eyeSize = .5f;
+        public PartStyle headStyle = PartStyle.Rounded;
         public PartStyle trunkStyle = PartStyle.Rounded;
         public PartStyle tailStyle = PartStyle.Slender;
         public PartStyle limbStyle = PartStyle.Robust;
@@ -74,6 +75,7 @@ namespace EarthRogueOrigins.PixelCreatures
             child.armor=Cross(mother.armor,father.armor,rng,mutation);
             child.spots=Cross(mother.spots,father.spots,rng,mutation);
             child.eyeSize=Cross(mother.eyeSize,father.eyeSize,rng,mutation);
+            child.headStyle=rng.Next(2)==0?mother.headStyle:father.headStyle;
             child.trunkStyle=rng.Next(2)==0?mother.trunkStyle:father.trunkStyle;
             child.tailStyle=rng.Next(2)==0?mother.tailStyle:father.tailStyle;
             child.limbStyle=rng.Next(2)==0?mother.limbStyle:father.limbStyle;
@@ -121,7 +123,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     P(PartSlot.Fin,PartStyle.Fan,94+tailWidth,51,8+Mathf.RoundToInt(r.finSize*13),15,1),
                     P(PartSlot.Trunk,r.trunkStyle,61,50,bodyLength,bodyDepth,2),
                     P(PartSlot.Fin,PartStyle.Fan,64,35,15,10,3),
-                    P(PartSlot.Head,PartStyle.Rounded,32,50,headWidth,bodyDepth-4,4),
+                    P(PartSlot.Head,r.headStyle,32,50,headWidth,bodyDepth-4,4),
                     P(PartSlot.Eye,PartStyle.Rounded,25,46,3,3,6),
                     P(PartSlot.Markings,PartStyle.Rounded,62,50,bodyLength,bodyDepth,5)
                 };
@@ -130,7 +132,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     P(PartSlot.Trunk,PartStyle.Segmented,66,50,bodyLength+8,bodyDepth,1),
                     P(PartSlot.HindLeg,PartStyle.Slender,76,57,18,limbHeight,0),
                     P(PartSlot.ForeLeg,PartStyle.Slender,46,58,18,limbHeight,0),
-                    P(PartSlot.Head,PartStyle.Robust,27,52,headWidth,bodyDepth-3,3),
+                    P(PartSlot.Head,r.headStyle,27,52,headWidth,bodyDepth-3,3),
                     P(PartSlot.Armor,PartStyle.Plated,65,39,bodyLength+5,bodyDepth,4),
                     P(PartSlot.Eye,PartStyle.Rounded,23,47,3,3,6)
                 };
@@ -141,7 +143,7 @@ namespace EarthRogueOrigins.PixelCreatures
                 P(PartSlot.Trunk,r.trunkStyle,63,50,bodyLength,bodyDepth,2),
                 P(PartSlot.Markings,PartStyle.Rounded,63,50,bodyLength,bodyDepth,3),
                 P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,4),
-                P(PartSlot.Head,PartStyle.Rounded,30,51,headWidth,bodyDepth-3,5),
+                P(PartSlot.Head,r.headStyle,30,51,headWidth,bodyDepth-3,5),
                 P(PartSlot.Eye,PartStyle.Rounded,24,47,3,3,6),
                 P(PartSlot.ForeLeg,r.limbStyle,38,62,12,limbHeight,7),
                 P(PartSlot.HindLeg,r.limbStyle,75,62,12,limbHeight,7)
