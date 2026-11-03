@@ -6,7 +6,23 @@ The approved visual target is a hand-illustrated, top-down cartoon swamp with da
 
 ## Status
 
-**Early Unity prototype. Not a finished game.** A Unity v0.8 project archive was generated in the development conversation, but its complete Unity source and binary art assets have **not yet been committed to this repository**. This repository is now writable and has the initial Unity configuration, build helper, and planning documents. Do not treat this initial commit as a complete runnable game.
+**Early Unity simulation prototype. Not a finished game.** A Unity v0.8 project archive was generated in the development conversation, but its complete Unity source and binary art assets have **not yet been committed to this repository**. This repository is now writable and has the initial Unity configuration, build helper, and planning documents. Do not treat this initial commit as a complete runnable game.
+
+## New: Procedural Ecosystem Lab
+
+This repository now contains a **self-contained prototype world model** (separate from the older v0.8 illustrated scene). Its organism sprites and terrain PNGs are generated inside Unity.
+
+1. Open this repository using **Unity 6**.
+2. From the top menu, choose **Earth: Rogue Origins → World → Create Ecosystem Lab Scene**.
+3. The tool generates **24 organism variants and 40 terrain tiles** and saves `Assets/Scenes/EcosystemLab.unity`.
+4. Press **Play**. The scene starts with a spatial ecosystem of grazers, omnivores, detritivores and predators.
+5. Space pauses; 1/2/3 adjusts speed; WASD pans; mouse wheel zooms; P/O changes temperature, C changes CO2, and R resets the seed.
+
+Use **Earth: Rogue Origins → Experiments → Run Ecosystem Seed Sweep** to export a 12-seed paired run of predator/no-predator ecosystems to `ExperimentResults/ecosystem_seed_sweep.csv`. Unity Edit Mode tests are in `Assets/Tests/Editor`.
+
+The graphics are **generated prototype assets**, not a 1:1 reproduction of the concept-art quality. The scene has not yet been compiled or playtested in Unity here.
+
+For architecture, limitations and research methods, see [Docs/WORLD_AND_EMERGENCE.md](Docs/WORLD_AND_EMERGENCE.md).
 
 ## Target engine
 
