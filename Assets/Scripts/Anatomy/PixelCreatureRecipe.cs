@@ -144,24 +144,36 @@ namespace EarthRogueOrigins.PixelCreatures
                     P(PartSlot.Armor,PartStyle.Plated,65,39,bodyLength+5,bodyDepth,4),
                     P(PartSlot.Eye,PartStyle.Rounded,23,47,3,3,6)
                 };
-            var face=PixelFaceGrammar.Landmarks(r.plan,r.headStyle,30,51,
-                headWidth,bodyDepth-3);
+            // Attachment stations are derived from inherited trunk length
+            // and depth. Fixed world-pixel stations previously detached legs
+            // and tails from unusually short or long bodies.
+            const int trunkX=63,trunkY=50,headX=30,headY=51;
+            int bodyLeft=trunkX-bodyLength/2;
+            int bodyRight=trunkX+bodyLength/2;
+            int foreX=bodyLeft+Mathf.RoundToInt(bodyLength*.26f);
+            int rearX=bodyRight-Mathf.RoundToInt(bodyLength*.23f);
+            int rootY=trunkY-Mathf.RoundToInt(bodyDepth*.29f);
+            int tailX=bodyRight+Mathf.Max(2,tailWidth/4);
+            int rootX=bodyRight-2;
+            var face=PixelFaceGrammar.Landmarks(r.plan,r.headStyle,
+                headX,headY,headWidth,bodyDepth-3);
             return new[]{
-                P(PartSlot.Tail,r.tailStyle,90,53,tailWidth,12,0),
-                P(PartSlot.HindLeg,r.limbStyle,78,45,12,limbHeight,1),
-                P(PartSlot.ForeLeg,r.limbStyle,44,45,12,limbHeight,1),
-                P(PartSlot.Trunk,r.trunkStyle,63,50,bodyLength,bodyDepth,2),
-                P(PartSlot.TailRootBlend,PartStyle.Rounded,85,51,13,11,3),
-                P(PartSlot.Markings,PartStyle.Rounded,63,50,bodyLength,bodyDepth,4),
-                P(PartSlot.NeckBlend,PartStyle.Rounded,39,51,13,10,8),
-                P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,5),
-                P(PartSlot.Head,r.headStyle,30,51,headWidth,bodyDepth-3,6),
-                P(PartSlot.FaceDetails,r.headStyle,30,51,headWidth,bodyDepth-3,7),
-                P(PartSlot.Eye,PartStyle.Rounded,face.eye.x,face.eye.y,3,3,12),
-                P(PartSlot.ForeLeg,r.limbStyle,44,44,12,limbHeight,9),
-                P(PartSlot.ShoulderBlend,PartStyle.Rounded,44,44,11,8,10),
-                P(PartSlot.HindLeg,r.limbStyle,76,44,12,limbHeight,9),
-                P(PartSlot.HipBlend,PartStyle.Rounded,76,44,11,8,10)
+                P(PartSlot.Tail,r.tailStyle,tailX,52,tailWidth,12,0),
+                P(PartSlot.HindLeg,r.limbStyle,rearX+2,rootY+1,12,limbHeight,1),
+                P(PartSlot.ForeLeg,r.limbStyle,foreX+2,rootY+1,12,limbHeight,1),
+                P(PartSlot.Trunk,r.trunkStyle,trunkX,trunkY,bodyLength,bodyDepth,2),
+                P(PartSlot.TailRootBlend,PartStyle.Rounded,rootX,51,13,11,3),
+                P(PartSlot.Markings,PartStyle.Rounded,trunkX,trunkY,bodyLength,bodyDepth,4),
+                // Neck is occluded by the head, never painted over the face.
+                P(PartSlot.NeckBlend,PartStyle.Rounded,bodyLeft+6,51,13,10,5),
+                P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,6),
+                P(PartSlot.Head,r.headStyle,headX,headY,headWidth,bodyDepth-3,7),
+                P(PartSlot.FaceDetails,r.headStyle,headX,headY,headWidth,bodyDepth-3,8),
+                P(PartSlot.ForeLeg,r.limbStyle,foreX,rootY,12,limbHeight,9),
+                P(PartSlot.HindLeg,r.limbStyle,rearX,rootY,12,limbHeight,9),
+                P(PartSlot.ShoulderBlend,PartStyle.Rounded,foreX,rootY,11,8,10),
+                P(PartSlot.HipBlend,PartStyle.Rounded,rearX,rootY,11,8,10),
+                P(PartSlot.Eye,PartStyle.Rounded,face.eye.x,face.eye.y,3,3,12)
             };
         }
 
