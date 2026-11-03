@@ -75,14 +75,17 @@ namespace EarthRogueOrigins.PixelCreatures
                 speciesId=speciesId,genus=original.genus,
                 diagnosticTraits=original.diagnosticTraits
             };
-            const string syllables="abcedefgilmnoprstuv";
-            uint code=unchecked((uint)speciesId);
-            char a=syllables[(int)(code%(uint)syllables.Length)];
-            char b=syllables[(int)((code/(uint)syllables.Length)%(uint)syllables.Length)];
-            // Species IDs are unbounded; append the numeric index only when
-            // necessary for complete collision resistance.
-            copy.epithet=original.epithet+"-"+a+b+speciesId.ToString(
-                System.Globalization.CultureInfo.InvariantCulture)+"ensis";
+            // Distinct positive IDs use a reversible lower-case alphabetic
+            // suffix, avoiding digits or punctuation inside the binomial.
+            uint value=unchecked((uint)speciesId)+1u;
+            string token="";
+            do
+            {
+                token=(char)('a'+value%26u)+token;
+                value/=26u;
+            }
+            while(value!=0);
+            copy.epithet=original.epithet+token+"ensis";
             return copy;
         }
 
