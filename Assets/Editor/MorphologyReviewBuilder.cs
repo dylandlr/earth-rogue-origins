@@ -7,6 +7,7 @@ using EarthRogueOrigins.Anatomy;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace EarthRogueOrigins.Editor
 {
@@ -21,7 +22,6 @@ namespace EarthRogueOrigins.Editor
         const int Rows=4;
         const int Width=1600;
         const int Height=1000;
-        const string ScenePath="Assets/Scenes/MorphologyReview.unity";
         const string OutputFolder="ValidationResults/VisualReview";
 
         [MenuItem("Earth: Rogue Origins/Art/Create Morphology Review Board")]
@@ -32,7 +32,7 @@ namespace EarthRogueOrigins.Editor
             var art=IllustratedPartsGenerator.Generate(false);
             if(art==null || !art.HasCoreParts)
                 throw new InvalidOperationException("Illustrated creature library is missing its core parts.");
-            var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+            var scene=EditorSceneManager.NewPreviewScene();
 
             Shader shader=Shader.Find("Sprites/Default");
             if(shader==null)shader=Shader.Find("Unlit/Color");
@@ -41,6 +41,7 @@ namespace EarthRogueOrigins.Editor
             var material=new Material(shader);
             material.name="Temporary morphology review material";
             var root=new GameObject("REVIEW — Real phenotype-driven anatomy");
+            SceneManager.MoveGameObjectToScene(root,scene);
             const float stepX=4.4f, stepY=3.2f;
             var csv=new StringBuilder("variant,adaptation,intensity,trunk_length,tail_length,limb_length,fin,armor,swim_speed,land_speed,upkeep\n");
 
@@ -101,6 +102,7 @@ namespace EarthRogueOrigins.Editor
                 csv.AppendLine();
             }
             var camObj=new GameObject("Visual Review Camera");
+            SceneManager.MoveGameObjectToScene(camObj,scene);
             var camera=camObj.AddComponent<Camera>();
             camObj.tag="MainCamera";
             camera.orthographic=true;
@@ -109,8 +111,6 @@ namespace EarthRogueOrigins.Editor
             camera.transform.position=new Vector3(0,0,-20);
             camera.clearFlags=CameraClearFlags.SolidColor;
             camera.backgroundColor=new Color(.17f,.21f,.17f,1);
-            EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene,ScenePath);
             File.WriteAllText(OutputFolder+"/morphology_metrics.csv",csv.ToString());
 
             // Actual editor-camera render, not generated illustration. Correctly restore
@@ -134,10 +134,10 @@ namespace EarthRogueOrigins.Editor
                 RenderTexture.active=previous;
                 if(capture!=null)UnityEngine.Object.DestroyImmediate(capture);
                 UnityEngine.Object.DestroyImmediate(rt);
+                EditorSceneManager.ClosePreviewScene(scene);
                 UnityEngine.Object.DestroyImmediate(material);
             }
-            AssetDatabase.Refresh();
-            Debug.Log("Morphology review saved: "+ScenePath+"; "+OutputFolder+
+            Debug.Log("Morphology review saved: "+OutputFolder+
                 "/morphology_board.png and morphology_metrics.csv");
         }
     }
