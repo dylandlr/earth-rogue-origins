@@ -1,3 +1,11 @@
+## Visual Fidelity v1.8 (silhouette-first)
+- [x] Add procedural clustered dorsal spots and individually shaped toes to C# rasterizer
+- [x] Replace pointed tetrapod tail wedge with softer tapered end
+- [x] Generate five original transparent v1.8 sprites, walk strip and v1.5 comparisons in Python
+- [x] Add bounds/determinism regression checks for new primitives
+- [ ] Validate these visual changes in an actual Unity rendering run
+- [ ] Keep refining facial character, low body ratio and organic skin clusters until the recreated sprite target is reached
+
 ## Pixel art fidelity v1.1 (art-directed procedural phase)
 - [x] Lock six color ramps for ink, shadow, midtone, highlight and pattern
 - [x] Define eight intentional organism archetypes and marking grammars
