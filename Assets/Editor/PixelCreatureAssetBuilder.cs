@@ -57,6 +57,17 @@ namespace EarthRogueOrigins.Editor
                         .Append(part.extent.y).Append(',').Append(part.drawOrder).AppendLine();
                 }
                 WriteText(folder+"/layers.csv",descriptors.ToString(),overwrite);
+                // Export all poses from the exact same layered recipe, including
+                // the neutral frame. Keep each PNG individually artist-editable.
+                string motionFolder=folder+"/Animation";
+                Directory.CreateDirectory(motionFolder);
+                for(int mode=0;mode<2;mode++)
+                for(int frame=0;frame<PixelCreaturePoses.Frames;frame++)
+                {
+                    string animationName=(mode==0?"walk_":"swim_")+frame.ToString("00")+".png";
+                    WriteImage(motionFolder+"/"+animationName,
+                        PixelCreaturePainter.RenderPixels(r,frame,mode==1),overwrite);
+                }
                 csv.Append(r.id).Append(',').Append(r.plan).Append(',').Append(r.seed)
                     .Append(',').Append(layout.Length).Append(',').Append(r.armor)
                     .Append(',').Append(r.finSize).Append(',').Append(r.legLength)
