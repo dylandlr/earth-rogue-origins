@@ -67,8 +67,11 @@ namespace EarthRogueOrigins.Editor
                 int eyeIndex=eye.anchor.y*tileW+eye.anchor.x;
                 // The eye layer is topmost, so the eye center must be opaque
                 // regardless of the palette.
+                var ink=PixelArtDirection.Ramp(recipe.palette).ink;
                 bool eyeVisible=eyeIndex>=0&&eyeIndex<pixels.Length&&
-                    pixels[eyeIndex].a>0;
+                    pixels[eyeIndex].a>0&&
+                    pixels[eyeIndex].r==ink.r&&pixels[eyeIndex].g==ink.g&&
+                    pixels[eyeIndex].b==ink.b;
                 if(!valid || !eyeVisible)failures++;
                 report.Append(Styles[col]).Append(',').Append(Sizes[row])
                     .Append(',').Append(marks.eye.x).Append(',').Append(marks.eye.y)
