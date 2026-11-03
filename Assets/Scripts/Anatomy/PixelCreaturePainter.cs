@@ -79,11 +79,7 @@ namespace EarthRogueOrigins.PixelCreatures
             switch(d.slot)
             {
                 case PartSlot.Trunk:
-                    Ellipse(c,x,y,w/2+2,h/2+2,c.ink);
-                    Ellipse(c,x,y,w/2,h/2,dark);
-                    Ellipse(c,x,y+2,w/2-2,Mathf.Max(2,h/2-3),r.baseColor);
-                    Ellipse(c,x-5,y+Mathf.Max(2,h/5),Mathf.Max(3,w/3),
-                        Mathf.Max(2,h/6),light);
+                    PaintProfile(c,PartSlot.Trunk,d.style,x,y,w,h,palette);
                     if(d.style==PartStyle.Segmented)
                     {
                         int segments=7+Mathf.RoundToInt(r.armor*5);
@@ -101,33 +97,16 @@ namespace EarthRogueOrigins.PixelCreatures
                     break;
 
                 case PartSlot.Head:
-                    if(d.style==PartStyle.Wedge)
-                    {
-                        Polygon(c,new[]{
-                            new Vector2Int(x-w/2-3,y-2),new Vector2Int(x+w/2,y+h/2),
-                            new Vector2Int(x+w/2+3,y-h/2),
-                            new Vector2Int(x-w/2-3,y-h/4)
-                        },c.ink);
-                        Polygon(c,new[]{
-                            new Vector2Int(x-w/2,y-1),new Vector2Int(x+w/2-2,y+h/2-2),
-                            new Vector2Int(x+w/2,y-h/2+2),
-                            new Vector2Int(x-w/2,y-h/4)
-                        },r.baseColor);
-                    }
-                    else
-                    {
-                        int extension=d.style==PartStyle.LongSnout?9:0;
-                        Ellipse(c,x-extension/2,y,w/2+2+extension/2,h/2+2,c.ink);
-                        Ellipse(c,x-extension/2,y,w/2+extension/2,h/2,r.baseColor);
-                    }
-                    Ellipse(c,x-2,y+3,Mathf.Max(3,w/3),Mathf.Max(2,h/5),light);
-                    // Small snout and jaw keep the face readable at 32 px.
+                    PaintProfile(c,PartSlot.Head,d.style,x,y,w,h,palette);
+                    // Organic cheek and raised brow preserve character at 32 px.
+                    Ellipse(c,x-2,y+Mathf.Max(2,h/5),Mathf.Max(3,w/3),
+                        Mathf.Max(2,h/6),palette.light);
                     if(r.plan!=CreaturePlan.Arthropod)
                     {
-                        Ellipse(c,x-w/3-(d.style==PartStyle.LongSnout?5:0),y-1,
-                            Mathf.Max(4,w/3),Mathf.Max(3,h/4),r.baseColor);
-                        Line(c,x-w/2-4-(d.style==PartStyle.LongSnout?8:0),y-4,x-w/3,y-4,c.ink,2);
-                        Line(c,x-w/2-3,y-6,x-w/3+2,y-6,EyeWhite,1);
+                        int snout=d.style==PartStyle.LongSnout?7:3;
+                        // Overlapping jaw pixels hide the head/snout seam.
+                        Line(c,x-w/2-snout,y-3,x-w/2+5,y-3,c.ink,2);
+                        Line(c,x-w/2-snout+2,y-5,x-w/2+4,y-5,palette.highlight,1);
                     }
                     break;
 
@@ -239,6 +218,42 @@ namespace EarthRogueOrigins.PixelCreatures
                 case PartSlot.Markings:
                     DrawMarkings(c,x,y,w,h,r,palette);
                     break;
+            }
+        }
+
+        static void PaintProfile(Canvas canvas,PartSlot slot,PartStyle style,
+            int cx,int cy,int width,int height,PixelColorRamp ramp)
+        {
+            // The outer contour is grown by two pixels while the painted core has
+            // its own 1-2px underside shadow and an offset upper-left highlight.
+            int left=cx-width/2,right=cx+width/2;
+            for(int x=left-2;x<=right+2;x++)
+            {
+                float u=(x-left)/(float)Mathf.Max(1,right-left);
+                float upper,lower;
+                float[] top,bottom;
+                PixelSilhouetteTemplates.Profile(slot,style,out top,out bottom);
+                upper=PixelSilhouetteTemplates.Sample(top,u);
+                lower=PixelSilhouetteTemplates.Sample(bottom,u);
+                int high=cy+Mathf.RoundToInt(upper*height*.5f);
+                int low=cy+Mathf.RoundToInt(lower*height*.5f);
+                for(int y=low-2;y<=high+2;y++)
+                {
+                    bool inside=x>=left&&x<=right&&y>=low&&y<=high;
+                    if(!inside)
+                    {
+                        canvas.Put(x,y,ramp.ink);
+                        continue;
+                    }
+                    int distanceToEdge=Mathf.Min(
+                        Mathf.Min(x-left,right-x),Mathf.Min(high-y,y-low));
+                    Color32 fill=y<cy-height*.12f?ramp.shadow:ramp.mid;
+                    if(distanceToEdge>=2 && y>cy+height*.19f &&
+                       x<cx+width*.16f)fill=ramp.light;
+                    if(distanceToEdge>=4 && y>cy+height*.30f &&
+                       x<cx-width*.08f)fill=ramp.highlight;
+                    canvas.Put(x,y,fill);
+                }
             }
         }
 
