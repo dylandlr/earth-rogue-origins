@@ -16,6 +16,7 @@ namespace EarthRogueOrigins.Editor
             Directory.CreateDirectory("Assets/Scenes");
             // Generate source sprites first so the saved scene contains direct sprite references.
             ProceduralArtGenerator.Generate();
+            CarboniferousTerrainPainter.Generate();
             var illustratedLibrary=IllustratedPartsGenerator.Generate();
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var camObj=new GameObject("Orthographic World Camera");
@@ -51,7 +52,7 @@ namespace EarthRogueOrigins.Editor
             var result=new Sprite[8];
             for(int i=0;i<8;i++)
                 result[i]=AssetDatabase.LoadAssetAtPath<Sprite>(
-                    "Assets/Art/Generated/Terrain/"+biome+"_"+i.ToString("00")+".png");
+                    "Assets/Art/CarboniferousTerrain/"+biome+"/"+biome+"_"+i.ToString("00")+".png");
             return result;
         }
     }
