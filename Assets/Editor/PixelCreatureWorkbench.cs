@@ -59,6 +59,15 @@ namespace EarthRogueOrigins.Editor
             recipe.id=EditorGUILayout.TextField("Asset ID",recipe.id);
             recipe.seed=EditorGUILayout.IntField("Appearance seed",recipe.seed);
             recipe.plan=(CreaturePlan)EditorGUILayout.EnumPopup("Body plan",recipe.plan);
+            var selected=(CreatureArchetype)EditorGUILayout.EnumPopup("Hero template",recipe.archetype);
+            if(selected!=recipe.archetype)
+            {
+                recipe=PixelArtDirection.Hero(selected,recipe.seed);
+                RepaintPreview();
+            }
+            var palette=(CreaturePalette)EditorGUILayout.EnumPopup("Palette ramp",recipe.palette);
+            if(palette!=recipe.palette)PixelArtDirection.ApplyPalette(recipe,palette);
+            recipe.pattern=(MarkingPattern)EditorGUILayout.EnumPopup("Marking grammar",recipe.pattern);
             recipe.headStyle=(PartStyle)EditorGUILayout.EnumPopup("Head module",recipe.headStyle);
             recipe.trunkStyle=(PartStyle)EditorGUILayout.EnumPopup("Trunk module",recipe.trunkStyle);
             recipe.tailStyle=(PartStyle)EditorGUILayout.EnumPopup("Tail module",recipe.tailStyle);
