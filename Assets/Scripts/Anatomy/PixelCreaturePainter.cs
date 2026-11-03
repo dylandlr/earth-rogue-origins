@@ -268,14 +268,30 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     else
                     {
+                        // Tapered fleshy root and softened blunt end instead
+                        // of a sharp wedge disconnected from the rump.
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2-5,y+7+tailWave),new Vector2Int(x+w/2,y+9),
-                            new Vector2Int(x+w/2+2,y-3),new Vector2Int(x-w/2+5,y-5+tailWave)
+                            new Vector2Int(x-w/2-5,y+7+tailWave),
+                            new Vector2Int(x-w/2+2,y+9+tailWave),
+                            new Vector2Int(x+w/2-5,y+4),
+                            new Vector2Int(x+w/2+2,y+2),
+                            new Vector2Int(x+w/2+2,y-2),
+                            new Vector2Int(x+w/2-5,y-4),
+                            new Vector2Int(x-w/2+1,y-7+tailWave),
+                            new Vector2Int(x-w/2-5,y-5+tailWave)
                         },c.ink);
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2-3,y+5+tailWave),new Vector2Int(x+w/2-2,y+7),
-                            new Vector2Int(x+w/2,y-1),new Vector2Int(x-w/2+5,y-3+tailWave)
+                            new Vector2Int(x-w/2-3,y+5+tailWave),
+                            new Vector2Int(x-w/2+1,y+7+tailWave),
+                            new Vector2Int(x+w/2-5,y+3),
+                            new Vector2Int(x+w/2,y+1),
+                            new Vector2Int(x+w/2,y-1),
+                            new Vector2Int(x+w/2-5,y-2),
+                            new Vector2Int(x-w/2+1,y-5+tailWave),
+                            new Vector2Int(x-w/2-3,y-3+tailWave)
                         },r.baseColor);
+                        Line(c,x-w/2,y+4+tailWave,x+2,y+3,
+                            palette.light,1);
                     }
                     break;
 
