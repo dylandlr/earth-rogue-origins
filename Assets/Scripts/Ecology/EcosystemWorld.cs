@@ -117,6 +117,8 @@ namespace EarthRogueOrigins.Ecology
                 var tile = Cell(Mathf.FloorToInt(c.position.x), Mathf.FloorToInt(c.position.y));
                 float thermal = Mathf.Abs(tile.temperature-(25f+c.Trait(5)*7f));
                 float metabolic = (.5f+(1f-c.Trait(2))*.6f)*(1f+.04f*thermal);
+                if(c.development!=null)
+                    metabolic*=Development.Express(c.development,ToGenome(c.genes)).upkeep;
                 c.energy -= metabolic*dt;
                 if (c.energy < 5) c.health -= dt*6f;
                 if (c.age > 25f+c.Trait(5)*20f) c.health -= dt*3f;
@@ -129,7 +131,6 @@ namespace EarthRogueOrigins.Ecology
                 {
                     var phenotype=Development.Express(c.development,ToGenome(c.genes));
                     movementSpeed=tile.terrain==TerrainKind.Water?phenotype.swimmingSpeed:phenotype.terrestrialSpeed;
-                    metabolic*=phenotype.upkeep;
                 }
                 float terrainPenalty = tile.terrain == TerrainKind.Water ? .5f : 1f;
                 Vector2 movement = delta.sqrMagnitude > .05f
