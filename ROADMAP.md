@@ -1,3 +1,16 @@
+## Emergent speciation v2.2
+- [x] Observe heritable divergence across physiological and anatomical gene summaries
+- [x] Require persistent x-axis spatial isolation, viable group sizes and multiple generations
+- [x] Promote existing diverged cohort into a descendant species while retaining pedigrees
+- [x] Keep original species name immutable, assign distinct descendant binomial
+- [x] Persist parent species, tick and quantitative supporting evidence
+- [x] Show compact taxonomic ancestry in the live field guide
+- [x] Add deterministic controlled-population Edit Mode test cases
+- [ ] Execute Unity tests and verify actual first branching events
+- [ ] Replace x-axis proxy with 2D traversable-habitat separation
+- [ ] Model mate compatibility and gene flow rather than relying on a species-ID mating restriction
+- [ ] Compare seeded divergence experiments against disabled-speciation controls
+
 ## Species taxonomy & face contour verification v2.1
 - [x] Generate simulated binomials from founding inherited body-plan, armor, tail, snout, leg and pigment traits
 - [x] Register canonical scientific taxon once per species ID and preserve across offspring and individual mutations
