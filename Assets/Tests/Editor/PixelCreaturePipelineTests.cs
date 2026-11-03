@@ -444,9 +444,11 @@ namespace EarthRogueOrigins.Tests
             foreach(PartStyle style in new[]{PartStyle.Rounded,PartStyle.Robust,
                 PartStyle.Wedge,PartStyle.LongSnout})
             foreach(float size in new[]{0f,.5f,1f})
+            foreach(float depth in new[]{0f,.5f,1f})
             {
                 var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,901);
                 recipe.headSize=size;
+                recipe.trunkDepth=depth;
                 recipe.headStyle=style;
                 var layout=PixelCreatureDevelopment.Layout(recipe);
                 PixelPartDescriptor head=null,eye=null,face=null;
@@ -472,7 +474,7 @@ namespace EarthRogueOrigins.Tests
                     Assert.IsTrue(PixelSilhouetteTemplates.Contains(
                         PartSlot.Head,style,u,v),
                         "Floating facial feature at "+point+" / "+style+
-                        " / head size "+size);
+                        " / head size "+size+" / depth "+depth);
                 }
                 foreach(var point in new[]{marks.eye,marks.nostril,
                     marks.mouthStart,marks.mouthEnd,marks.cheek})
