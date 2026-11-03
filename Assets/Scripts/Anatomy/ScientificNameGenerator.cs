@@ -34,9 +34,11 @@ namespace EarthRogueOrigins.PixelCreatures
                 case CreaturePlan.Fish:
                     genus=recipe.finSize>.6f?"Pterolimnus":"Limnophysis";
                     reason=recipe.finSize>.6f?"expanded swimming fins":"streamlined aquatic body";
-                    epithet=recipe.armor>.65f?"loricata":
-                        recipe.tailLength>.65f?"longicauda":
-                        recipe.headStyle==PartStyle.LongSnout?"rostrata":"palustris";
+                    bool masculine=genus=="Pterolimnus";
+                    epithet=recipe.armor>.65f?(masculine?"loricatus":"loricata"):
+                        recipe.tailLength>.65f?(masculine?"longicaudus":"longicauda"):
+                        recipe.headStyle==PartStyle.LongSnout?
+                            (masculine?"rostratus":"rostrata"):"palustris";
                     break;
                 case CreaturePlan.Arthropod:
                     genus=recipe.armor>.55f?"Scutarthron":"Paludarthron";
@@ -51,11 +53,15 @@ namespace EarthRogueOrigins.PixelCreatures
                     reason=recipe.armor>.6f?"heavy dorsal armor":
                         recipe.tailLength>.75f?"elongated tail":
                         recipe.headStyle==PartStyle.LongSnout?"long rostrum":"broad low-slung trunk";
-                    epithet=recipe.armor>.6f?"armatum":
+                    bool masculine=genus.EndsWith("limnus",StringComparison.Ordinal);
+                    epithet=recipe.armor>.6f?(masculine?"armatus":"armatum"):
                         recipe.legLength>.7f?"longipes":
-                        recipe.palette==CreaturePalette.RustClay?"ferrugineum":
-                        recipe.palette==CreaturePalette.PaleSand?"pallidum":
-                        recipe.spots>.55f?"maculatum":"olivaceum";
+                        recipe.palette==CreaturePalette.RustClay?
+                            (masculine?"ferrugineus":"ferrugineum"):
+                        recipe.palette==CreaturePalette.PaleSand?
+                            (masculine?"pallidus":"pallidum"):
+                        recipe.spots>.55f?(masculine?"maculatus":"maculatum"):
+                            (masculine?"olivaceus":"olivaceum");
                     break;
             }
             return new ScientificTaxon {
