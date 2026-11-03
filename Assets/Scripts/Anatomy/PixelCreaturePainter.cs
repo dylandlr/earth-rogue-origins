@@ -125,6 +125,24 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     break;
 
+                case PartSlot.TailRootBlend:
+                    // Overlap covers the dark tail/body join with an inset,
+                    // tapered skin bridge. Drawn before markings and armor.
+                    Polygon(c,new[]{
+                        new Vector2Int(x-w/2-2,y-2),
+                        new Vector2Int(x+w/2+1,y+4),
+                        new Vector2Int(x+w/2+1,y-3),
+                        new Vector2Int(x-w/2-2,y-5)
+                    },palette.shadow);
+                    Polygon(c,new[]{
+                        new Vector2Int(x-w/2,y),
+                        new Vector2Int(x+w/2-1,y+4),
+                        new Vector2Int(x+w/2-1,y-1),
+                        new Vector2Int(x-w/2,y-3)
+                    },r.baseColor);
+                    Line(c,x-2,y+3,x+w/2-2,y+3,palette.light,1);
+                    break;
+
                 case PartSlot.NeckBlend:
                     // A controlled occlusion patch unifies the back of the head
                     // with the forward shoulder without erasing the snout.
@@ -168,14 +186,30 @@ namespace EarthRogueOrigins.PixelCreatures
                             d.style==PartStyle.Robust?Mathf.Max(7,w/2+2):Mathf.Max(5,w/2);
                         Line(c,x,y,x+2,y-h+3,c.ink,thickness);
                         Line(c,x,y,x+2,y-h+3,r.baseColor,Mathf.Max(2,thickness-3));
-                        Line(c,x+2,y-h+3,x-4,y-h,c.ink,4);
-                        Line(c,x+2,y-h+4,x-3,y-h+1,light,2);
+                        // A broad, flattened three-toe contact foot provides a
+                        // distinct planted silhouette instead of a straight cap.
+                        int ground=y-h+1;
+                        int toeSpread=d.style==PartStyle.Webbed?9:
+                            d.style==PartStyle.Robust?7:5;
+                        Ellipse(c,x-1,ground,5,3,c.ink);
+                        Line(c,x-toeSpread,ground-1,x+toeSpread,ground-1,c.ink,3);
+                        Line(c,x-toeSpread+2,ground,x+toeSpread-1,ground,light,1);
+                        for(int toe=-1;toe<=1;toe++)
+                        {
+                            int tx=x+toe*toeSpread/2;
+                            Line(c,tx,ground,tx-2,ground-2,c.ink,2);
+                            c.Put(tx-2,ground-1,palette.highlight);
+                        }
                         if(d.style==PartStyle.Webbed)
+                        {
                             Polygon(c,new[]{
-                                new Vector2Int(x-6,y-h+1),
-                                new Vector2Int(x+7,y-h+1),
-                                new Vector2Int(x+2,y-h+8)
-                            },r.secondaryColor);
+                                new Vector2Int(x-toeSpread,ground+1),
+                                new Vector2Int(x+toeSpread,ground+1),
+                                new Vector2Int(x,ground+7)
+                            },palette.shadow);
+                            Line(c,x-toeSpread+2,ground+2,x+toeSpread-2,ground+2,
+                                palette.light,1);
+                        }
                     }
                     break;
 
