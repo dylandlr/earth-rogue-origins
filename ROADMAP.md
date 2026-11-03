@@ -22,6 +22,9 @@
 - [x] Add initial four-frame walk/swim morphology posing (not production IK)
 - [x] Add first articulated multi-part rig with head, tail, limbs and dorsal plates
 - [x] Add reusable illustrated part library and anatomical skin binding (prototype artwork)
+- [x] Add Carboniferous terrain palette, ferns, positional depth and genetic markings
+- [x] Add approved concept/reference comparison window
+- [ ] Import isolated approved organism illustrations into a curated anatomical component atlas
 - [ ] Replace starter illustrations with approved hand-painted component atlases
 - [ ] Add IK foot planting and direction-dependent poses
 - [x] Add reference-counted phenotype sprite cache
