@@ -439,6 +439,64 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void FaceLandmarksStayInsideCanvasForAllTetrapodHeadStyles()
+        {
+            foreach(PartStyle style in new[]{PartStyle.Rounded,PartStyle.Robust,
+                PartStyle.Wedge,PartStyle.LongSnout})
+            foreach(float size in new[]{0f,.5f,1f})
+            {
+                var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,901);
+                recipe.headSize=size;
+                recipe.headStyle=style;
+                var layout=PixelCreatureDevelopment.Layout(recipe);
+                PixelPartDescriptor head=null,eye=null,face=null;
+                foreach(var part in layout)
+                {
+                    if(part.slot==PartSlot.Head)head=part;
+                    if(part.slot==PartSlot.Eye)eye=part;
+                    if(part.slot==PartSlot.FaceDetails)face=part;
+                }
+                Assert.NotNull(head);
+                Assert.NotNull(eye);
+                Assert.NotNull(face);
+                var marks=PixelFaceGrammar.Landmarks(recipe.plan,head.style,
+                    head.anchor.x,head.anchor.y,head.extent.x,head.extent.y);
+                Assert.AreEqual(marks.eye,eye.anchor);
+                foreach(var point in new[]{marks.eye,marks.nostril,
+                    marks.mouthStart,marks.mouthEnd,marks.cheek})
+                {
+                    Assert.That(point.x,Is.InRange(0,127));
+                    Assert.That(point.y,Is.InRange(0,95));
+                }
+                var pixels=PixelCreaturePainter.RenderPixels(recipe);
+                Assert.AreEqual(128*96,pixels.Length);
+            }
+        }
+
+        [Test]
+        public void FaceDetailLayerPreservesCompositingAcrossMorphologies()
+        {
+            foreach(CreatureArchetype hero in new[]{CreatureArchetype.MarshCrawler,
+                CreatureArchetype.ClayRunner,CreatureArchetype.PaleJuvenile})
+            {
+                var recipe=PixelArtDirection.Hero(hero,1977);
+                var parts=PixelCreatureDevelopment.Layout(recipe);
+                Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
+                int faceIndex=-1;
+                var assembled=new Color32[128*96];
+                for(int i=0;i<parts.Length;i++)
+                {
+                    if(parts[i].slot==PartSlot.FaceDetails)faceIndex=i;
+                    var layer=PixelCreaturePainter.RenderLayerPixels(recipe,i);
+                    for(int pixel=0;pixel<layer.Length;pixel++)
+                        if(layer[pixel].a!=0)assembled[pixel]=layer[pixel];
+                }
+                Assert.Greater(faceIndex,0);
+                CollectionAssert.AreEqual(PixelCreaturePainter.RenderPixels(recipe),assembled);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
