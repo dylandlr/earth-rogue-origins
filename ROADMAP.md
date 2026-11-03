@@ -1,3 +1,14 @@
+## Pixel art fidelity v1.1 (art-directed procedural phase)
+- [x] Lock six color ramps for ink, shadow, midtone, highlight and pattern
+- [x] Define eight intentional organism archetypes and marking grammars
+- [x] Integrate palette-specific contour inks, skin-bound spots, bands and stripes
+- [x] Export ordered, context-sensitive composable layers and validate image parity
+- [x] Expose archetype/palette/marking selection in Unity Composer
+- [x] Add tests for distinct archetype renders, palette order and pigment variation
+- [ ] Run Unity compile, Edit Mode tests and export actual rendered contact sheets
+- [ ] Replace placeholder primitive head/trunk masks with carefully authored pixel silhouettes
+- [ ] Perform side-by-side quality acceptance against the recreated sprite reference
+
 ## Milestone 1B: Original composable pixel-art asset system
 - [x] Versioned recipes, body-plan grammars and ordered part attachment descriptors
 - [x] Original 128×96 transparent pixel compositor with deterministic colors, outlines and markings
