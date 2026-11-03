@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using EarthRogueOrigins.Ecology;
 using EarthRogueOrigins.Anatomy;
 using EarthRogueOrigins.Evolution;
@@ -93,9 +94,8 @@ namespace EarthRogueOrigins.Preview
                     prop.transform.localScale=Vector3.one*scale;
                     var sr=prop.AddComponent<SpriteRenderer>();
                     sr.sprite=sprite;
-                    sr.sortingOrder=20;
-                    // Stable screen-space sort: taller plants overlap objects farther north.
-                    sr.sortingOrder=1500-y*2;
+                    // Plants sort by their ground anchor, not their crown height.
+                    sr.sortingOrder=1500-Mathf.FloorToInt((y+.57f)*8f);
                     createdObjects.Add(prop);
                 }
             }
@@ -177,6 +177,7 @@ namespace EarthRogueOrigins.Preview
                     var go=new GameObject("Organism "+c.id+" G"+c.generation);
                     go.transform.SetParent(transform,false);
                     renderer=go.AddComponent<SpriteRenderer>();
+                    go.AddComponent<SortingGroup>();
                     renderer.sortingOrder=10;
                     creatureRenderers[c.id]=renderer;
                     createdObjects.Add(go);
@@ -246,6 +247,9 @@ namespace EarthRogueOrigins.Preview
                 renderer.color=c.diet==DietKind.Predator?new Color(1,.68f,.6f):
                     c.diet==DietKind.Detritivore?new Color(.9f,.85f,1f):Color.white;
                 renderer.transform.position=new Vector3(c.position.x,c.position.y,-.03f);
+                var sorting=renderer.GetComponent<SortingGroup>();
+                if(sorting!=null)
+                    sorting.sortingOrder=1500-Mathf.FloorToInt(c.position.y*8f);
                 if(!useArticulatedRig)
                     renderer.transform.localScale=Vector3.one*(useAnatomicalSprites?1f:.78f);
             }
