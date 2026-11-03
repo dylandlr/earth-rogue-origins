@@ -188,6 +188,7 @@ namespace EarthRogueOrigins.Preview
                     renderer=go.AddComponent<SpriteRenderer>();
                     go.AddComponent<SortingGroup>();
                     renderer.sortingOrder=10;
+                    renderer.gameObject.name=world.ScientificName(c)+"  |  individual "+c.id;
                     creatureRenderers[c.id]=renderer;
                     createdObjects.Add(go);
                 }
@@ -367,6 +368,21 @@ namespace EarthRogueOrigins.Preview
                 "Plants "+s.totalPlants.ToString("0")+"  |  Detritus "+s.totalDetritus.ToString("0"),label);
             GUI.Label(new Rect(24,109,350,22),
                 "Temperature offset "+world.temperatureOffset.ToString("+0;-0;0")+"C",label);
+            // Compact taxonomic field guide; population belongs to the
+            // authoritative speciesId, not a per-individual visual guess.
+            int taxonRow=0;
+            GUI.Box(new Rect(12,191,365,28+Mathf.Max(1,3)*25),
+                "SPECIES FIELD GUIDE",panel);
+            foreach(var taxon in world.NamedSpecies)
+            {
+                int living=0;
+                foreach(var creature in world.creatures)
+                    if(creature.speciesId==taxon.speciesId)living++;
+                GUI.Label(new Rect(24,217+taxonRow*25,345,24),
+                    "<i>"+taxon.Binomial+"</i>  ·  "+living+" living",label);
+                taxonRow++;
+                if(taxonRow>=3)break;
+            }
             GUI.Label(new Rect(24,135,355,42),
                 "SPACE pause | 1/2/3 speed | WASD pan | Wheel zoom\nP/O heat/cool | C CO2 | R reset",label);
         }
