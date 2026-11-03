@@ -23,9 +23,19 @@ namespace EarthRogueOrigins.Editor
         [MenuItem("Earth: Rogue Origins/Art/Generate Creature Variations and Terrain")]
         public static void Generate()
         {
+            Generate(false);
+        }
+
+        [MenuItem("Earth: Rogue Origins/Art/Regenerate Legacy Terrain and Creatures (Overwrite PNGs)")]
+        public static void RegenerateAll()
+        {
+            Generate(true);
+        }
+
+        public static void Generate(bool overwrite)
+        {
             Directory.CreateDirectory(Root+"/Creatures");
             Directory.CreateDirectory(Root+"/Terrain");
-            var random = new System.Random(2046);
             for (int i=0;i<24;i++)
             {
                 float armor=(i%6)/5f;
@@ -33,15 +43,19 @@ namespace EarthRogueOrigins.Editor
                 float aquatic=(i%3)/2f;
                 var palette = i%4==0?C(150,162,114):i%4==1?C(176,126,101):
                     i%4==2?C(120,145,150):C(191,177,132);
+                string path=Root+"/Creatures/tetrapod_"+i.ToString("00")+".png";
+                if(!overwrite && File.Exists(path))continue;
                 Texture2D sprite=GenerateCreature(palette,armor,limbs,aquatic,i);
-                Write(sprite,Root+"/Creatures/tetrapod_"+i.ToString("00")+".png");
+                Write(sprite,path);
             }
             string[] biomes={"forest","mud","water","rock","floodplain"};
             for(int i=0;i<biomes.Length;i++)
             for(int variant=0;variant<8;variant++)
             {
+                string path=Root+"/Terrain/"+biomes[i]+"_"+variant.ToString("00")+".png";
+                if(!overwrite && File.Exists(path))continue;
                 Texture2D tile=GenerateTile(i,new System.Random(8046+i*173+variant*13));
-                Write(tile,Root+"/Terrain/"+biomes[i]+"_"+variant.ToString("00")+".png");
+                Write(tile,path);
             }
             AssetDatabase.Refresh();
             string[] paths=AssetDatabase.FindAssets("t:Texture2D",new[]{Root});
@@ -58,7 +72,8 @@ namespace EarthRogueOrigins.Editor
                 importer.SaveAndReimport();
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("Generated 24 organism morphs and 40 terrain tiles at "+Root);
+            Debug.Log("Ensured 24 organism morphs and 40 terrain tiles at "+Root+
+                (overwrite?" (existing PNGs overwritten)":" (existing PNGs preserved)"));
         }
 
         public static Texture2D GenerateCreature(Color32 baseColor,float armor,float limbs,float aquatic,int seed)
