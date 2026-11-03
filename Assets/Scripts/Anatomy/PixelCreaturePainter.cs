@@ -212,66 +212,69 @@ namespace EarthRogueOrigins.PixelCreatures
                     {
                         int thickness=d.style==PartStyle.Slender?Mathf.Max(4,w/3):
                             d.style==PartStyle.Robust?Mathf.Max(7,w/2+2):Mathf.Max(5,w/2);
-                        Line(c,x,y,x+2,y-h+3,c.ink,thickness);
-                        Line(c,x,y,x+2,y-h+3,r.baseColor,Mathf.Max(2,thickness-3));
+                        int plantedX=x+d.mirrorGroup;
+                        Line(c,x,y,plantedX+2,y-h+3,c.ink,thickness);
+                        Line(c,x,y,plantedX+2,y-h+3,r.baseColor,Mathf.Max(2,thickness-3));
                         // A broad, flattened three-toe contact foot provides a
                         // distinct planted silhouette instead of a straight cap.
                         int ground=y-h+1;
+                        int footX=plantedX;
                         int toeSpread=d.style==PartStyle.Webbed?9:
                             d.style==PartStyle.Robust?7:5;
-                        Ellipse(c,x-1,ground,5,3,c.ink);
-                        Line(c,x-toeSpread,ground-1,x+toeSpread,ground-1,c.ink,3);
-                        Line(c,x-toeSpread+2,ground,x+toeSpread-1,ground,light,1);
+                        Ellipse(c,footX-1,ground,5,3,c.ink);
+                        Line(c,footX-toeSpread,ground-1,footX+toeSpread,ground-1,c.ink,3);
+                        Line(c,footX-toeSpread+2,ground,footX+toeSpread-1,ground,light,1);
                         for(int toe=-1;toe<=1;toe++)
                         {
-                            int tx=x+toe*toeSpread/2;
+                            int tx=footX+toe*toeSpread/2;
                             Line(c,tx,ground,tx-2,ground-2,c.ink,2);
                             c.Put(tx-2,ground-1,palette.highlight);
                         }
                         if(d.style==PartStyle.Webbed)
                         {
                             Polygon(c,new[]{
-                                new Vector2Int(x-toeSpread,ground+1),
-                                new Vector2Int(x+toeSpread,ground+1),
-                                new Vector2Int(x,ground+7)
+                                new Vector2Int(footX-toeSpread,ground+1),
+                                new Vector2Int(footX+toeSpread,ground+1),
+                                new Vector2Int(footX,ground+7)
                             },palette.shadow);
-                            Line(c,x-toeSpread+2,ground+2,x+toeSpread-2,ground+2,
+                            Line(c,footX-toeSpread+2,ground+2,footX+toeSpread-2,ground+2,
                                 palette.light,1);
                         }
                     }
                     break;
 
                 case PartSlot.Tail:
+                    int tailWave=d.mirrorGroup;
                     if(r.plan==CreaturePlan.Fish)
                     {
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2-2,y+3),new Vector2Int(x+w/2,y+7),
-                            new Vector2Int(x+w/2,y-7),new Vector2Int(x-w/2-2,y-3)
+                            new Vector2Int(x-w/2-2,y+3+tailWave),new Vector2Int(x+w/2,y+7),
+                            new Vector2Int(x+w/2,y-7),new Vector2Int(x-w/2-2,y-3+tailWave)
                         },c.ink);
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2,y+2),new Vector2Int(x+w/2-2,y+5),
-                            new Vector2Int(x+w/2-2,y-5),new Vector2Int(x-w/2,y-2)
+                            new Vector2Int(x-w/2,y+2+tailWave),new Vector2Int(x+w/2-2,y+5),
+                            new Vector2Int(x+w/2-2,y-5),new Vector2Int(x-w/2,y-2+tailWave)
                         },r.secondaryColor);
                     }
                     else if(d.style==PartStyle.Fan)
                     {
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2-5,y+12),
+                            new Vector2Int(x-w/2-5,y+12+tailWave),
                             new Vector2Int(x+w/2,y+7),
                             new Vector2Int(x+w/2,y-4),
-                            new Vector2Int(x-w/2-5,y-12)
+                            new Vector2Int(x-w/2-5,y-12+tailWave)
                         },r.secondaryColor);
-                        Line(c,x-w/2,y,x+w/2,y,r.accentColor,2);
+                        Line(c,x-w/2,y+tailWave,x+w/2,y,r.accentColor,2);
                     }
                     else
                     {
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2-5,y+7),new Vector2Int(x+w/2,y+9),
-                            new Vector2Int(x+w/2+2,y-3),new Vector2Int(x-w/2+5,y-5)
+                            new Vector2Int(x-w/2-5,y+7+tailWave),new Vector2Int(x+w/2,y+9),
+                            new Vector2Int(x+w/2+2,y-3),new Vector2Int(x-w/2+5,y-5+tailWave)
                         },c.ink);
                         Polygon(c,new[]{
-                            new Vector2Int(x-w/2-3,y+5),new Vector2Int(x+w/2-2,y+7),
-                            new Vector2Int(x+w/2,y-1),new Vector2Int(x-w/2+5,y-3)
+                            new Vector2Int(x-w/2-3,y+5+tailWave),new Vector2Int(x+w/2-2,y+7),
+                            new Vector2Int(x+w/2,y-1),new Vector2Int(x-w/2+5,y-3+tailWave)
                         },r.baseColor);
                     }
                     break;
