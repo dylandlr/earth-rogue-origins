@@ -52,6 +52,16 @@ namespace EarthRogueOrigins.Editor
                     }
                     if (!preview.useArticulatedRig)
                         errors.Add("Articulated creature rendering is not enabled.");
+                    if (preview.fernProps == null || preview.fernProps.Length != 8 ||
+                        preview.fernProps.Any(x => x == null))
+                        errors.Add("Carboniferous foliage art is missing or not assigned.");
+                    foreach(var sprite in preview.forestTiles)
+                    {
+                        if(sprite == null)continue;
+                        if(sprite.texture.width != CarboniferousTerrainPainter.Size ||
+                           sprite.texture.height != CarboniferousTerrainPainter.Size)
+                            errors.Add("Terrain atlas contains incorrect-size tiles.");
+                    }
                 }
                 if (!scene.IsValid())
                     errors.Add("Unity did not load EcosystemLab scene.");
