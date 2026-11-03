@@ -21,6 +21,8 @@ namespace EarthRogueOrigins.Preview
         public Sprite[] organismSprites;
         public bool useAnatomicalSprites = true;
         public bool useArticulatedRig = true;
+        [Tooltip("When assigned, illustrated anatomical parts replace primitive rig meshes.")]
+        public CreatureArtLibrary creatureArt;
         readonly Dictionary<int,ArticulatedCreatureView> articulatedViews = new Dictionary<int,ArticulatedCreatureView>();
         Material sharedRigMaterial;
         readonly Dictionary<int,string> organismMorphs = new Dictionary<int,string>();
@@ -166,6 +168,11 @@ namespace EarthRogueOrigins.Preview
                             sharedRigMaterial=new Material(shader);
                         }
                         rig.Initialize(phenotype,sharedRigMaterial);
+                        if(creatureArt!=null && creatureArt.HasCoreParts)
+                        {
+                            var skin=renderer.gameObject.AddComponent<IllustratedCreatureSkin>();
+                            skin.Apply(creatureArt);
+                        }
                         articulatedViews.Add(c.id,rig);
                         previousPositions[c.id]=c.position;
                     }
