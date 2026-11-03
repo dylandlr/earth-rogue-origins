@@ -68,6 +68,34 @@ namespace EarthRogueOrigins.PixelCreatures
             return output;
         }
 
+        /// <summary>
+        /// Independent ground-contact shadow. It never becomes a creature layer:
+        /// world rendering sorts it behind the organism, while export preserves
+        /// full transparency everywhere else.
+        /// </summary>
+        public static Color32[] RenderGroundShadowPixels(PixelCreatureRecipe recipe)
+        {
+            recipe.Validate();
+            var pixels=new Color32[Width*Height];
+            if(recipe.plan==CreaturePlan.Fish)return pixels;
+            int cx=62,cy=23;
+            int rx=Mathf.RoundToInt(Mathf.Lerp(25f,38f,recipe.trunkLength));
+            int ry=Mathf.RoundToInt(Mathf.Lerp(3f,5f,recipe.trunkDepth));
+            for(int y=-ry-2;y<=ry+2;y++)
+            for(int x=-rx-3;x<=rx+3;x++)
+            {
+                float u=x/(float)Mathf.Max(1,rx),v=y/(float)Mathf.Max(1,ry);
+                float d=u*u+v*v;
+                if(d>1.5f)continue;
+                int px=cx+x,py=cy+y;
+                if(px<0||px>=Width||py<0||py>=Height)continue;
+                float opacity=Mathf.Clamp01((1.5f-d)*.50f);
+                pixels[py*Width+px]=new Color32(20,26,19,
+                    (byte)Mathf.RoundToInt(opacity*112f));
+            }
+            return pixels;
+        }
+
         public static Texture2D TextureFromPixels(Color32[] data)
         {
             if(data==null || data.Length!=Width*Height)
