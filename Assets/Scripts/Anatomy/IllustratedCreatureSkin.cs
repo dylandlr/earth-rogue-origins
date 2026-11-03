@@ -34,7 +34,11 @@ namespace EarthRogueOrigins.Anatomy
             var p=rig.Phenotype;
             skinRoot=new GameObject("Illustrated Anatomy");
             skinRoot.transform.SetParent(transform,false);
-            var tint=art.baseTint;
+            var tint=Color.Lerp(
+                new Color(.75f,.83f,.62f,1f),
+                new Color(.93f,.69f,.57f,1f),
+                Mathf.Clamp01(p.hue));
+            tint=Color.Lerp(tint,art.baseTint,.28f);
             float headWidth=p.headRadius*2.5f;
             // Sort numbers refer to render stacking, not gameplay depth.
             RenderPart("Shadow",art.groundShadow,skinRoot.transform,
@@ -68,6 +72,26 @@ namespace EarthRogueOrigins.Anatomy
             RenderPart("Torso",art.torso,skinRoot.transform,
                 Vector3.zero,p.trunkLength*1.1f,p.trunkDepth*2.15f,
                 22,tint);
+            if(art.skinMarking!=null)
+            {
+                // Stable, body-constrained markings follow the inherited trunk shape.
+                int marks=Mathf.RoundToInt(p.patternDensity*15f);
+                var appearanceSeed=Mathf.RoundToInt(p.trunkLength*4096f)^
+                    Mathf.RoundToInt(p.hue*65535f)^Mathf.RoundToInt(p.patternDensity*8191f);
+                var rng=new System.Random(appearanceSeed);
+                for(int i=0;i<marks;i++)
+                {
+                    float theta=(float)rng.NextDouble()*Mathf.PI*2f;
+                    float radius=Mathf.Sqrt((float)rng.NextDouble())*.8f;
+                    float x=Mathf.Cos(theta)*radius*p.trunkLength*.46f;
+                    float y=Mathf.Sin(theta)*radius*p.trunkDepth*.77f;
+                    Color marking=Color.Lerp(tint,new Color(.25f,.30f,.24f),.69f);
+                    marking.a=.75f;
+                    float diameter=.035f+.045f*(float)rng.NextDouble();
+                    RenderPart("Skin mark "+i,art.skinMarking,skinRoot.transform,
+                        new Vector3(x,y,0),diameter*1.6f,diameter,24,marking);
+                }
+            }
             if(art.torsoHighlight!=null)
             {
                 Color highlight=Color.white;
