@@ -224,11 +224,11 @@ namespace EarthRogueOrigins.PixelCreatures
                         Ellipse(c,footX-1,ground,5,3,c.ink);
                         Line(c,footX-toeSpread,ground-1,footX+toeSpread,ground-1,c.ink,3);
                         Line(c,footX-toeSpread+2,ground,footX+toeSpread-1,ground,light,1);
-                        for(int toe=-1;toe<=1;toe++)
+                        var toes=PixelDetailGrammar.FootToes(footX,ground,d.style);
+                        foreach(var toe in toes)
                         {
-                            int tx=footX+toe*toeSpread/2;
-                            Line(c,tx,ground,tx-2,ground-2,c.ink,2);
-                            c.Put(tx-2,ground-1,palette.highlight);
+                            Line(c,footX,ground+1,toe.x,toe.y,c.ink,2);
+                            c.Put(toe.x,toe.y+1,palette.highlight);
                         }
                         if(d.style==PartStyle.Webbed)
                         {
@@ -379,6 +379,17 @@ namespace EarthRogueOrigins.PixelCreatures
                     int halfHeight=Mathf.RoundToInt((h*.28f)*Mathf.Sin(Mathf.PI*i/6f));
                     for(int yy=y-halfHeight;yy<=y+halfHeight;yy++)
                         c.MarkBody(px+(yy%2==0?0:1),yy,palette.pattern);
+                }
+                return;
+            }
+            if(r.pattern==MarkingPattern.MottledBack)
+            {
+                foreach(var mark in PixelDetailGrammar.DorsalMottle(r,x,y,w,h))
+                {
+                    for(int yy=-mark.radius;yy<=mark.radius;yy++)
+                    for(int xx=-mark.radius;xx<=mark.radius;xx++)
+                        if(xx*xx+yy*yy<=mark.radius*mark.radius)
+                            c.MarkBody(mark.x+xx,mark.y+yy,mark.pigment);
                 }
                 return;
             }
