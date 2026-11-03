@@ -16,7 +16,7 @@ namespace EarthRogueOrigins.Anatomy
         static readonly Color32 Ink=new Color32(33,35,29,255);
         static readonly Color32 Clear=new Color32(0,0,0,0);
 
-        public static Texture2D Bake(AnatomicalPhenotype anatomy,int seed)
+        public static Texture2D Bake(AnatomicalPhenotype anatomy,int seed,float phase=0f,bool swimming=false)
         {
             if(!Development.IsValid(anatomy))throw new ArgumentException("Invalid anatomy.");
             var texture=new Texture2D(W,H,TextureFormat.RGBA32,false);
@@ -32,7 +32,7 @@ namespace EarthRogueOrigins.Anatomy
             Ellipse(pixels,0,-.67f,.78f,.11f,new Color32(20,20,17,65));
             // Tail behind the hind leg, continuously attached to the trunk.
             Vector2 baseTail=anatomy.tailRoot+center;
-            var tailTip=baseTail+new Vector2(-anatomy.tailLength,-.10f);
+            var tailTip=baseTail+new Vector2(-anatomy.tailLength,-.10f + (swimming ? Mathf.Sin(phase)*.13f : Mathf.Sin(phase)*.025f));
             Segment(pixels,baseTail,tailTip,.115f,Ink);
             Segment(pixels,baseTail,tailTip,.077f,dark);
             if(anatomy.tailFinSize>.035f)
@@ -44,7 +44,7 @@ namespace EarthRogueOrigins.Anatomy
                     tailTip+new Vector2(.18f,-fin*.75f),new Color32(75,146,147,255));
             }
             // Four independently anchored limbs are drawn behind and then foreground.
-            DrawLimbs(pixels,anatomy,center,true,dark,Ink);
+            DrawLimbs(pixels,anatomy,center,true,dark,Ink,phase,swimming);
             Ellipse(pixels,0,center.y,anatomy.trunkLength*.52f,anatomy.trunkDepth,Ink);
             Ellipse(pixels,-.012f,center.y+.015f,anatomy.trunkLength*.51f,anatomy.trunkDepth*.94f,dark);
             Ellipse(pixels,-.018f,center.y+.08f,anatomy.trunkLength*.48f,anatomy.trunkDepth*.74f,baseColor);
@@ -77,7 +77,7 @@ namespace EarthRogueOrigins.Anatomy
                     right-tangent*.009f,new Color32(170,156,119,255));
                 Segment(pixels,root,tip,0.012f,light);
             }
-            DrawLimbs(pixels,anatomy,center,false,baseColor,Ink);
+            DrawLimbs(pixels,anatomy,center,false,baseColor,Ink,phase,swimming);
             // Head overlaps and conceals the neck connection.
             var head=anatomy.head+center;
             Segment(pixels,new Vector2(anatomy.trunkLength*.40f,center.y),head,
@@ -99,20 +99,24 @@ namespace EarthRogueOrigins.Anatomy
             return texture;
         }
 
-        public static Sprite BakeSprite(AnatomicalPhenotype p,int seed)
+        public static Sprite BakeSprite(AnatomicalPhenotype p,int seed,float phase=0f,bool swimming=false)
         {
-            var texture=Bake(p,seed);
+            var texture=Bake(p,seed,phase,swimming);
             return Sprite.Create(texture,new Rect(0,0,W,H),new Vector2(.5f,.42f),Scale);
         }
 
         static void DrawLimbs(Color32[] pixels,AnatomicalPhenotype p,Vector2 center,bool rear,
-            Color32 color,Color32 ink)
+            Color32 color,Color32 ink,float phase,bool swimming)
         {
+            int legIndex=0;
             foreach(var anchor in new[]{p.rearLeg,p.frontLeg})
             {
                 var start=anchor+center+new Vector2(rear ? .04f : -.025f,rear ? .07f : -.05f);
-                var knee=start+new Vector2(anchor.x<0?-.10f:.10f,-p.limbLength*.60f);
-                var foot=knee+new Vector2(anchor.x<0?-.07f:.08f,-p.limbLength*.40f);
+                float offset=(legIndex++==0?0f:Mathf.PI)+(rear?Mathf.PI:0f);
+                float swing=Mathf.Sin(phase+offset)*(swimming?.055f:p.limbLength*.34f);
+                float lift=swimming ? -.015f : Mathf.Max(0f,Mathf.Cos(phase+offset))*.085f;
+                var knee=start+new Vector2((anchor.x<0?-.10f:.10f)+swing*.45f,-p.limbLength*.60f+lift*.4f);
+                var foot=knee+new Vector2((anchor.x<0?-.07f:.08f)+swing*.55f,-p.limbLength*.40f+lift*.6f);
                 float radius=p.limbThickness*(rear ? .78f : 1f);
                 Segment(pixels,start,knee,radius+.025f,ink);
                 Segment(pixels,knee,foot,radius*.72f+.016f,ink);
@@ -177,7 +181,7 @@ namespace EarthRogueOrigins.Anatomy
             if(Mathf.Abs(area)<1e-6f)return;
             for(int y=minY;y<=maxY;y++)for(int x=minX;x<=maxX;x++)
             {
-                var p=new Vector2((x-W*.44f)/Scale,(y-H*.52f)/Scale);
+                var p=new Vector2((x-W*.53f)/Scale,(y-H*.52f)/Scale);
                 float u=Edge(v2,v3,p)/area,v=Edge(v3,v1,p)/area,w=1-u-v;
                 if(u>=0&&v>=0&&w>=0)Pixel(a,x,y,c);
             }
