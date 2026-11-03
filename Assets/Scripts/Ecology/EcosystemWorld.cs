@@ -52,8 +52,8 @@ namespace EarthRogueOrigins.Ecology
         public readonly HabitatCell[] cells;
         public readonly List<EvolvingCreature> creatures = new List<EvolvingCreature>();
         public readonly List<string> events = new List<string>();
-        readonly Dictionary<int,ScientificTaxon> speciesCatalog =
-            new Dictionary<int,ScientificTaxon>();
+        readonly SortedDictionary<int,ScientificTaxon> speciesCatalog =
+            new SortedDictionary<int,ScientificTaxon>();
         public IEnumerable<ScientificTaxon> NamedSpecies { get { return speciesCatalog.Values; } }
         public ScientificTaxon GetSpecies(int speciesId)
         {
