@@ -31,6 +31,7 @@ namespace EarthRogueOrigins.Ecology
         public float geographicGap,centroidSeparation,geneticDistance;
         public Vector2 leftCentroid,rightCentroid;
         public int[] candidateIndividualIds;
+        public float retainedCohortFraction;
     }
 
     public sealed class SpeciationDetector
@@ -119,10 +120,21 @@ namespace EarthRogueOrigins.Ecology
             streaks.TryGetValue(speciesId,out previous);
             // Reject a different cohort substituting for the original one:
             // multiple distinct gaps do not constitute persistent isolation.
-            if(previous!=null &&
-               (Vector2.Distance(previous.leftCentroid,leftCenter)>3.5f ||
-                Vector2.Distance(previous.rightCentroid,rightCenter)>3.5f))
-                previous=null;
+            if(previous!=null)
+            {
+                int overlap=0;
+                var oldMembers=new HashSet<int>(previous.candidateIndividualIds);
+                for(int i=cut;i<group.Count;i++)
+                    if(oldMembers.Contains(group[i].id))overlap++;
+                // Demography can change through births/deaths, but a wholly
+                // different set of animals must not inherit the old streak.
+                float retained=overlap/(float)Mathf.Max(1,
+                    Math.Min(previous.candidateIndividualIds.Length,group.Count-cut));
+                if(Vector2.Distance(previous.leftCentroid,leftCenter)>3.5f ||
+                   Vector2.Distance(previous.rightCentroid,rightCenter)>3.5f ||
+                   retained<.60f)
+                    previous=null;
+            }
             var result=new SpeciationEvidence{
                 parentSpeciesId=speciesId,
                 observations=previous==null?1:previous.observations+1,
@@ -131,12 +143,23 @@ namespace EarthRogueOrigins.Ecology
                 centroidSeparation=centroidDistance,
                 geneticDistance=difference,
                 leftCentroid=leftCenter,rightCentroid=rightCenter,
+                retainedCohortFraction=previous==null?1f:RetainedFraction(
+                    previous.candidateIndividualIds,group,cut),
                 candidateIndividualIds=new int[group.Count-cut]
             };
             for(int i=cut;i<group.Count;i++)
                 result.candidateIndividualIds[i-cut]=group[i].id;
             streaks[speciesId]=result;
             return result;
+        }
+
+        static float RetainedFraction(int[] prior,List<EvolvingCreature> current,int start)
+        {
+            var ids=new HashSet<int>(prior);
+            int overlap=0;
+            for(int i=start;i<current.Count;i++)
+                if(ids.Contains(current[i].id))overlap++;
+            return overlap/(float)Mathf.Max(1,Math.Min(prior.Length,current.Count-start));
         }
 
         SpeciationEvidence Fail(int speciesId)
