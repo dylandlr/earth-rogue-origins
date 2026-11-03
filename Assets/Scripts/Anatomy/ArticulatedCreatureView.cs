@@ -16,6 +16,7 @@ namespace EarthRogueOrigins.Anatomy
         public Transform HeadJoint { get; private set; }
         public Transform TailJoint { get; private set; }
         public Transform[] LegJoints { get; private set; }
+        public Transform[] ArmorJoints { get { return armorJoints; } }
         public bool Swimming { get; private set; }
         public int AllocatedMeshes { get { return ownedMeshes.Count; } }
 
@@ -129,6 +130,12 @@ namespace EarthRogueOrigins.Anatomy
                     new Vector2(.039f,.012f),new Color(.72f,.67f,.50f,1),-.04f);
             }
             initialized=true;
+        }
+
+        public void SetPrimitiveVisible(bool visible)
+        {
+            foreach(var renderer in GetComponentsInChildren<MeshRenderer>(true))
+                renderer.enabled=visible;
         }
 
         bool ownsMaterial;
