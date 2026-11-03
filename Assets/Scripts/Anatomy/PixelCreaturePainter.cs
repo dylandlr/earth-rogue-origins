@@ -110,6 +110,23 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     break;
 
+                case PartSlot.NeckBlend:
+                    // A controlled occlusion patch unifies the back of the head
+                    // with the forward shoulder without erasing the snout.
+                    Ellipse(c,x,y,Mathf.Max(3,w/2),Mathf.Max(2,h/2),palette.shadow);
+                    Ellipse(c,x-1,y+2,Mathf.Max(2,w/2-2),Mathf.Max(2,h/2-2),r.baseColor);
+                    Line(c,x-w/2+2,y+Mathf.Max(1,h/2-1),x+1,y+Mathf.Max(1,h/2-1),
+                        palette.light,1);
+                    break;
+
+                case PartSlot.ShoulderBlend:
+                case PartSlot.HipBlend:
+                    // Joint cap is painted *after* the foreground limb, hiding
+                    // its polygonal origin in the torso instead of leaving a seam.
+                    Ellipse(c,x,y,Mathf.Max(3,w/2),Mathf.Max(3,h/2),palette.shadow);
+                    Ellipse(c,x-1,y+2,Mathf.Max(2,w/2-2),Mathf.Max(2,h/2-2),r.baseColor);
+                    break;
+
                 case PartSlot.Eye:
                     Ellipse(c,x,y,Mathf.Max(2,w/2+1),Mathf.Max(2,h/2+1),c.ink);
                     Dot(c,x,y,Mathf.Max(1,Mathf.RoundToInt(r.eyeSize*2)),Black);
