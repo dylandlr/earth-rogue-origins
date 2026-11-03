@@ -22,6 +22,7 @@ namespace EarthRogueOrigins.Anatomy
         public Sprite tailFin;
         public Sprite armorPlate;
         public Sprite groundShadow;
+        public Sprite skinMarking;
 
         [Header("Color / materials")]
         public Color baseTint = Color.white;
