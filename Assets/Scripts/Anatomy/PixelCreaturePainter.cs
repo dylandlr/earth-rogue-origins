@@ -18,16 +18,25 @@ namespace EarthRogueOrigins.PixelCreatures
 
         public static Texture2D Render(PixelCreatureRecipe recipe)
         {
+            return Render(recipe,0,false);
+        }
+
+        public static Texture2D Render(PixelCreatureRecipe recipe,int frame,bool swimming)
+        {
             recipe.Validate();
-            Color32[] pixels=RenderPixels(recipe);
-            return TextureFromPixels(pixels);
+            return TextureFromPixels(RenderPixels(recipe,frame,swimming));
         }
 
         public static Color32[] RenderPixels(PixelCreatureRecipe recipe)
         {
+            return RenderPixels(recipe,0,false);
+        }
+
+        public static Color32[] RenderPixels(PixelCreatureRecipe recipe,int frame,bool swimming)
+        {
             recipe.Validate();
             var c=new Canvas(PixelArtDirection.Ramp(recipe.palette).ink);
-            var parts=PixelCreatureDevelopment.Layout(recipe);
+            var parts=PixelCreaturePoses.Layout(recipe,frame,swimming);
             Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
             foreach(var part in parts)
                 DrawPart(c,part,recipe);
@@ -36,8 +45,14 @@ namespace EarthRogueOrigins.PixelCreatures
 
         public static Color32[] RenderLayerPixels(PixelCreatureRecipe recipe,int partIndex)
         {
+            return RenderLayerPixels(recipe,partIndex,0,false);
+        }
+
+        public static Color32[] RenderLayerPixels(PixelCreatureRecipe recipe,int partIndex,
+            int frame,bool swimming)
+        {
             recipe.Validate();
-            var parts=PixelCreatureDevelopment.Layout(recipe);
+            var parts=PixelCreaturePoses.Layout(recipe,frame,swimming);
             Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
             if(partIndex<0 || partIndex>=parts.Length)throw new ArgumentOutOfRangeException(nameof(partIndex));
             // Context-sensitive parts (especially markings) need the preceding
