@@ -497,6 +497,61 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void HandAuthoredHeadContoursStayOrderedAtAllSamples()
+        {
+            foreach(PartStyle head in new[]{PartStyle.Rounded,PartStyle.Robust,
+                PartStyle.Wedge,PartStyle.LongSnout})
+            {
+                float[] upper,lower;
+                PixelSilhouetteTemplates.Profile(PartSlot.Head,head,out upper,out lower);
+                Assert.GreaterOrEqual(upper.Length,13);
+                Assert.AreEqual(upper.Length,lower.Length);
+                for(int step=0;step<=100;step++)
+                {
+                    float u=step/100f;
+                    float hi=PixelSilhouetteTemplates.Sample(upper,u);
+                    float lo=PixelSilhouetteTemplates.Sample(lower,u);
+                    Assert.Greater(hi,lo,
+                        "Head profile inverted at "+head+" u="+u);
+                    Assert.That(hi,Is.InRange(-1f,1f));
+                    Assert.That(lo,Is.InRange(-1f,1f));
+                }
+            }
+        }
+
+        [Test]
+        public void HeadContoursDoNotCreateFilledRectangleCorners()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+            foreach(PartStyle style in new[]{PartStyle.Rounded,PartStyle.Robust,
+                PartStyle.Wedge,PartStyle.LongSnout})
+            {
+                recipe.headStyle=style;
+                var layout=PixelCreatureDevelopment.Layout(recipe);
+                Array.Sort(layout,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
+                int headIndex=-1;
+                for(int i=0;i<layout.Length;i++)
+                    if(layout[i].slot==PartSlot.Head){headIndex=i;break;}
+                Assert.GreaterOrEqual(headIndex,0);
+                var pixels=PixelCreaturePainter.RenderLayerPixels(recipe,headIndex);
+                // Probe above the snout and below the rear upper contour.
+                // A rectangular border fill would color these empty corners.
+                var head=layout[headIndex];
+                int left=head.anchor.x-head.extent.x/2;
+                int top=head.anchor.y+head.extent.y/2+2;
+                int background=0;
+                for(int dx=-2;dx<=1;dx++)
+                for(int dy=0;dy<=2;dy++)
+                {
+                    int x=left+dx,y=top+dy;
+                    if(x>=0&&x<128&&y>=0&&y<96&&pixels[y*128+x].a==0)
+                        background++;
+                }
+                Assert.Greater(background,0,"Rectangle border artifact for "+style);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
