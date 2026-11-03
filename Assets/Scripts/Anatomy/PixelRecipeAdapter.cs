@@ -29,7 +29,12 @@ namespace EarthRogueOrigins.PixelCreatures
             recipe.armor=phenotype.armorCoverage;
             recipe.spots=phenotype.patternDensity;
             recipe.eyeSize=Normalize(phenotype.eyeRadius,.018f,.055f);
-            recipe.baseColor=Palette(genome.Get(BodyGene.Hue));
+            float pigment=genome.Get(BodyGene.Hue);
+            recipe.palette=pigment<.20f?CreaturePalette.SwampOlive:
+                pigment<.40f?CreaturePalette.RustClay:
+                pigment<.65f?CreaturePalette.Slate:
+                pigment<.85f?CreaturePalette.PaleSand:CreaturePalette.Moss;
+            recipe.baseColor=Palette(pigment);
             recipe.secondaryColor=Scale(recipe.baseColor,.65f);
             recipe.accentColor=new Color32(199,180,133,255);
             recipe.limbStyle=genome.Get(BodyGene.LimbMuscle)>.6f?
