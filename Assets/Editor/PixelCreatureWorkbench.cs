@@ -138,6 +138,10 @@ namespace EarthRogueOrigins.Editor
                 var all=PixelCreaturePainter.Render(recipe);
                 try{File.WriteAllBytes(folder+"/assembled.png",all.EncodeToPNG());}
                 finally{DestroyImmediate(all);}
+                var shadow=PixelCreaturePainter.TextureFromPixels(
+                    PixelCreaturePainter.RenderGroundShadowPixels(recipe));
+                try{File.WriteAllBytes(folder+"/contact_shadow.png",shadow.EncodeToPNG());}
+                finally{DestroyImmediate(shadow);}
                 var parts=PixelCreatureDevelopment.Layout(recipe);
                 Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
                 var csv=new System.Text.StringBuilder("part,slot,style,x,y,width,height,order\n");
