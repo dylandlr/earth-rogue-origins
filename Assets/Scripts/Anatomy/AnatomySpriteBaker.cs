@@ -110,10 +110,10 @@ namespace EarthRogueOrigins.Anatomy
         {
             foreach(var anchor in new[]{p.rearLeg,p.frontLeg})
             {
-                var start=anchor+center+new Vector2(rear?.04f:-.025f,rear?.07f:-.05f);
+                var start=anchor+center+new Vector2(rear ? .04f : -.025f,rear ? .07f : -.05f);
                 var knee=start+new Vector2(anchor.x<0?-.10f:.10f,-p.limbLength*.60f);
                 var foot=knee+new Vector2(anchor.x<0?-.07f:.08f,-p.limbLength*.40f);
-                float radius=p.limbThickness*(rear?.78f:1f);
+                float radius=p.limbThickness*(rear ? .78f : 1f);
                 Segment(pixels,start,knee,radius+.025f,ink);
                 Segment(pixels,knee,foot,radius*.72f+.016f,ink);
                 Segment(pixels,start,knee,radius,color);
