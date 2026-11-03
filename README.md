@@ -30,6 +30,14 @@ Run `./scripts/validate-unity.ps1 -UnityEditor "<path-to-Unity.exe>"` to generat
 
 When regenerating the scene, hand-painted PNG replacements and manually assigned sprites in the CreatureArtLibrary are preserved by default. The explicit `Art > Regenerate Starter Parts (Overwrite PNGs)` command intentionally overwrites these generated parts.
 
+## Concept-art fidelity v0.8
+
+The Ecosystem Lab scene now generates detailed Carboniferous swamp terrain, transparent fern props, and inherited creature markings. Visuals are **not yet approved**; see [Docs/VISUAL_FIDELITY_V08.md](Docs/VISUAL_FIDELITY_V08.md).
+
+The approved organism sprites and world reference exist in the earlier prototype art archive. For local visual comparison, copy the Concept Art Source Pack's `Assets/Art/ConceptReference` into the Unity project. This source art is not a seamless runtime map.
+
+Choose **Earth: Rogue Origins > Art > Compare Render to Approved Concept** after exporting a morphology board. The window compares the actual Unity render beside the approved concept reference.
+
 ## Target engine
 
 Unity **6000.0.23f1**, Windows 64-bit.
