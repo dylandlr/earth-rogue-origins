@@ -23,9 +23,22 @@ namespace EarthRogueOrigins.Editor
         [MenuItem("Earth: Rogue Origins/Art/Generate Illustrated Parts Library")]
         public static CreatureArtLibrary Generate()
         {
+            return Generate(false);
+        }
+
+        [MenuItem("Earth: Rogue Origins/Art/Regenerate Starter Parts (Overwrite PNGs)")]
+        public static void RegenerateStarterParts()
+        {
+            Generate(true);
+        }
+
+        public static CreatureArtLibrary Generate(bool overwrite)
+        {
             Directory.CreateDirectory(Folder);
             for(int part=0;part<Names.Length;part++)
             {
+                string output=Folder+"/"+Names[part]+".png";
+                if(!overwrite && File.Exists(output))continue;
                 var pixels=new Color32[W*H];
                 var rng=new System.Random(9803+part*451);
                 for(int y=0;y<H;y++)
@@ -54,7 +67,7 @@ namespace EarthRogueOrigins.Editor
                 }
                 var texture=new Texture2D(W,H,TextureFormat.RGBA32,false);
                 texture.SetPixels32(pixels);texture.Apply(false,false);
-                File.WriteAllBytes(Folder+"/"+Names[part]+".png",texture.EncodeToPNG());
+                File.WriteAllBytes(output,texture.EncodeToPNG());
                 UnityEngine.Object.DestroyImmediate(texture);
             }
             AssetDatabase.Refresh();
