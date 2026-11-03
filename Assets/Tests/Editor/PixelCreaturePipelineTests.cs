@@ -197,6 +197,79 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void AuthoredHeadProfilesHaveDistinctContours()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+            recipe.headStyle=PartStyle.Robust;
+            var broad=PixelCreaturePainter.RenderPixels(recipe);
+            recipe.headStyle=PartStyle.Wedge;
+            var wedge=PixelCreaturePainter.RenderPixels(recipe);
+            recipe.headStyle=PartStyle.LongSnout;
+            var longSnout=PixelCreaturePainter.RenderPixels(recipe);
+            int broadWedge=0,wedgeLong=0;
+            for(int i=0;i<broad.Length;i++)
+            {
+                if(!broad[i].Equals(wedge[i]))broadWedge++;
+                if(!wedge[i].Equals(longSnout[i]))wedgeLong++;
+            }
+            Assert.Greater(broadWedge,55);
+            Assert.Greater(wedgeLong,55);
+        }
+
+        [Test]
+        public void AuthoredProfilesRemainInsideCanvasAcrossMorphologyExtremes()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,491);
+            foreach(PartStyle style in new[]{PartStyle.Rounded,PartStyle.Robust,
+                PartStyle.Slender,PartStyle.Wedge,PartStyle.LongSnout})
+            {
+                r.headStyle=style;
+                foreach(float value in new[]{0f,.5f,1f})
+                {
+                    r.trunkLength=value;r.trunkDepth=value;r.headSize=value;
+                    var pixels=PixelCreaturePainter.RenderPixels(r);
+                    int visible=0;
+                    for(int y=1;y<PixelCreaturePainter.Height-1;y++)
+                    for(int x=1;x<PixelCreaturePainter.Width-1;x++)
+                        if(pixels[y*PixelCreaturePainter.Width+x].a>0)visible++;
+                    Assert.Greater(visible,250);
+                }
+            }
+        }
+
+        [Test]
+        public void ArchetypeLayoutsHaveOverlappingHeadAndBodyEnvelopes()
+        {
+            foreach(CreatureArchetype archetype in Enum.GetValues(typeof(CreatureArchetype)))
+            {
+                var r=PixelArtDirection.Hero(archetype,45);
+                var parts=PixelCreatureDevelopment.Layout(r);
+                PixelPartDescriptor head=null,trunk=null;
+                foreach(var part in parts)
+                {
+                    if(part.slot==PartSlot.Head)head=part;
+                    if(part.slot==PartSlot.Trunk)trunk=part;
+                }
+                Assert.NotNull(head);
+                Assert.NotNull(trunk);
+                Assert.IsTrue(PixelSilhouetteTemplates.AttachmentOverlap(head,trunk),
+                    "Disconnected head envelope for "+archetype);
+            }
+        }
+
+        [Test]
+        public void RepaintingCustomPigmentChangesRenderedPixels()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,17);
+            var before=PixelCreaturePainter.RenderPixels(r);
+            r.baseColor=new Color32(191,114,105,255);
+            var after=PixelCreaturePainter.RenderPixels(r);
+            int changed=0;
+            for(int i=0;i<before.Length;i++)if(!before[i].Equals(after[i]))changed++;
+            Assert.Greater(changed,70);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
