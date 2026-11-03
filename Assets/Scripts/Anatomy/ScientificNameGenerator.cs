@@ -14,6 +14,9 @@ namespace EarthRogueOrigins.PixelCreatures
     public sealed class ScientificTaxon
     {
         public int speciesId;
+        public int parentSpeciesId=-1;
+        public int foundedTick;
+        public float foundingGeneticDistance, foundingGeographicGap;
         public string genus;
         public string epithet;
         public string diagnosticTraits;
