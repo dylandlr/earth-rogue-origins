@@ -17,7 +17,7 @@ namespace EarthRogueOrigins.Editor
         const int W=192,H=128;
         static readonly string[] Names={
             "torso","torsoHighlight","head","eye","forelimb","hindlimb",
-            "foot","tail","tailFin","armorPlate","groundShadow"
+            "foot","tail","tailFin","armorPlate","groundShadow","skinMarking"
         };
 
         [MenuItem("Earth: Rogue Origins/Art/Generate Illustrated Parts Library")]
@@ -56,6 +56,7 @@ namespace EarthRogueOrigins.Editor
                         part==8?new Color(.36f,.63f,.63f):
                         part==9?new Color(.72f,.65f,.49f):
                         part==10?new Color(.12f,.16f,.12f):
+                        part==11?new Color(.25f,.31f,.23f):
                         part==1?new Color(.82f,.85f,.69f):
                         new Color(.53f,.62f,.43f);
                     Color ink=new Color(.12f,.14f,.11f);
@@ -101,6 +102,7 @@ namespace EarthRogueOrigins.Editor
             if(overwrite || library.tailFin==null)library.tailFin=SpriteAt(8);
             if(overwrite || library.armorPlate==null)library.armorPlate=SpriteAt(9);
             if(overwrite || library.groundShadow==null)library.groundShadow=SpriteAt(10);
+            if(overwrite || library.skinMarking==null)library.skinMarking=SpriteAt(11);
             EditorUtility.SetDirty(library);
             AssetDatabase.SaveAssets();
             Debug.Log("Illustrated anatomical starter library created at "+libraryPath);
@@ -128,6 +130,7 @@ namespace EarthRogueOrigins.Editor
                 case 8: return Mathf.Max(Mathf.Abs(u)*.72f+Mathf.Abs(v)*.88f-.74f,-u-.80f);
                 case 9: return Mathf.Max(Mathf.Abs(u)*.8f+v*.65f-.55f,-v-.65f);
                 case 10: return Mathf.Sqrt(u*u*.7f+v*v*7f)-.75f;
+                case 11: return Mathf.Sqrt(u*u*.8f+v*v*2.1f)-.64f;
                 default: return ellipse;
             }
         }
