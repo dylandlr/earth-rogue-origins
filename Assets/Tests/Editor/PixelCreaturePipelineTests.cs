@@ -343,6 +343,62 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void TailRootTransitionAndFootLayersMaintainExactCompositing()
+        {
+            foreach(int phase in new[]{0,1,2,3})
+            {
+                var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,400+phase);
+                var layout=PixelCreaturePoses.Layout(recipe,phase,false);
+                Array.Sort(layout,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
+                bool foundTailBlend=false,foundHip=false,foundShoulder=false;
+                var assembled=new Color32[PixelCreaturePainter.Width*PixelCreaturePainter.Height];
+                for(int i=0;i<layout.Length;i++)
+                {
+                    if(layout[i].slot==PartSlot.TailRootBlend)foundTailBlend=true;
+                    if(layout[i].slot==PartSlot.HipBlend)foundHip=true;
+                    if(layout[i].slot==PartSlot.ShoulderBlend)foundShoulder=true;
+                    var layer=PixelCreaturePainter.RenderLayerPixels(recipe,i,phase,false);
+                    for(int j=0;j<assembled.Length;j++)
+                        if(layer[j].a!=0)assembled[j]=layer[j];
+                }
+                Assert.IsTrue(foundTailBlend&&foundHip&&foundShoulder);
+                CollectionAssert.AreEqual(
+                    PixelCreaturePainter.RenderPixels(recipe,phase,false),assembled);
+            }
+        }
+
+        [Test]
+        public void GroundShadowIsTransparentSeparateAndScalesWithBody()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,712);
+            recipe.trunkLength=0f;
+            var narrow=PixelCreaturePainter.RenderGroundShadowPixels(recipe);
+            recipe.trunkLength=1f;
+            var wide=PixelCreaturePainter.RenderGroundShadowPixels(recipe);
+            int narrowCount=0,wideCount=0;
+            foreach(var p in narrow)
+                if(p.a!=0)narrowCount++;
+            foreach(var p in wide)
+                if(p.a!=0)wideCount++;
+            Assert.Greater(wideCount,narrowCount);
+            Assert.AreEqual(0,wide[0].a);
+            Assert.AreEqual(0,wide[wide.Length-1].a);
+            Assert.Less(wide[23*PixelCreaturePainter.Width+62].a,160);
+            var fish=PixelArtDirection.Hero(CreatureArchetype.PaddleFish,713);
+            foreach(var p in PixelCreaturePainter.RenderGroundShadowPixels(fish))
+                Assert.AreEqual(0,p.a);
+        }
+
+        [Test]
+        public void GroundShadowGenerationIsSeedStable()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.ClayRunner,431);
+            CollectionAssert.AreEqual(
+                PixelCreaturePainter.RenderGroundShadowPixels(r),
+                PixelCreaturePainter.RenderGroundShadowPixels(r.Copy()));
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
