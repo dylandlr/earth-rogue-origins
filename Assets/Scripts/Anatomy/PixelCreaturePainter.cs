@@ -79,7 +79,7 @@ namespace EarthRogueOrigins.PixelCreatures
             switch(d.slot)
             {
                 case PartSlot.Trunk:
-                    PaintProfile(c,PartSlot.Trunk,d.style,x,y,w,h,palette);
+                    PaintProfile(c,PartSlot.Trunk,d.style,x,y,w,h,palette,r.baseColor);
                     if(d.style==PartStyle.Segmented)
                     {
                         int segments=7+Mathf.RoundToInt(r.armor*5);
@@ -97,7 +97,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     break;
 
                 case PartSlot.Head:
-                    PaintProfile(c,PartSlot.Head,d.style,x,y,w,h,palette);
+                    PaintProfile(c,PartSlot.Head,d.style,x,y,w,h,palette,r.baseColor);
                     // Organic cheek and raised brow preserve character at 32 px.
                     Ellipse(c,x-2,y+Mathf.Max(2,h/5),Mathf.Max(3,w/3),
                         Mathf.Max(2,h/6),palette.light);
@@ -222,7 +222,7 @@ namespace EarthRogueOrigins.PixelCreatures
         }
 
         static void PaintProfile(Canvas canvas,PartSlot slot,PartStyle style,
-            int cx,int cy,int width,int height,PixelColorRamp ramp)
+            int cx,int cy,int width,int height,PixelColorRamp ramp,Color32 baseColor)
         {
             // The outer contour is grown by two pixels while the painted core has
             // its own 1-2px underside shadow and an offset upper-left highlight.
@@ -247,7 +247,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     int distanceToEdge=Mathf.Min(
                         Mathf.Min(x-left,right-x),Mathf.Min(high-y,y-low));
-                    Color32 fill=y<cy-height*.12f?ramp.shadow:ramp.mid;
+                    Color32 fill=y<cy-height*.12f?ramp.shadow:baseColor;
                     if(distanceToEdge>=2 && y>cy+height*.19f &&
                        x<cx+width*.16f)fill=ramp.light;
                     if(distanceToEdge>=4 && y>cy+height*.30f &&
