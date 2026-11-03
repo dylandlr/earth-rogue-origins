@@ -20,7 +20,9 @@
 - [ ] Add hand-painted 2.5D surface materials and illustrated anatomical layers
 - [x] Add initial four-frame walk/swim morphology posing (not production IK)
 - [x] Add first articulated multi-part rig with head, tail, limbs and dorsal plates
-- [ ] Add painted component layers, IK foot planting and direction-dependent poses
+- [x] Add reusable illustrated part library and anatomical skin binding (prototype artwork)
+- [ ] Replace starter illustrations with approved hand-painted component atlases
+- [ ] Add IK foot planting and direction-dependent poses
 - [x] Add reference-counted phenotype sprite cache
 - [ ] Profile GPU/CPU memory and replace per-morph raster sheets with deformable parts/atlases
 
