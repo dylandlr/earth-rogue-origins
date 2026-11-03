@@ -31,12 +31,21 @@ namespace EarthRogueOrigins.PixelCreatures
             -.32f,-.07f,.30f,.62f,.85f,.97f,1f,1f,.98f,.89f,.76f,.52f,.22f};
         static readonly float[] RoundHeadBottom={
             -.44f,-.61f,-.78f,-.87f,-.96f,-1f,-1f,-.97f,-.87f,-.77f,-.64f,-.51f,-.39f};
-        static readonly float[] TorsoTop={.23f,.55f,.83f,.99f,.96f,.78f,.51f};
-        static readonly float[] TorsoBottom={-.22f,-.64f,-.92f,-1f,-.91f,-.74f,-.44f};
-        static readonly float[] StockyTop={.46f,.76f,.96f,1f,.98f,.90f,.65f};
-        static readonly float[] StockyBottom={-.42f,-.78f,-.96f,-1f,-.97f,-.86f,-.55f};
-        static readonly float[] SlenderTop={.08f,.48f,.77f,.95f,.91f,.68f,.36f};
-        static readonly float[] SlenderBottom={-.10f,-.48f,-.72f,-.86f,-.81f,-.57f,-.30f};
+        // Back rises gradually from the neck, crests over the shoulders, and
+        // falls into the rump. Lower contour has asymmetric shoulder/hip
+        // transitions rather than a centered geometric ellipse.
+        static readonly float[] TorsoTop={
+            .32f,.47f,.63f,.81f,.92f,.97f,1f,.99f,.96f,.90f,.81f,.65f,.43f};
+        static readonly float[] TorsoBottom={
+            -.26f,-.43f,-.60f,-.77f,-.86f,-.94f,-.97f,-1f,-.98f,-.89f,-.80f,-.64f,-.39f};
+        static readonly float[] StockyTop={
+            .48f,.59f,.74f,.89f,.97f,1f,1f,.99f,.98f,.95f,.86f,.73f,.58f};
+        static readonly float[] StockyBottom={
+            -.41f,-.59f,-.74f,-.87f,-.95f,-.98f,-1f,-1f,-.98f,-.94f,-.87f,-.73f,-.51f};
+        static readonly float[] SlenderTop={
+            .16f,.33f,.51f,.69f,.84f,.93f,.97f,.95f,.89f,.79f,.65f,.49f,.31f};
+        static readonly float[] SlenderBottom={
+            -.11f,-.27f,-.44f,-.61f,-.71f,-.80f,-.86f,-.88f,-.82f,-.72f,-.59f,-.45f,-.27f};
 
         public static void Profile(PartSlot slot,PartStyle style,
             out float[] upper,out float[] lower)
