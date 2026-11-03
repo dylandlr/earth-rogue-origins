@@ -1,3 +1,18 @@
+## Milestone 1B: Original composable pixel-art asset system
+- [x] Versioned recipes, body-plan grammars and ordered part attachment descriptors
+- [x] Original 128×96 transparent pixel compositor with deterministic colors, outlines and markings
+- [x] Starter exporter for 12 creatures across tetrapod, fish and arthropod silhouettes
+- [x] Independent per-part PNGs, editable recipe JSON, layer metadata, contact sheet
+- [x] Visual composer/editor window with individual export
+- [x] Bridge inherited tetrapod genes to gameplay pixel sprites
+- [x] Add deterministic pixel, layer parity and reproduction constraint tests
+- [ ] Compile Unity and execute the complete Edit Mode test suite
+- [ ] Replace primitive procedural brushes with authored pixel materials and anatomy templates
+- [ ] Add multiple silhouette modules and validated part variants per body plan
+- [ ] Add multi-direction poses, animation frames and runtime atlasing
+- [ ] Model fish and arthropod physiology before enabling them as ecosystem agents
+
+
 # Roadmap — Earth: Rogue Origins
 
 ## Milestone 0: Reproducible Unity baseline
