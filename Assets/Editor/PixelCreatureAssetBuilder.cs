@@ -131,6 +131,12 @@ namespace EarthRogueOrigins.Editor
             r.legLength=index==4?.65f:.45f;
             r.tailLength=index>=5&&index<9?.82f:.53f;
             if(index>=9)r.trunkStyle=PartStyle.Segmented;
+            if(index==1 || index==6)r.headStyle=PartStyle.Wedge;
+            if(index==3 || index==7)r.headStyle=PartStyle.LongSnout;
+            if(index==2)r.trunkStyle=PartStyle.Slender;
+            if(index==4)r.trunkStyle=PartStyle.Robust;
+            if(index==3)r.tailStyle=PartStyle.Fan;
+            if(index==4)r.limbStyle=PartStyle.Robust;
             r.Validate();
             return r;
         }
