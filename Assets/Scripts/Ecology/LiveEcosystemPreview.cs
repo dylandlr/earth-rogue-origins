@@ -20,8 +20,10 @@ namespace EarthRogueOrigins.Preview
         public Sprite[] forestTiles, mudTiles, waterTiles, rockTiles, floodplainTiles;
         public Sprite[] organismSprites;
         public bool useAnatomicalSprites = true;
-        readonly List<Sprite> createdSprites = new List<Sprite>();
-        readonly List<Texture2D> createdTextures = new List<Texture2D>();
+        readonly Dictionary<int,string> organismMorphs = new Dictionary<int,string>();
+        readonly Dictionary<int,Vector2> previousPositions = new Dictionary<int,Vector2>();
+        readonly Dictionary<int,float> traveled = new Dictionary<int,float>();
+        PhenotypeSpriteCache spriteCache;
         public Camera worldCamera;
 
         EcosystemWorld world;
@@ -41,9 +43,9 @@ namespace EarthRogueOrigins.Preview
         void Restart()
         {
             foreach(var o in createdObjects)if(o!=null)Destroy(o);
-            foreach(var sprite in createdSprites)if(sprite!=null)Destroy(sprite);
-            foreach(var texture in createdTextures)if(texture!=null)Destroy(texture);
-            createdSprites.Clear();createdTextures.Clear();
+            if(spriteCache!=null)spriteCache.Dispose();
+            spriteCache=new PhenotypeSpriteCache(64);
+            organismMorphs.Clear();previousPositions.Clear();traveled.Clear();
             createdObjects.Clear();creatureRenderers.Clear();
             world=new EcosystemWorld(worldWidth,worldHeight,seed);
             for(int y=0;y<worldHeight;y++)
@@ -145,15 +147,30 @@ namespace EarthRogueOrigins.Preview
                     creatureRenderers[c.id]=renderer;
                     createdObjects.Add(go);
                 }
-                if(renderer.sprite==null && useAnatomicalSprites && c.development!=null)
+                if(useAnatomicalSprites && c.development!=null)
                 {
-                    var genome=new DiploidGenome();
-                    Array.Copy(c.genes,genome.alleles,Math.Min(c.genes.Length,genome.alleles.Length));
-                    var phenotype=Development.Express(c.development,genome);
-                    var sprite=AnatomySpriteBaker.BakeSprite(phenotype,c.id+seed*17);
-                    createdSprites.Add(sprite);
-                    createdTextures.Add(sprite.texture);
-                    renderer.sprite=sprite;
+                    string key;
+                    if(!organismMorphs.TryGetValue(c.id,out key))
+                    {
+                        var genome=new DiploidGenome();
+                        Array.Copy(c.genes,genome.alleles,Math.Min(c.genes.Length,genome.alleles.Length));
+                        var phenotype=Development.Express(c.development,genome);
+                        key=spriteCache.Acquire(phenotype);
+                        organismMorphs.Add(c.id,key);
+                        previousPositions[c.id]=c.position;
+                        traveled[c.id]=0f;
+                    }
+                    Vector2 previous;
+                    if(!previousPositions.TryGetValue(c.id,out previous))previous=c.position;
+                    float delta=Vector2.Distance(previous,c.position);
+                    traveled[c.id]=traveled[c.id]+delta;
+                    previousPositions[c.id]=c.position;
+                    var cell=world.Cell(Mathf.FloorToInt(c.position.x),Mathf.FloorToInt(c.position.y));
+                    bool swimming=cell.terrain==TerrainKind.Water;
+                    int pose=delta<.002f?0:Mathf.FloorToInt(traveled[c.id]*4f)%PhenotypeSpriteCache.FrameCount;
+                    renderer.sprite=spriteCache.Frame(key,swimming,pose);
+                    if(delta>.002f)
+                        renderer.flipX=c.position.x<previous.x;
                 }
                 else if(renderer.sprite==null && organismSprites!=null && organismSprites.Length>0)
                 {
@@ -168,7 +185,18 @@ namespace EarthRogueOrigins.Preview
             var expired=new List<int>();
             foreach(var pair in creatureRenderers)
                 if(!active.Contains(pair.Key)){if(pair.Value!=null)Destroy(pair.Value.gameObject);expired.Add(pair.Key);}
-            foreach(int id in expired)creatureRenderers.Remove(id);
+            foreach(int id in expired)
+            {
+                creatureRenderers.Remove(id);
+                string key;
+                if(organismMorphs.TryGetValue(id,out key))
+                {
+                    spriteCache.Release(key);
+                    organismMorphs.Remove(id);
+                }
+                previousPositions.Remove(id);
+                traveled.Remove(id);
+            }
         }
 
         void OnGUI()
@@ -192,6 +220,12 @@ namespace EarthRogueOrigins.Preview
                 "Temperature offset "+world.temperatureOffset.ToString("+0;-0;0")+"C",label);
             GUI.Label(new Rect(24,135,355,42),
                 "SPACE pause | 1/2/3 speed | WASD pan | Wheel zoom\nP/O heat/cool | C CO2 | R reset",label);
+        }
+
+        void OnDestroy()
+        {
+            if(spriteCache!=null)spriteCache.Dispose();
+            spriteCache=null;
         }
 
         public EcosystemSnapshot CurrentSnapshot(){return world!=null?world.Snapshot():null;}
