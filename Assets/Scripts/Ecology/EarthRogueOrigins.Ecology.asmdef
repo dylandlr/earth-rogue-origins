@@ -1,7 +1,10 @@
 {
   "name": "EarthRogueOrigins.Ecology",
   "rootNamespace": "EarthRogueOrigins.Ecology",
-  "references": [],
+  "references": [
+    "EarthRogueOrigins.Evolution",
+    "EarthRogueOrigins.Anatomy"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
