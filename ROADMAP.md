@@ -1,3 +1,11 @@
+## Creature Face Fidelity v1.9
+- [x] Inherit eye placement from authored head morphology
+- [x] Add composable cheek, mouth, nostril and eye highlight details
+- [x] Add face landmark bounding and compositing regression tests
+- [x] Produce standalone 5-species v1.8 to v1.9 face study PNGs
+- [ ] Run Unity and verify actual C# sprite output visually
+- [ ] Curate asymmetric face silhouettes and improve shoulder/head joins
+
 ## Visual Fidelity v1.8 (silhouette-first)
 - [x] Add procedural clustered dorsal spots and individually shaped toes to C# rasterizer
 - [x] Replace pointed tetrapod tail wedge with softer tapered end
