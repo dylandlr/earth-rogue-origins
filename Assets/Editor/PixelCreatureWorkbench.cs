@@ -59,6 +59,7 @@ namespace EarthRogueOrigins.Editor
             recipe.id=EditorGUILayout.TextField("Asset ID",recipe.id);
             recipe.seed=EditorGUILayout.IntField("Appearance seed",recipe.seed);
             recipe.plan=(CreaturePlan)EditorGUILayout.EnumPopup("Body plan",recipe.plan);
+            recipe.headStyle=(PartStyle)EditorGUILayout.EnumPopup("Head module",recipe.headStyle);
             recipe.trunkStyle=(PartStyle)EditorGUILayout.EnumPopup("Trunk module",recipe.trunkStyle);
             recipe.tailStyle=(PartStyle)EditorGUILayout.EnumPopup("Tail module",recipe.tailStyle);
             recipe.limbStyle=(PartStyle)EditorGUILayout.EnumPopup("Limb module",recipe.limbStyle);
