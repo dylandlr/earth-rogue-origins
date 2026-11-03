@@ -42,6 +42,8 @@ namespace EarthRogueOrigins.Editor
                 WriteText(folder+"/recipe.json",json,overwrite);
                 var pixels=PixelCreaturePainter.RenderPixels(r);
                 WriteImage(folder+"/assembled.png",pixels,overwrite);
+                WriteImage(folder+"/contact_shadow.png",
+                    PixelCreaturePainter.RenderGroundShadowPixels(r),overwrite);
                 var layout=PixelCreatureDevelopment.Layout(r);
                 Array.Sort(layout,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
                 var descriptors=new StringBuilder("layer,slot,style,anchor_x,anchor_y,width,height,order\n");
