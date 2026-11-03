@@ -11,8 +11,8 @@ namespace EarthRogueOrigins.Anatomy
     /// </summary>
     public static class AnatomySpriteBaker
     {
-        const int W=256,H=160;
-        const float Scale=89f;
+        const int W=384,H=224;
+        const float Scale=88f;
         static readonly Color32 Ink=new Color32(33,35,29,255);
         static readonly Color32 Clear=new Color32(0,0,0,0);
 
@@ -146,7 +146,7 @@ namespace EarthRogueOrigins.Anatomy
             return new Color32((byte)Mathf.Clamp(c.r*k,0,255),
                 (byte)Mathf.Clamp(c.g*k,0,255),(byte)Mathf.Clamp(c.b*k,0,255),c.a);
         }
-        static int X(float x){return Mathf.RoundToInt(W*.44f+x*Scale);}
+        static int X(float x){return Mathf.RoundToInt(W*.53f+x*Scale);}
         static int Y(float y){return Mathf.RoundToInt(H*.52f+y*Scale);}
         static void Pixel(Color32[] a,int x,int y,Color32 color)
         {
