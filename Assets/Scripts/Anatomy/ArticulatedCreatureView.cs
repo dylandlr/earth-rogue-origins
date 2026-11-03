@@ -37,6 +37,7 @@ namespace EarthRogueOrigins.Anatomy
             {
                 Shader shader=Shader.Find("Sprites/Default");
                 if(shader==null)shader=Shader.Find("Unlit/Color");
+                if(shader==null)throw new InvalidOperationException("No supported shader found for articulated view.");
                 material=new Material(shader){name="EarthRogueOrigins/RuntimeMesh"};
                 ownsMaterial=true;
             }
@@ -212,9 +213,17 @@ namespace EarthRogueOrigins.Anatomy
         void OnDestroy()
         {
             foreach(var mesh in ownedMeshes)
-                if(mesh!=null)Destroy(mesh);
+                if(mesh!=null)
+                {
+                    if(Application.isPlaying)Destroy(mesh);
+                    else DestroyImmediate(mesh);
+                }
             ownedMeshes.Clear();
-            if(ownsMaterial && material!=null)Destroy(material);
+            if(ownsMaterial && material!=null)
+            {
+                if(Application.isPlaying)Destroy(material);
+                else DestroyImmediate(material);
+            }
         }
     }
 }
