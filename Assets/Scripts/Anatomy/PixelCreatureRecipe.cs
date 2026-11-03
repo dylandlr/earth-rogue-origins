@@ -4,7 +4,7 @@ using UnityEngine;
 namespace EarthRogueOrigins.PixelCreatures
 {
     public enum CreaturePlan { Tetrapod, Fish, Arthropod }
-    public enum PartSlot { Tail, HindLeg, ForeLeg, Trunk, Head, Eye, Armor, Fin, Markings }
+    public enum PartSlot { Tail, HindLeg, ForeLeg, Trunk, Head, Eye, Armor, Fin, Markings, NeckBlend, ShoulderBlend, HipBlend }
     public enum PartStyle { Rounded, Slender, Robust, Plated, Segmented, Fan, Webbed, Wedge, LongSnout }
 
     [Serializable]
@@ -146,15 +146,18 @@ namespace EarthRogueOrigins.PixelCreatures
                 };
             return new[]{
                 P(PartSlot.Tail,r.tailStyle,90,53,tailWidth,12,0),
-                P(PartSlot.HindLeg,r.limbStyle,78,61,12,limbHeight,1),
-                P(PartSlot.ForeLeg,r.limbStyle,42,61,12,limbHeight,1),
+                P(PartSlot.HindLeg,r.limbStyle,78,45,12,limbHeight,1),
+                P(PartSlot.ForeLeg,r.limbStyle,44,45,12,limbHeight,1),
                 P(PartSlot.Trunk,r.trunkStyle,63,50,bodyLength,bodyDepth,2),
                 P(PartSlot.Markings,PartStyle.Rounded,63,50,bodyLength,bodyDepth,3),
+                P(PartSlot.NeckBlend,PartStyle.Rounded,39,51,13,10,6),
                 P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,4),
                 P(PartSlot.Head,r.headStyle,30,51,headWidth,bodyDepth-3,5),
-                P(PartSlot.Eye,PartStyle.Rounded,24,47,3,3,6),
-                P(PartSlot.ForeLeg,r.limbStyle,38,62,12,limbHeight,7),
-                P(PartSlot.HindLeg,r.limbStyle,75,62,12,limbHeight,7)
+                P(PartSlot.Eye,PartStyle.Rounded,24,55,3,3,9),
+                P(PartSlot.ForeLeg,r.limbStyle,44,44,12,limbHeight,7),
+                P(PartSlot.ShoulderBlend,PartStyle.Rounded,44,44,11,8,8),
+                P(PartSlot.HindLeg,r.limbStyle,76,44,12,limbHeight,7),
+                P(PartSlot.HipBlend,PartStyle.Rounded,76,44,11,8,8)
             };
         }
 
