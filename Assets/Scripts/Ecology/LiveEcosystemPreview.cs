@@ -19,6 +19,7 @@ namespace EarthRogueOrigins.Preview
         public float secondsPerTick = .2f;
         public Sprite[] forestTiles, mudTiles, waterTiles, rockTiles, floodplainTiles;
         public Sprite[] organismSprites;
+        public Sprite[] fernProps;
         public bool useAnatomicalSprites = true;
         public bool useArticulatedRig = true;
         [Tooltip("When assigned, illustrated anatomical parts replace primitive rig meshes.")]
@@ -69,6 +70,34 @@ namespace EarthRogueOrigins.Preview
                 renderer.sprite=sprite;renderer.sortingOrder=-100;
                 renderer.color=new Color(1,1,1,.88f);
                 createdObjects.Add(go);
+            }
+            // Additional height-ordered foliage is visual only. It doesn't change
+            // plant biomass, accessibility, or organism rewards.
+            if(fernProps!=null && fernProps.Length>0)
+            {
+                for(int y=1;y<worldHeight-1;y++)
+                for(int x=1;x<worldWidth-1;x++)
+                {
+                    var habitat=world.Cell(x,y);
+                    if(habitat.terrain!=TerrainKind.Forest && habitat.terrain!=TerrainKind.Floodplain)
+                        continue;
+                    int hash=unchecked(x*73856093 ^ y*19349663 ^ seed*83492791);
+                    if((hash & 7)>2)continue;
+                    var sprite=fernProps[(hash & int.MaxValue)%fernProps.Length];
+                    if(sprite==null)continue;
+                    var prop=new GameObject("Fern "+x+","+y);
+                    prop.transform.SetParent(transform,false);
+                    // Sprite is 192 px wide at 192 PPU: 1 ground-tile footprint.
+                    float scale=.62f+(hash & 3)*.11f;
+                    prop.transform.localPosition=new Vector3(x+.5f,y+.57f,-.015f);
+                    prop.transform.localScale=Vector3.one*scale;
+                    var sr=prop.AddComponent<SpriteRenderer>();
+                    sr.sprite=sprite;
+                    sr.sortingOrder=20;
+                    // Stable screen-space sort: taller plants overlap objects farther north.
+                    sr.sortingOrder=1500-y*2;
+                    createdObjects.Add(prop);
+                }
             }
             var random=new System.Random(seed+17);
             for(int i=0;i<62;i++)
