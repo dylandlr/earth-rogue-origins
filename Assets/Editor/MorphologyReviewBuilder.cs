@@ -126,7 +126,20 @@ namespace EarthRogueOrigins.Editor
                 capture=new Texture2D(Width,Height,TextureFormat.RGB24,false);
                 capture.ReadPixels(new Rect(0,0,Width,Height),0,0);
                 capture.Apply(false,false);
+                var sample=capture.GetPixels32();
+                int foregroundPixels=0;
+                var background=(Color32)camera.backgroundColor;
+                foreach(var color in sample)
+                {
+                    if(Mathf.Abs(color.r-background.r)>12 ||
+                       Mathf.Abs(color.g-background.g)>12 ||
+                       Mathf.Abs(color.b-background.b)>12)foregroundPixels++;
+                }
+                if(foregroundPixels<Width*Height/500)
+                    throw new InvalidOperationException("Morphology capture is blank or almost empty ("+
+                        foregroundPixels+" distinct foreground pixels). Inspect camera and sprite shaders.");
                 File.WriteAllBytes(OutputFolder+"/morphology_board.png",capture.EncodeToPNG());
+                Debug.Log("Morphology screenshot distinct foreground pixels: "+foregroundPixels);
             }
             finally
             {
