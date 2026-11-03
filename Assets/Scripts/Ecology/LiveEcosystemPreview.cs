@@ -308,6 +308,10 @@ namespace EarthRogueOrigins.Preview
                     int index=Mathf.Clamp(Mathf.RoundToInt(c.Trait(1)*5),0,5);
                     renderer.sprite=organismSprites[(index+Mathf.Max(0,c.speciesId-1)*6)%organismSprites.Length];
                 }
+                // A speciation event can rename the taxon while this
+                // individual remains alive and keeps its stable organism ID.
+                renderer.gameObject.name=world.ScientificName(c)+
+                    "  |  individual "+c.id;
                 renderer.color=c.diet==DietKind.Predator?new Color(1,.68f,.6f):
                     c.diet==DietKind.Detritivore?new Color(.9f,.85f,1f):Color.white;
                 renderer.transform.position=new Vector3(c.position.x,c.position.y,-.03f);
