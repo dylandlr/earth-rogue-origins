@@ -153,15 +153,15 @@ namespace EarthRogueOrigins.PixelCreatures
                 P(PartSlot.Trunk,r.trunkStyle,63,50,bodyLength,bodyDepth,2),
                 P(PartSlot.TailRootBlend,PartStyle.Rounded,85,51,13,11,3),
                 P(PartSlot.Markings,PartStyle.Rounded,63,50,bodyLength,bodyDepth,4),
-                P(PartSlot.NeckBlend,PartStyle.Rounded,39,51,13,10,7),
+                P(PartSlot.NeckBlend,PartStyle.Rounded,39,51,13,10,8),
                 P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,5),
                 P(PartSlot.Head,r.headStyle,30,51,headWidth,bodyDepth-3,6),
                 P(PartSlot.FaceDetails,r.headStyle,30,51,headWidth,bodyDepth-3,7),
-                P(PartSlot.Eye,PartStyle.Rounded,face.eye.x,face.eye.y,3,3,11),
-                P(PartSlot.ForeLeg,r.limbStyle,44,44,12,limbHeight,8),
-                P(PartSlot.ShoulderBlend,PartStyle.Rounded,44,44,11,8,9),
-                P(PartSlot.HindLeg,r.limbStyle,76,44,12,limbHeight,8),
-                P(PartSlot.HipBlend,PartStyle.Rounded,76,44,11,8,9)
+                P(PartSlot.Eye,PartStyle.Rounded,face.eye.x,face.eye.y,3,3,12),
+                P(PartSlot.ForeLeg,r.limbStyle,44,44,12,limbHeight,9),
+                P(PartSlot.ShoulderBlend,PartStyle.Rounded,44,44,11,8,10),
+                P(PartSlot.HindLeg,r.limbStyle,76,44,12,limbHeight,9),
+                P(PartSlot.HipBlend,PartStyle.Rounded,76,44,11,8,10)
             };
         }
 
