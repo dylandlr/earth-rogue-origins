@@ -666,6 +666,81 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void BentLegKeepsItsAttachmentRootAcrossAllGaitFrames()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,103);
+            foreach(int frame in new[]{0,1,2,3})
+            foreach(bool swimming in new[]{false,true})
+            {
+                var parts=PixelCreaturePoses.Layout(recipe,frame,swimming);
+                foreach(var part in parts)
+                {
+                    if(part.slot!=PartSlot.ForeLeg&&part.slot!=PartSlot.HindLeg)
+                        continue;
+                    var shape=PixelLimbSilhouette.Build(
+                        part.anchor.x,part.anchor.y,part.extent.y,
+                        part.style,part.mirrorGroup,
+                        part.slot==PartSlot.ForeLeg,part.drawOrder<2);
+                    Assert.AreEqual(part.anchor,shape.root);
+                    Assert.Less(shape.knee.y,shape.root.y);
+                    Assert.Less(shape.ankle.y,shape.knee.y);
+                    Assert.LessOrEqual(Mathf.Abs(shape.ankle.x-shape.root.x),9);
+                    Assert.GreaterOrEqual(shape.upperRadius,shape.lowerRadius);
+                }
+            }
+        }
+
+        [Test]
+        public void LimbContoursRemainWithinCanvasAtMorphologyExtremes()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,518);
+            foreach(float length in new[]{0f,.5f,1f})
+            foreach(PartStyle style in new[]{PartStyle.Slender,
+                PartStyle.Rounded,PartStyle.Robust,PartStyle.Webbed})
+            {
+                recipe.legLength=length;recipe.limbStyle=style;
+                foreach(int frame in new[]{0,1,2,3})
+                {
+                    var layout=PixelCreaturePoses.Layout(recipe,frame,false);
+                    foreach(var p in layout)
+                    {
+                        if(p.slot!=PartSlot.ForeLeg&&p.slot!=PartSlot.HindLeg)
+                            continue;
+                        var shape=PixelLimbSilhouette.Build(
+                            p.anchor.x,p.anchor.y,p.extent.y,p.style,
+                            p.mirrorGroup,p.slot==PartSlot.ForeLeg,p.drawOrder<2);
+                        var upper=PixelLimbSilhouette.UpperPolygon(shape);
+                        var lower=PixelLimbSilhouette.LowerPolygon(shape);
+                        foreach(var point in upper)
+                        {
+                            Assert.That(point.x,Is.InRange(0,127));
+                            Assert.That(point.y,Is.InRange(0,95));
+                        }
+                        foreach(var point in lower)
+                        {
+                            Assert.That(point.x,Is.InRange(0,127));
+                            Assert.That(point.y,Is.InRange(0,95));
+                        }
+                    }
+                    var pixels=PixelCreaturePainter.RenderPixels(recipe,frame,false);
+                    Assert.AreEqual(128*96,pixels.Length);
+                }
+            }
+        }
+
+        [Test]
+        public void FarSideLegHasSmallerShoulderThanNearSide()
+        {
+            var foreground=PixelLimbSilhouette.Build(
+                44,43,18,PartStyle.Robust,3,true,false);
+            var background=PixelLimbSilhouette.Build(
+                44,43,18,PartStyle.Robust,3,true,true);
+            Assert.Less(background.upperRadius,foreground.upperRadius);
+            Assert.AreEqual(background.root,foreground.root);
+            Assert.AreEqual(background.ankle,foreground.ankle);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
