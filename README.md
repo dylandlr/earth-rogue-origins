@@ -38,6 +38,16 @@ The approved organism sprites and world reference exist in the earlier prototype
 
 Choose **Earth: Rogue Origins > Art > Compare Render to Approved Concept** after exporting a morphology board. The window compares the actual Unity render beside the approved concept reference.
 
+## New: Original composable pixel creatures
+
+Generate **original** 128×96 pixel-art creature assets from procedural anatomical parts, not extracted screenshots.
+
+- Unity menu: **Earth: Rogue Origins > Art > Pixel Creatures > Generate Starter Library** — creates 12 starter creatures (5 tetrapods, 4 fish, 3 arthropods), transparent assembled PNGs, separate part PNGs, editable JSON recipes and a contact sheet.
+- **Art > Pixel Creatures > Open Composer** — edit a single recipe, preview the creature and export its layers.
+- `LiveEcosystemPreview.usePixelCreatureSprites = true` — render organisms from live inherited tetrapod anatomy. Other body plans are currently asset-only.
+
+See [Docs/PROCEDURAL_PIXEL_CREATURES.md](Docs/PROCEDURAL_PIXEL_CREATURES.md) for slot contracts, compatibility constraints, pixel-art import settings, and limitations. These are first-generation procedural blockouts, **not yet the polished recreated sprites**.
+
 ## Target engine
 
 Unity **6000.0.23f1**, Windows 64-bit.
