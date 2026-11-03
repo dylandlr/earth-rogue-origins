@@ -1,7 +1,7 @@
 {
   "name": "EarthRogueOrigins.Tests",
   "rootNamespace": "EarthRogueOrigins.Tests",
-  "references": ["Assembly-CSharp"],
+  "references": ["EarthRogueOrigins.Evolution"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"],
   "overrideReferences": true,
