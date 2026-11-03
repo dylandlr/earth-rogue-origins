@@ -18,8 +18,10 @@
 - [ ] Execute Unity compilation and Edit Mode tests
 - [ ] Review generated contact sheet in Unity against approved concept artwork
 - [ ] Add hand-painted 2.5D surface materials and illustrated anatomical layers
-- [ ] Add joint-based gait and swim animations
-- [ ] Optimize phenotype sprite caching/pooling
+- [x] Add initial four-frame walk/swim morphology posing (not production IK)
+- [ ] Add joint-based skeletal gait, IK and planted feet
+- [x] Add reference-counted phenotype sprite cache
+- [ ] Profile GPU/CPU memory and replace per-morph raster sheets with deformable parts/atlases
 
 ## Milestone 1: Concept-matched playable habitat
 - [ ] Create layered illustrated terrain tileset
