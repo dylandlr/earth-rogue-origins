@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using EarthRogueOrigins.PixelCreatures;
+using EarthRogueOrigins.Anatomy;
 
 namespace EarthRogueOrigins.Tests
 {
@@ -104,6 +105,21 @@ namespace EarthRogueOrigins.Tests
             Assert.Throws<ArgumentOutOfRangeException>(()=>r.Validate());
             r.finSize=.5f;r.version=3;
             Assert.Throws<NotSupportedException>(()=>r.Validate());
+        }
+
+        [Test]
+        public void EcologicalGenomeControlsPixelArmorAndFins()
+        {
+            var g=DevelopmentalGenome.Founder(new System.Random(93));
+            g.regulatory[(int)BodyGene.ArmorCoverage]=0f;
+            g.regulatory[(int)BodyGene.TailFin]=0f;
+            var low=PixelRecipeAdapter.FromDevelopment(g,Development.Express(g),14);
+            g.regulatory[(int)BodyGene.ArmorCoverage]=1f;
+            g.regulatory[(int)BodyGene.TailFin]=1f;
+            var high=PixelRecipeAdapter.FromDevelopment(g,Development.Express(g),14);
+            Assert.AreEqual(CreaturePlan.Tetrapod,high.plan);
+            Assert.Greater(high.armor,low.armor);
+            Assert.Greater(high.finSize,low.finSize);
         }
 
         [Test]
