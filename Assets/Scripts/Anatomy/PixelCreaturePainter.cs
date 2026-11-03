@@ -60,6 +60,11 @@ namespace EarthRogueOrigins.PixelCreatures
         static void DrawPart(Canvas c,PixelPartDescriptor d,PixelCreatureRecipe r)
         {
             int x=d.anchor.x,y=d.anchor.y,w=d.extent.x,h=d.extent.y;
+            if(d.slot==PartSlot.Trunk)
+            {
+                if(d.style==PartStyle.Slender)h=Mathf.Max(11,h-6);
+                if(d.style==PartStyle.Robust)h+=5;
+            }
             var dark=Shade(r.baseColor,.64f);
             var light=Shade(r.baseColor,1.24f);
             switch(d.slot)
@@ -87,14 +92,32 @@ namespace EarthRogueOrigins.PixelCreatures
                     break;
 
                 case PartSlot.Head:
-                    Ellipse(c,x,y,w/2+2,h/2+2,Ink);
-                    Ellipse(c,x,y,w/2,h/2,r.baseColor);
+                    if(d.style==PartStyle.Wedge)
+                    {
+                        Polygon(c,new[]{
+                            new Vector2Int(x-w/2-3,y-2),new Vector2Int(x+w/2,y+h/2),
+                            new Vector2Int(x+w/2+3,y-h/2),
+                            new Vector2Int(x-w/2-3,y-h/4)
+                        },Ink);
+                        Polygon(c,new[]{
+                            new Vector2Int(x-w/2,y-1),new Vector2Int(x+w/2-2,y+h/2-2),
+                            new Vector2Int(x+w/2,y-h/2+2),
+                            new Vector2Int(x-w/2,y-h/4)
+                        },r.baseColor);
+                    }
+                    else
+                    {
+                        int extension=d.style==PartStyle.LongSnout?9:0;
+                        Ellipse(c,x-extension/2,y,w/2+2+extension/2,h/2+2,Ink);
+                        Ellipse(c,x-extension/2,y,w/2+extension/2,h/2,r.baseColor);
+                    }
                     Ellipse(c,x-2,y+3,Mathf.Max(3,w/3),Mathf.Max(2,h/5),light);
                     // Small snout and jaw keep the face readable at 32 px.
                     if(r.plan!=CreaturePlan.Arthropod)
                     {
-                        Ellipse(c,x-w/3,y-1,Mathf.Max(4,w/3),Mathf.Max(3,h/4),r.baseColor);
-                        Line(c,x-w/2-4,y-4,x-w/3,y-4,Ink,2);
+                        Ellipse(c,x-w/3-(d.style==PartStyle.LongSnout?5:0),y-1,
+                            Mathf.Max(4,w/3),Mathf.Max(3,h/4),r.baseColor);
+                        Line(c,x-w/2-4-(d.style==PartStyle.LongSnout?8:0),y-4,x-w/3,y-4,Ink,2);
                         Line(c,x-w/2-3,y-6,x-w/3+2,y-6,EyeWhite,1);
                     }
                     break;
@@ -121,10 +144,18 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     else
                     {
-                        Line(c,x,y,x+2,y-h+3,Ink,Mathf.Max(5,w/2));
-                        Line(c,x,y,x+2,y-h+3,r.baseColor,Mathf.Max(3,w/2-2));
+                        int thickness=d.style==PartStyle.Slender?Mathf.Max(4,w/3):
+                            d.style==PartStyle.Robust?Mathf.Max(7,w/2+2):Mathf.Max(5,w/2);
+                        Line(c,x,y,x+2,y-h+3,Ink,thickness);
+                        Line(c,x,y,x+2,y-h+3,r.baseColor,Mathf.Max(2,thickness-3));
                         Line(c,x+2,y-h+3,x-4,y-h,Ink,4);
                         Line(c,x+2,y-h+4,x-3,y-h+1,light,2);
+                        if(d.style==PartStyle.Webbed)
+                            Polygon(c,new[]{
+                                new Vector2Int(x-6,y-h+1),
+                                new Vector2Int(x+7,y-h+1),
+                                new Vector2Int(x+2,y-h+8)
+                            },r.secondaryColor);
                     }
                     break;
 
@@ -139,6 +170,16 @@ namespace EarthRogueOrigins.PixelCreatures
                             new Vector2Int(x-w/2,y+2),new Vector2Int(x+w/2-2,y+5),
                             new Vector2Int(x+w/2-2,y-5),new Vector2Int(x-w/2,y-2)
                         },r.secondaryColor);
+                    }
+                    else if(d.style==PartStyle.Fan)
+                    {
+                        Polygon(c,new[]{
+                            new Vector2Int(x-w/2-5,y+12),
+                            new Vector2Int(x+w/2,y+7),
+                            new Vector2Int(x+w/2,y-4),
+                            new Vector2Int(x-w/2-5,y-12)
+                        },r.secondaryColor);
+                        Line(c,x-w/2,y,x+w/2,y,r.accentColor,2);
                     }
                     else
                     {
