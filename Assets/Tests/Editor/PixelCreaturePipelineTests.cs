@@ -123,6 +123,22 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void SwappingHeadAndBodyModulesChangesRenderedPixels()
+        {
+            var r=PixelCreatureRecipe.Founder(CreaturePlan.Tetrapod,120);
+            r.headStyle=PartStyle.Rounded;
+            r.trunkStyle=PartStyle.Rounded;
+            var before=PixelCreaturePainter.RenderPixels(r);
+            r.headStyle=PartStyle.LongSnout;
+            r.trunkStyle=PartStyle.Slender;
+            var after=PixelCreaturePainter.RenderPixels(r);
+            int differences=0;
+            for(int i=0;i<before.Length;i++)
+                if(!before[i].Equals(after[i]))differences++;
+            Assert.Greater(differences,30);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
