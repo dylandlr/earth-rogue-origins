@@ -40,9 +40,17 @@ namespace EarthRogueOrigins.PixelCreatures
             var parts=PixelCreatureDevelopment.Layout(recipe);
             Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
             if(partIndex<0 || partIndex>=parts.Length)throw new ArgumentOutOfRangeException(nameof(partIndex));
+            // Context-sensitive parts (especially markings) need the preceding
+            // layers as a mask. Output only pixels actually changed by this part.
+            // This ensures ordered exported layers reproduce the assembled sprite.
             var canvas=new Canvas(PixelArtDirection.Ramp(recipe.palette).ink);
+            for(int i=0;i<partIndex;i++)DrawPart(canvas,parts[i],recipe);
+            var previous=(Color32[])canvas.pixels.Clone();
             DrawPart(canvas,parts[partIndex],recipe);
-            return canvas.pixels;
+            var output=new Color32[Width*Height];
+            for(int i=0;i<output.Length;i++)
+                output[i]=canvas.pixels[i].Equals(previous[i])?Clear:canvas.pixels[i];
+            return output;
         }
 
         public static Texture2D TextureFromPixels(Color32[] data)
