@@ -24,6 +24,12 @@ The graphics are **generated prototype assets**, not a 1:1 reproduction of the c
 
 For architecture, limitations and research methods, see [Docs/WORLD_AND_EMERGENCE.md](Docs/WORLD_AND_EMERGENCE.md).
 
+## Verify the Unity project on Windows
+
+Run `./scripts/validate-unity.ps1 -UnityEditor "<path-to-Unity.exe>"` to generate the ecosystem scene, run Edit Mode tests, and attempt a Windows build. See [Docs/UNITY_VALIDATION.md](Docs/UNITY_VALIDATION.md). Actual compilation and playtest are **not yet verified** by the project maintainers through this pipeline.
+
+When regenerating the scene, hand-painted PNG replacements and manually assigned sprites in the CreatureArtLibrary are preserved by default. The explicit `Art > Regenerate Starter Parts (Overwrite PNGs)` command intentionally overwrites these generated parts.
+
 ## Target engine
 
 Unity **6000.0.23f1**, Windows 64-bit.
