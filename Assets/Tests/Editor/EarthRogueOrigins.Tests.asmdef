@@ -1,11 +1,22 @@
 {
   "name": "EarthRogueOrigins.Tests",
   "rootNamespace": "EarthRogueOrigins.Tests",
-  "references": ["EarthRogueOrigins.Evolution"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"],
+  "references": [
+    "EarthRogueOrigins.Evolution",
+    "EarthRogueOrigins.Ecology"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
   "overrideReferences": true,
-  "precompiledReferences": ["nunit.framework.dll"],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
   "autoReferenced": false,
-  "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ]
 }
