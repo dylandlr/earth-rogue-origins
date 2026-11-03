@@ -113,30 +113,17 @@ namespace EarthRogueOrigins.Editor
         public static PixelCreatureRecipe Starter(int index)
         {
             if(index<0 || index>=12)throw new ArgumentOutOfRangeException(nameof(index));
-            var plan=index<5?CreaturePlan.Tetrapod:index<9?CreaturePlan.Fish:CreaturePlan.Arthropod;
-            var r=PixelCreatureRecipe.Founder(plan,7900+index*137);
-            r.id="starter_"+index.ToString("00")+"_"+plan.ToString().ToLowerInvariant();
-            // Muted palettes deliberately follow the recreated game sprite study.
-            Color32[] colors={
-                C(151,156,113), C(191,124,98), C(143,143,145), C(196,183,160),
-                C(178,167,138), C(94,128,119), C(119,144,135), C(172,159,119),
-                C(91,113,96), C(155,94,75), C(119,120,78), C(154,115,81)
-            };
-            r.baseColor=colors[index];
-            r.secondaryColor=Darker(colors[index]);
-            r.accentColor=C(191,178,132);
-            r.armor=index==4?.85f:index>=9?.75f:.03f;
-            r.finSize=plan==CreaturePlan.Fish?.72f:index==3?.28f:0f;
-            r.spots=index%4==0?.66f:index%3==0?.21f:.36f;
-            r.legLength=index==4?.65f:.45f;
-            r.tailLength=index>=5&&index<9?.82f:.53f;
-            if(index>=9)r.trunkStyle=PartStyle.Segmented;
-            if(index==1 || index==6)r.headStyle=PartStyle.Wedge;
-            if(index==3 || index==7)r.headStyle=PartStyle.LongSnout;
-            if(index==2)r.trunkStyle=PartStyle.Slender;
-            if(index==4)r.trunkStyle=PartStyle.Robust;
-            if(index==3)r.tailStyle=PartStyle.Fan;
-            if(index==4)r.limbStyle=PartStyle.Robust;
+            var archetype=(CreatureArchetype)(index%8);
+            var r=PixelArtDirection.Hero(archetype,7900+index*137);
+            r.id="starter_"+index.ToString("00")+"_"+archetype.ToString().ToLowerInvariant();
+            if(index>=8)
+            {
+                // Second generation of related variants: conserve the selected
+                // family silhouette while changing localized inherited controls.
+                r.headSize=Mathf.Clamp01(r.headSize+(index%2==0?.12f:-.1f));
+                r.tailLength=Mathf.Clamp01(r.tailLength+(index%2==0?.18f:-.12f));
+                r.spots=Mathf.Clamp01(r.spots+.2f);
+            }
             r.Validate();
             return r;
         }
