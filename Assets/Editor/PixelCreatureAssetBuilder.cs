@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -31,13 +32,30 @@ namespace EarthRogueOrigins.Editor
             var background=new Color32(246,240,225,255);
             var sheet=new Color32[preview.width*preview.height];
             for(int i=0;i<sheet.Length;i++)sheet[i]=background;
-            var csv=new StringBuilder("id,body_plan,seed,layer_count,armor,fin,legs,tail,spots\n");
+            var csv=new StringBuilder("id,body_plan,seed,layer_count,armor,fin,legs,tail,spots,species_id,scientific_name\n");
+            var speciesNames=new Dictionary<CreatureArchetype,ScientificTaxon>();
+            var usedNames=new HashSet<string>();
 
             for(int index=0;index<Columns*Rows;index++)
             {
                 var r=Starter(index);
                 string folder=Root+"/"+r.id;
                 Directory.CreateDirectory(folder);
+                ScientificTaxon taxon;
+                if(!speciesNames.TryGetValue(r.archetype,out taxon))
+                {
+                    int taxonId=(int)r.archetype+1;
+                    taxon=ScientificNameGenerator.Describe(r,taxonId);
+                    if(!usedNames.Add(taxon.Binomial))
+                    {
+                        taxon=ScientificNameGenerator.Distinguish(taxon,taxonId);
+                        usedNames.Add(taxon.Binomial);
+                    }
+                    speciesNames.Add(r.archetype,taxon);
+                }
+                // Second-generation visual variants retain their clade's
+                // original binomial; a new paint job isn't speciation.
+                WriteText(folder+"/species.json",JsonUtility.ToJson(taxon,true),overwrite);
                 string json=JsonUtility.ToJson(r,true);
                 WriteText(folder+"/recipe.json",json,overwrite);
                 var pixels=PixelCreaturePainter.RenderPixels(r);
@@ -73,7 +91,9 @@ namespace EarthRogueOrigins.Editor
                 csv.Append(r.id).Append(',').Append(r.plan).Append(',').Append(r.seed)
                     .Append(',').Append(layout.Length).Append(',').Append(r.armor)
                     .Append(',').Append(r.finSize).Append(',').Append(r.legLength)
-                    .Append(',').Append(r.tailLength).Append(',').Append(r.spots).AppendLine();
+                    .Append(',').Append(r.tailLength).Append(',').Append(r.spots)
+                    .Append(',').Append(taxon.speciesId)
+                    .Append(',').Append(taxon.Binomial).AppendLine();
                 int x0=(index%Columns)*PixelCreaturePainter.Width;
                 int y0=(Rows-1-index/Columns)*PixelCreaturePainter.Height;
                 for(int y=0;y<PixelCreaturePainter.Height;y++)
