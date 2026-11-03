@@ -10,7 +10,9 @@
 - [x] Add composable neck/shoulder/hip concealment layers and corrected leg anchors
 - [x] Add deterministic four-frame walk/swim pixel poses and per-frame layered exports
 - [x] Add connected-silhouette and animation-compositing regression tests
-- [ ] Replace procedural blend caps with authored joint-skin and tail-root masks
+- [x] Add tail-root concealment, improved toe silhouettes and separate proportional ground shadows
+- [x] Preserve limb root anchors across walk/swim poses
+- [ ] Replace remaining procedural joint caps with curated hand-painted anatomical masks
 - [ ] Perform side-by-side quality acceptance against the recreated sprite reference
 
 ## Milestone 1B: Original composable pixel-art asset system
