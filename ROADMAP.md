@@ -16,7 +16,8 @@
 - [x] Bake morphology contact sheet through a Unity Editor command
 - [x] Commit deterministic anatomy tests
 - [ ] Execute Unity compilation and Edit Mode tests
-- [ ] Review generated contact sheet in Unity against approved concept artwork
+- [x] Add actual Unity-camera morphology review generator with phenotype CSV and blank-output checks
+- [ ] Execute visual review and compare screenshots to approved concept artwork
 - [ ] Add hand-painted 2.5D surface materials and illustrated anatomical layers
 - [x] Add initial four-frame walk/swim morphology posing (not production IK)
 - [x] Add first articulated multi-part rig with head, tail, limbs and dorsal plates
