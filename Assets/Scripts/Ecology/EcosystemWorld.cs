@@ -257,8 +257,18 @@ namespace EarthRogueOrigins.Ecology
                 taxon.foundedTick=tick;
                 taxon.foundingGeneticDistance=evidence.geneticDistance;
                 taxon.foundingGeographicGap=evidence.geographicGap;
+                int disambiguation=0;
                 while(NameUsed(taxon.Binomial))
-                    taxon=ScientificNameGenerator.Distinguish(taxon,childId);
+                {
+                    // A new numeric discriminator guarantees progress even
+                    // when an earlier taxon uses the same generated suffix.
+                    if(disambiguation++>10000)
+                        throw new InvalidOperationException(
+                            "Unable to assign a unique descendant scientific name.");
+                    taxon=ScientificNameGenerator.Distinguish(
+                        ScientificNameGenerator.Describe(recipe,childId),
+                        checked(childId+disambiguation-1));
+                }
                 speciesCatalog.Add(childId,taxon);
                 foreach(var c in creatures)
                     if(c.speciesId==parentId&&candidates.Contains(c.id))
