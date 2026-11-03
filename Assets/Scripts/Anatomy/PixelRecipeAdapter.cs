@@ -34,6 +34,9 @@ namespace EarthRogueOrigins.PixelCreatures
             recipe.accentColor=new Color32(199,180,133,255);
             recipe.limbStyle=genome.Get(BodyGene.LimbMuscle)>.6f?
                 PartStyle.Robust:PartStyle.Slender;
+            recipe.headStyle=phenotype.headRadius>.24f?
+                PartStyle.Robust:genome.Get(BodyGene.NeckLength)>.65f?
+                PartStyle.LongSnout:PartStyle.Rounded;
             recipe.trunkStyle=phenotype.trunkDepth>.51f?
                 PartStyle.Robust:PartStyle.Rounded;
             recipe.tailStyle=phenotype.tailFinSize>.16f?
