@@ -354,38 +354,83 @@ namespace EarthRogueOrigins.PixelCreatures
             }
         }
 
+        /// <summary>
+        /// Shape-aware rasterization: define an exact silhouette mask, dilate
+        /// that mask by 1px for ink and paint only within the silhouette.
+        /// Avoids the rectangular ink bars produced by per-column borders.
+        /// Each pixel is still an original integer-grid pixel.
+        /// </summary>
         static void PaintProfile(Canvas canvas,PartSlot slot,PartStyle style,
             int cx,int cy,int width,int height,PixelColorRamp ramp,Color32 baseColor)
         {
-            // The outer contour is grown by two pixels while the painted core has
-            // its own 1-2px underside shadow and an offset upper-left highlight.
             int left=cx-width/2,right=cx+width/2;
-            for(int x=left-2;x<=right+2;x++)
+            int minX=Mathf.Max(1,left-3),maxX=Mathf.Min(Width-2,right+3);
+            int minY=Mathf.Max(1,cy-height/2-5);
+            int maxY=Mathf.Min(Height-2,cy+height/2+5);
+            var mask=new bool[Width*Height];
+            var interior=new bool[Width*Height];
+
+            float[] top,bottom;
+            PixelSilhouetteTemplates.Profile(slot,style,out top,out bottom);
+            for(int x=left;x<=right;x++)
             {
                 float u=(x-left)/(float)Mathf.Max(1,right-left);
-                float upper,lower;
-                float[] top,bottom;
-                PixelSilhouetteTemplates.Profile(slot,style,out top,out bottom);
-                upper=PixelSilhouetteTemplates.Sample(top,u);
-                lower=PixelSilhouetteTemplates.Sample(bottom,u);
-                int high=cy+Mathf.RoundToInt(upper*height*.5f);
-                int low=cy+Mathf.RoundToInt(lower*height*.5f);
-                for(int y=low-2;y<=high+2;y++)
+                int high=cy+Mathf.RoundToInt(
+                    PixelSilhouetteTemplates.Sample(top,u)*height*.5f);
+                int low=cy+Mathf.RoundToInt(
+                    PixelSilhouetteTemplates.Sample(bottom,u)*height*.5f);
+                for(int y=Mathf.Max(minY,low);y<=Mathf.Min(maxY,high);y++)
+                    mask[y*Width+x]=true;
+            }
+
+            // Native pixel outline is a true morphological dilation of the
+            // anatomical mask, with no rectangular corner artifacts.
+            for(int y=minY;y<=maxY;y++)
+            for(int x=minX;x<=maxX;x++)
+            {
+                int index=y*Width+x;
+                if(mask[index])continue;
+                bool near=false;
+                for(int oy=-1;oy<=1&&!near;oy++)
+                for(int ox=-1;ox<=1;ox++)
+                    if(mask[(y+oy)*Width+x+ox]){near=true;break;}
+                if(near)canvas.Put(x,y,ramp.ink);
+            }
+
+            for(int y=minY;y<=maxY;y++)
+            for(int x=minX;x<=maxX;x++)
+            {
+                int index=y*Width+x;
+                if(!mask[index])continue;
+                bool edge=false;
+                for(int oy=-1;oy<=1&&!edge;oy++)
+                for(int ox=-1;ox<=1;ox++)
+                    if(!mask[(y+oy)*Width+x+ox]){edge=true;break;}
+                if(edge)
                 {
-                    bool inside=x>=left&&x<=right&&y>=low&&y<=high;
-                    if(!inside)
-                    {
-                        canvas.Put(x,y,ramp.ink);
-                        continue;
-                    }
-                    int distanceToEdge=Mathf.Min(
-                        Mathf.Min(x-left,right-x),Mathf.Min(high-y,y-low));
-                    Color32 fill=y<cy-height*.12f?ramp.shadow:baseColor;
-                    if(distanceToEdge>=2 && y>cy+height*.19f &&
-                       x<cx+width*.16f)fill=ramp.light;
-                    if(distanceToEdge>=4 && y>cy+height*.30f &&
-                       x<cx-width*.08f)fill=ramp.highlight;
-                    canvas.Put(x,y,fill);
+                    canvas.Put(x,y,ramp.ink);
+                    continue;
+                }
+                interior[index]=true;
+                // This ramp uses coherent material zones rather than random
+                // texture noise: underside, midtone, dorsal and lit shoulder.
+                Color32 fill=y<cy-height*.08f?ramp.shadow:baseColor;
+                if(y>cy+height*.12f && x<cx+width*.24f)fill=ramp.light;
+                if(y>cy+height*.28f && x<cx-width*.12f)fill=ramp.highlight;
+                canvas.Put(x,y,fill);
+            }
+
+            // Broken, organic dorsal flecks are constrained to the painted
+            // interior. Never paint through the black contour into empty air.
+            if(slot==PartSlot.Trunk)
+            {
+                for(int i=0;i<4;i++)
+                {
+                    int x=cx-width/3+i*Mathf.Max(2,width/7);
+                    int y=cy+Mathf.RoundToInt(height*(.22f+.04f*(i%2)));
+                    int index=y*Width+x;
+                    if(x>0&&x<Width&&y>0&&y<Height&&interior[index])
+                        canvas.Put(x,y,ramp.highlight);
                 }
             }
         }
