@@ -26,7 +26,7 @@ namespace EarthRogueOrigins.Preview
         public bool useArticulatedRig = true;
         [Tooltip("Render original composited 128x96 pixel-art tetrapods; overrides articulated art.")]
         public bool usePixelCreatureSprites = true;
-        readonly Dictionary<int,Sprite> pixelSprites = new Dictionary<int,Sprite>();
+        readonly Dictionary<int,Sprite[]> pixelSprites = new Dictionary<int,Sprite[]>();
         [Tooltip("When assigned, illustrated anatomical parts replace primitive rig meshes.")]
         public CreatureArtLibrary creatureArt;
         readonly Dictionary<int,ArticulatedCreatureView> articulatedViews = new Dictionary<int,ArticulatedCreatureView>();
@@ -56,13 +56,7 @@ namespace EarthRogueOrigins.Preview
             foreach(var o in createdObjects)if(o!=null)Destroy(o);
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=new PhenotypeSpriteCache(64);
-            foreach(var entry in pixelSprites)
-            {
-                if(entry.Value==null)continue;
-                Texture2D tex=entry.Value.texture;
-                Destroy(entry.Value);
-                if(tex!=null)Destroy(tex);
-            }
+            foreach(var entry in pixelSprites)DestroyPixelFrames(entry.Value);
             pixelSprites.Clear();
             organismMorphs.Clear();previousPositions.Clear();traveled.Clear();articulatedViews.Clear();
             createdObjects.Clear();creatureRenderers.Clear();
@@ -196,24 +190,39 @@ namespace EarthRogueOrigins.Preview
                 }
                 if(usePixelCreatureSprites && c.development!=null)
                 {
-                    Sprite pixelSprite;
-                    if(!pixelSprites.TryGetValue(c.id,out pixelSprite))
+                    Sprite[] frames;
+                    if(!pixelSprites.TryGetValue(c.id,out frames))
                     {
                         var genome=new DiploidGenome();
-                        Array.Copy(c.genes,genome.alleles,Math.Min(c.genes.Length,genome.alleles.Length));
+                        Array.Copy(c.genes,genome.alleles,
+                            Math.Min(c.genes.Length,genome.alleles.Length));
                         var phenotype=Development.Express(c.development,genome);
-                        var recipe=PixelRecipeAdapter.FromDevelopment(c.development,phenotype,c.id+seed*17);
-                        var texture=PixelCreaturePainter.Render(recipe);
-                        pixelSprite=Sprite.Create(texture,
-                            new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),64f);
-                        pixelSprites.Add(c.id,pixelSprite);
+                        var recipe=PixelRecipeAdapter.FromDevelopment(
+                            c.development,phenotype,c.id+seed*17);
+                        frames=new Sprite[PixelCreaturePoses.Frames*2];
+                        for(int mode=0;mode<2;mode++)
+                        for(int frame=0;frame<PixelCreaturePoses.Frames;frame++)
+                        {
+                            var texture=PixelCreaturePainter.Render(recipe,frame,mode==1);
+                            frames[mode*PixelCreaturePoses.Frames+frame]=Sprite.Create(
+                                texture,new Rect(0,0,texture.width,texture.height),
+                                new Vector2(.5f,.5f),64f);
+                        }
+                        pixelSprites.Add(c.id,frames);
                         previousPositions[c.id]=c.position;
+                        traveled[c.id]=0f;
                     }
-                    renderer.sprite=pixelSprite;
-                    renderer.enabled=true;
                     Vector2 old=previousPositions[c.id];
-                    if((c.position-old).sqrMagnitude>.00001f)
-                        renderer.flipX=c.position.x>old.x;
+                    float moved=Vector2.Distance(old,c.position);
+                    traveled[c.id]=traveled[c.id]+moved;
+                    var habitat=world.Cell(Mathf.FloorToInt(c.position.x),
+                        Mathf.FloorToInt(c.position.y));
+                    bool swim=habitat.terrain==TerrainKind.Water;
+                    int frameIndex=moved<.002f?0:
+                        Mathf.FloorToInt(traveled[c.id]*7f)%PixelCreaturePoses.Frames;
+                    renderer.sprite=frames[(swim?PixelCreaturePoses.Frames:0)+frameIndex];
+                    renderer.enabled=true;
+                    if(moved>.002f)renderer.flipX=c.position.x>old.x;
                     previousPositions[c.id]=c.position;
                 }
                 else if(useArticulatedRig && c.development!=null)
@@ -296,16 +305,11 @@ namespace EarthRogueOrigins.Preview
             {
                 creatureRenderers.Remove(id);
                 articulatedViews.Remove(id);
-                Sprite pixelSprite;
-                if(pixelSprites.TryGetValue(id,out pixelSprite))
+                Sprite[] pixelFrames;
+                if(pixelSprites.TryGetValue(id,out pixelFrames))
                 {
                     pixelSprites.Remove(id);
-                    if(pixelSprite!=null)
-                    {
-                        Texture2D texture=pixelSprite.texture;
-                        Destroy(pixelSprite);
-                        if(texture!=null)Destroy(texture);
-                    }
+                    DestroyPixelFrames(pixelFrames);
                 }
                 string key;
                 if(organismMorphs.TryGetValue(id,out key))
@@ -341,15 +345,22 @@ namespace EarthRogueOrigins.Preview
                 "SPACE pause | 1/2/3 speed | WASD pan | Wheel zoom\nP/O heat/cool | C CO2 | R reset",label);
         }
 
+        void DestroyPixelFrames(Sprite[] frames)
+        {
+            if(frames==null)return;
+            foreach(var sprite in frames)
+            {
+                if(sprite==null)continue;
+                var texture=sprite.texture;
+                Destroy(sprite);
+                if(texture!=null)Destroy(texture);
+            }
+        }
+
         void OnDestroy()
         {
-            foreach(var sprite in pixelSprites.Values)
-                if(sprite!=null)
-                {
-                    var texture=sprite.texture;
-                    Destroy(sprite);
-                    if(texture!=null)Destroy(texture);
-                }
+            foreach(var frames in pixelSprites.Values)
+                DestroyPixelFrames(frames);
             pixelSprites.Clear();
             if(spriteCache!=null)spriteCache.Dispose();
             spriteCache=null;
