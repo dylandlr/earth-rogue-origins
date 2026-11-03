@@ -14,6 +14,7 @@ namespace EarthRogueOrigins.Editor
             const string scenePath="Assets/Scenes/EcosystemLab.unity";
             // Generate source sprites first so the saved scene contains direct sprite references.
             ProceduralArtGenerator.Generate();
+            var illustratedLibrary=IllustratedPartsGenerator.Generate();
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var camObj=new GameObject("Orthographic World Camera");
             camObj.tag="MainCamera";
@@ -24,6 +25,8 @@ namespace EarthRogueOrigins.Editor
             var controller=new GameObject("Live Ecosystem World");
             var preview=controller.AddComponent<LiveEcosystemPreview>();
             preview.worldCamera=camera;
+            preview.useArticulatedRig=true;
+            preview.creatureArt=illustratedLibrary;
             preview.forestTiles=LoadTiles("forest");
             preview.mudTiles=LoadTiles("mud");
             preview.waterTiles=LoadTiles("water");
@@ -36,7 +39,7 @@ namespace EarthRogueOrigins.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene,scenePath);
             EditorUtility.DisplayDialog("Ecosystem Lab Ready",
-                "Generated 64 PNG assets and EcosystemLab.unity. Open the scene and press Play."+
+                "Generated 64 prototype tiles and creature sprites, illustrated anatomical parts, and EcosystemLab.unity. Open the scene and press Play."+
                 "\nControls are shown at the upper-left.", "OK");
         }
 
