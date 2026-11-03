@@ -378,8 +378,10 @@ namespace EarthRogueOrigins.Preview
                 int living=0;
                 foreach(var creature in world.creatures)
                     if(creature.speciesId==taxon.speciesId)living++;
+                string branch=taxon.parentSpeciesId>=0?
+                    "  ↳ "+world.GetSpecies(taxon.parentSpeciesId).genus:"";
                 GUI.Label(new Rect(24,217+taxonRow*25,345,24),
-                    "<i>"+taxon.Binomial+"</i>  ·  "+living+" living",label);
+                    "<i>"+taxon.Binomial+"</i>  ·  "+living+" living"+branch,label);
                 taxonRow++;
                 if(taxonRow>=3)break;
             }
