@@ -1,3 +1,12 @@
+## Creature silhouette fidelity v2.4
+- [x] Use inherited trunk geometry to anchor limb roots, tail root and neck bridge
+- [x] Author 13-station asymmetric rounded, robust and slender dorsal and belly contours
+- [x] Place neck blend behind the head to avoid hiding facial features
+- [x] Add inheritance-extremes, attachment and face draw-order regression tests
+- [x] Add actual C# full-creature morphology contact sheet exporter
+- [ ] Capture the C# contact sheet in Unity 6 and review against the approved sprite sheet
+- [ ] Address visible stiffness, facial integration, foot grounding and cluster shading based on rendered evidence
+
 ## Emergent speciation v2.2
 - [x] Observe heritable divergence across physiological and anatomical gene summaries
 - [x] Require persistent x-axis spatial isolation, viable group sizes and multiple generations
