@@ -71,19 +71,19 @@ namespace EarthRogueOrigins.Ecology
             if(bestGap<settings.minimumGeographicGap)return Fail(speciesId);
 
             float leftX=0,leftY=0,rightX=0,rightY=0;
-            int leftGeneration=0,rightGeneration=0;
+            int establishedLeft=0,establishedRight=0;
             for(int i=0;i<group.Count;i++)
             {
                 var c=group[i];
                 if(i<cut)
                 {
                     leftX+=c.position.x;leftY+=c.position.y;
-                    leftGeneration=Math.Max(leftGeneration,c.generation);
+                    if(c.generation>=settings.minimumGeneration)establishedLeft++;
                 }
                 else
                 {
                     rightX+=c.position.x;rightY+=c.position.y;
-                    rightGeneration=Math.Max(rightGeneration,c.generation);
+                    if(c.generation>=settings.minimumGeneration)establishedRight++;
                 }
             }
             var leftCenter=new Vector2(leftX/cut,leftY/cut);
@@ -91,8 +91,8 @@ namespace EarthRogueOrigins.Ecology
                 rightY/(group.Count-cut));
             float centroidDistance=Vector2.Distance(leftCenter,rightCenter);
             if(centroidDistance<settings.minimumCentroidSeparation ||
-               leftGeneration<settings.minimumGeneration ||
-               rightGeneration<settings.minimumGeneration)
+               establishedLeft<settings.minimumPerPopulation ||
+               establishedRight<settings.minimumPerPopulation)
                 return Fail(speciesId);
 
             // Six diploid-locus means plus 14 regulatory gene means.
