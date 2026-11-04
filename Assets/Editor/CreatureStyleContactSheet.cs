@@ -29,7 +29,14 @@ namespace EarthRogueOrigins.Editor
         [MenuItem("Earth: Rogue Origins/Art/Pixel Creatures/Export Actual Full Creature Art Review")]
         public static void Run()
         {
-            Directory.CreateDirectory(Folder);
+            // Each export goes into a new directory so image viewers cannot
+            // lock an earlier PNG and prevent the next capture.
+            string outputFolder=Environment.GetEnvironmentVariable(
+                "ERO_CREATURE_EXPORT_DIR");
+            if(string.IsNullOrEmpty(outputFolder))
+                outputFolder=Folder+"/run-"+DateTime.UtcNow.ToString(
+                    "yyyyMMdd-HHmmss-fff");
+            Directory.CreateDirectory(outputFolder);
             int tileWidth=PixelCreaturePainter.Width;
             int tileHeight=PixelCreaturePainter.Height;
             int width=tileWidth*4,height=tileHeight*2;
@@ -86,7 +93,7 @@ namespace EarthRogueOrigins.Editor
                 var sprite=PixelCreaturePainter.TextureFromPixels(pixels);
                 try
                 {
-                    File.WriteAllBytes(Folder+"/"+archetype+".png",sprite.EncodeToPNG());
+                    File.WriteAllBytes(outputFolder+"/"+archetype+".png",sprite.EncodeToPNG());
                 }
                 finally{UnityEngine.Object.DestroyImmediate(sprite);}
             }
@@ -109,8 +116,8 @@ namespace EarthRogueOrigins.Editor
             if(problems>0)
                 throw new InvalidOperationException(problems+
                     " creature(s) failed initial full-sprite QA:\n"+
-                    failures.ToString()+"Images and metrics were exported to "+Folder);
-            Debug.Log("Actual full creature art review exported: "+Folder);
+                    failures.ToString()+"Images and metrics were exported to "+outputFolder);
+            Debug.Log("Actual full creature art review exported: "+outputFolder);
         }
     }
 }
