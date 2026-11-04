@@ -943,6 +943,37 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void TorsoLightBandDoesNotCoverMostOfTheAnimalBack()
+        {
+            foreach(CreatureArchetype archetype in new[]{
+                CreatureArchetype.MarshCrawler,CreatureArchetype.ClayRunner,
+                CreatureArchetype.SlateNewt,CreatureArchetype.PaleJuvenile,
+                CreatureArchetype.ArmoredCrawler})
+            {
+                var recipe=PixelArtDirection.Hero(archetype,2046);
+                var parts=PixelCreatureDevelopment.Layout(recipe);
+                Array.Sort(parts,(a,b)=>a.drawOrder.CompareTo(b.drawOrder));
+                int trunkIndex=-1;
+                for(int i=0;i<parts.Length;i++)
+                    if(parts[i].slot==PartSlot.Trunk){trunkIndex=i;break;}
+                Assert.GreaterOrEqual(trunkIndex,0);
+                var layer=PixelCreaturePainter.RenderLayerPixels(recipe,trunkIndex);
+                var ramp=PixelArtDirection.Ramp(recipe.palette);
+                int lit=0,opaque=0;
+                foreach(var pixel in layer)
+                {
+                    if(pixel.a==0)continue;
+                    opaque++;
+                    if(pixel.Equals(ramp.light) || pixel.Equals(ramp.highlight))
+                        lit++;
+                }
+                Assert.Greater(opaque,100);
+                Assert.Less(lit,opaque*.22f,
+                    archetype+" has an oversized pale dorsal plate");
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
