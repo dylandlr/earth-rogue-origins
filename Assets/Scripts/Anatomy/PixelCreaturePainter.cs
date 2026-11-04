@@ -300,13 +300,14 @@ namespace EarthRogueOrigins.PixelCreatures
                         }
                         int ground=shape.ankle.y-2;
                         int footX=shape.ankle.x;
-                        int toeSpread=d.style==PartStyle.Webbed?8:
-                            d.style==PartStyle.Robust?7:5;
+                        int toeSpread=d.style==PartStyle.Webbed?7:
+                            d.style==PartStyle.Robust?5:
+                            d.style==PartStyle.Slender?3:4;
                         // Three distinct digit clusters taper toward the
                         // ground and stay connected to the ankle.
-                        Ellipse(c,footX,ground+1,toeSpread-2,3,c.ink);
+                        Ellipse(c,footX,ground+1,Mathf.Max(2,toeSpread-1),2,c.ink);
                         Ellipse(c,footX,ground+2,
-                            Mathf.Max(2,toeSpread-4),2,skin);
+                            Mathf.Max(1,toeSpread-2),1,skin);
                         var toes=PixelDetailGrammar.FootToes(footX,ground,d.style);
                         foreach(var toe in toes)
                         {
