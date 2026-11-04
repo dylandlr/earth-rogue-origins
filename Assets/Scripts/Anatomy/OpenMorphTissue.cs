@@ -34,6 +34,7 @@ namespace EarthRogueOrigins.PixelCreatures
             public readonly int width,height;
             public readonly Cell[] cells;
             public int steps;
+            public int prunedCells;
             public Field(int w,int h)
             {
                 if(w<8 || h<8 || w>256 || h>256)
@@ -214,6 +215,44 @@ namespace EarthRogueOrigins.PixelCreatures
                         int rejected=births[k];
                         next[rejected].fate=Fate.Empty;
                         next[rejected].energy=0f;
+                    }
+                }
+                if(structured && existing>8)
+                {
+                    // Conservative programmed pruning: remove at most
+                    // one terminal cell per tick. Requiring exactly one
+                    // neighbor before AND after proposed births prevents
+                    // deletion of a bridge supporting another new cell.
+                    int candidate=-1;
+                    float lowest=1f;
+                    for(int y=1;y<height-1;y++)
+                    for(int x=1;x<width-1;x++)
+                    {
+                        int i=y*width+x;
+                        if(field.cells[i].fate==Fate.Empty ||
+                            next[i].fate==Fate.Empty ||
+                            organizers.activation[i]>.24f ||
+                            field.cells[i].signalB<.45f)
+                            continue;
+                        int oldNeighbors=0,newNeighbors=0;
+                        for(int k=0;k<4;k++)
+                        {
+                            int j=(y+NeighborY[k])*width+x+NeighborX[k];
+                            if(field.cells[j].fate!=Fate.Empty)oldNeighbors++;
+                            if(next[j].fate!=Fate.Empty)newNeighbors++;
+                        }
+                        if(oldNeighbors!=1 || newNeighbors!=1)continue;
+                        float value=Noise(genome.seed^0x32D5,tick,x,y);
+                        if(value<.08f && value<lowest)
+                        {
+                            candidate=i;lowest=value;
+                        }
+                    }
+                    if(candidate>=0)
+                    {
+                        next[candidate].fate=Fate.Empty;
+                        next[candidate].energy=0f;
+                        field.prunedCells++;
                     }
                 }
                 Array.Copy(next,field.cells,next.Length);
