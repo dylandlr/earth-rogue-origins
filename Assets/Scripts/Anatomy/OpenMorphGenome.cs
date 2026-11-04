@@ -35,6 +35,15 @@ namespace EarthRogueOrigins.PixelCreatures
             public float inhibitionResponse=.45f;
             // Fate response is separate from cell division and geometry.
             public float fateResponse=.5f;
+            // Signed recurrent regulatory couplings. Three expression
+            // channels: growth, fate and suppression. Each can influence
+            // another channel across developmental time.
+            public float growthToFate=.2f;
+            public float fateToGrowth=-.15f;
+            public float growthToBrake=.1f;
+            public float brakeToGrowth=-.3f;
+            public float fateToBrake=.1f;
+            public float brakeToFate=-.2f;
             public Gene Copy() { return (Gene)MemberwiseClone(); }
         }
 
@@ -88,7 +97,13 @@ namespace EarthRogueOrigins.PixelCreatures
                    !FiniteRange(g.growthResponse,0f,1f) ||
                    !FiniteRange(g.tipResponse,0f,1f) ||
                    !FiniteRange(g.inhibitionResponse,0f,1f) ||
-                   !FiniteRange(g.fateResponse,0f,1f))
+                   !FiniteRange(g.fateResponse,0f,1f) ||
+                   !FiniteRange(g.growthToFate,-1f,1f) ||
+                   !FiniteRange(g.fateToGrowth,-1f,1f) ||
+                   !FiniteRange(g.growthToBrake,-1f,1f) ||
+                   !FiniteRange(g.brakeToGrowth,-1f,1f) ||
+                   !FiniteRange(g.fateToBrake,-1f,1f) ||
+                   !FiniteRange(g.brakeToFate,-1f,1f))
                     throw new InvalidOperationException("Invalid developmental parameter.");
             }
         }
@@ -156,6 +171,18 @@ namespace EarthRogueOrigins.PixelCreatures
                     (float)(rng.NextDouble()-.5)*.40f);
                 g.fateResponse=Mathf.Clamp01(g.fateResponse+
                     (float)(rng.NextDouble()-.5)*.40f);
+                // Perturb a single coupling independently of shape and
+                // the other regulatory edges.
+                float perturb=(float)(rng.NextDouble()-.5)*.36f;
+                switch(rng.Next(6))
+                {
+                    case 0:g.growthToFate=Mathf.Clamp(g.growthToFate+perturb,-1f,1f);break;
+                    case 1:g.fateToGrowth=Mathf.Clamp(g.fateToGrowth+perturb,-1f,1f);break;
+                    case 2:g.growthToBrake=Mathf.Clamp(g.growthToBrake+perturb,-1f,1f);break;
+                    case 3:g.brakeToGrowth=Mathf.Clamp(g.brakeToGrowth+perturb,-1f,1f);break;
+                    case 4:g.fateToBrake=Mathf.Clamp(g.fateToBrake+perturb,-1f,1f);break;
+                    default:g.brakeToFate=Mathf.Clamp(g.brakeToFate+perturb,-1f,1f);break;
+                }
             }
             else if(operation==3 && result.genes.Count>1)
             {
