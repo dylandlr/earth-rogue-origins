@@ -37,6 +37,26 @@ namespace EarthRogueOrigins.PixelCreatures
             };
         }
 
+        // This independent expression channel permits genetic
+        // differentiation with unchanged geometry and stochastic births.
+        // Tissue fates are candidate functional labels, not working organs.
+        public static OpenMorphTissue.Fate Differentiate(
+            OpenMorphGenome.Gene gene,float signalA,float signalB,
+            float tip)
+        {
+            if(gene==null)throw new ArgumentNullException(nameof(gene));
+            float expression=Mathf.Clamp01(
+                gene.fateResponse*.78f+
+                Mathf.Clamp01(signalA)*.08f+
+                Mathf.Clamp01(signalB)*.08f+
+                Mathf.Clamp01(tip)*.06f);
+            if(expression<.20f)return OpenMorphTissue.Fate.Storage;
+            if(expression<.40f)return OpenMorphTissue.Fate.Structural;
+            if(expression<.60f)return OpenMorphTissue.Fate.Contractile;
+            if(expression<.80f)return OpenMorphTissue.Fate.Transport;
+            return OpenMorphTissue.Fate.Sensory;
+        }
+
         public static OpenMorphGenome.Gene[] BuildLookup(
             OpenMorphGenome genome,OpenMorphOrganizers.Field organizers)
         {
