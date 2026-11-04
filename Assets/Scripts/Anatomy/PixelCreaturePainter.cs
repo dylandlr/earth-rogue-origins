@@ -294,9 +294,12 @@ namespace EarthRogueOrigins.PixelCreatures
                             Mathf.Max(2,shape.lowerRadius*2-2));
                         if(!farSide)
                         {
-                            Line(c,shape.root.x-1,shape.root.y+1,
-                                shape.knee.x-1,shape.knee.y+2,
-                                palette.light,2);
+                            // A small skin catchlight at the upper thigh,
+                            // not a bright stripe from shoulder to knee.
+                            var thighLight=PixelLimbSilhouette.ShoulderHighlight(shape);
+                            Line(c,thighLight[0].x,thighLight[0].y,
+                                thighLight[1].x,thighLight[1].y,
+                                palette.light,1);
                             c.Put(shape.knee.x-1,shape.knee.y+1,r.baseColor);
                         }
                         int ground=shape.ankle.y-2;
