@@ -1,3 +1,13 @@
+## GRN channel attribution v1.4
+- [x] Analyze verified v1.3 opportunities: pair 3 inhibited on 2,657/2,664 eligible sites, mean division chance 11.23% to 7.23%
+- [x] Retain inhibitory phenotypes rather than tuning an individual genotype
+- [x] Add matched Full/GrowthOnly/BrakeOnly/Neutral recurrent birth-channel interventions
+- [x] Add four Unity counterfactual sheets with quantitative opportunity and growth outcomes
+- [x] Test modulation invariants, deterministic replay and tissue connectivity
+- [ ] Compile and run the Unity EditMode tests and v1.4 contact sheets
+- [ ] Determine whether inhibitory phenotype primarily arises from growth expression or braking expression
+- [ ] Start conserved nutrient and maintenance budget experiments across inhibitory and growth-promoting genotypes
+
 ## Recurrent GRN growth calibration v1.2
 - [x] Inspect true v1.1 Unity GRN and signed-edge ablation screenshots: recurrent development appears strongly suppressed
 - [x] Replace compounded recurrent growth penalty with bounded neutral-preserving modulation
