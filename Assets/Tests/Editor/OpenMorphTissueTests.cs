@@ -211,6 +211,55 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void LimitedTissueBudgetNeverExceedsCellAllowance()
+        {
+            var baseline=OpenMorphGenome.Founder(9100);
+            var branch=baseline.Copy();
+            branch.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,attachX=.6f,
+                angle=75f,length=.85f,width=.15f,
+                rigidity=.85f,pigment=.75f,repeat=2
+            });
+            foreach(var genome in new[]{baseline,branch})
+            {
+                foreach(int budget in new[]{1,25,80,180})
+                {
+                    var field=OpenMorphTissue.Grow(genome,64,48,72,budget);
+                    Assert.That(field.Occupied(),Is.InRange(1,budget));
+                    Assert.AreEqual(72,field.steps);
+                    Assert.AreEqual(1,
+                        OpenMorphTopologyMetrics.Analyze(field).components,
+                        "A resource limit cannot create disconnected tissue");
+                }
+            }
+        }
+
+        [Test]
+        public void UnlimitedModeMatchesDefaultAndBudgetedModeReplays()
+        {
+            var genome=OpenMorphGenome.Founder(95);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                angle=-85f,repeat=2,mirror=true,
+                length=.75f,width=.19f
+            });
+            var oldMode=OpenMorphTissue.Grow(genome,48,36,50);
+            var explicitUnlimited=OpenMorphTissue.Grow(
+                genome,48,36,50,int.MaxValue);
+            var limitedA=OpenMorphTissue.Grow(genome,48,36,50,120);
+            var limitedB=OpenMorphTissue.Grow(genome,48,36,50,120);
+            for(int i=0;i<oldMode.cells.Length;i++)
+            {
+                Assert.AreEqual(oldMode.cells[i].fate,
+                    explicitUnlimited.cells[i].fate);
+                Assert.AreEqual(limitedA.cells[i].fate,
+                    limitedB.cells[i].fate);
+                Assert.AreEqual(limitedA.cells[i].signalA,
+                    limitedB.cells[i].signalA);
+            }
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
@@ -218,6 +267,8 @@ namespace EarthRogueOrigins.Tests
                 OpenMorphTissue.Grow(genome,4,40,10));
             Assert.Throws<System.ArgumentOutOfRangeException>(()=>
                 OpenMorphTissue.Grow(genome,64,48,257));
+            Assert.Throws<System.ArgumentOutOfRangeException>(()=>
+                OpenMorphTissue.Grow(genome,64,48,20,0));
         }
     }
 }
