@@ -102,6 +102,8 @@ namespace EarthRogueOrigins.Editor
                 File.WriteAllText(folder+"/provenance.txt",
                     "Unity C# OpenMorphGenome -> OpenMorphTissue.Grow -> Render\n"+
                     "Diagnostic 2D tissue growth; four matched baseline/added-branch pairs.\n"+
+                    "Common random numbers keyed by seed, tick, x, y; "+
+                    "morphology metrics include clipping and cavities.\n"+
                     "NOT biological tissues, organs, viability or an evolved ecosystem.\n");
             }
             finally {UnityEngine.Object.DestroyImmediate(tex);}
