@@ -498,6 +498,76 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void SignedGeneRegulatoryCouplingsAreHeritableAndBounded()
+        {
+            var genome=OpenMorphGenome.Founder(1203);
+            for(int k=0;k<75;k++)genome=genome.Mutate(321+k*19);
+            genome.Validate();
+            var copy=genome.Copy();
+            Assert.AreEqual(genome.genes.Count,copy.genes.Count);
+            for(int i=0;i<genome.genes.Count;i++)
+            {
+                var a=genome.genes[i];var b=copy.genes[i];
+                Assert.That(a.growthToFate,Is.InRange(-1f,1f));
+                Assert.That(a.fateToGrowth,Is.InRange(-1f,1f));
+                Assert.That(a.brakeToGrowth,Is.InRange(-1f,1f));
+                Assert.That(a.growthToBrake,Is.InRange(-1f,1f));
+                Assert.That(a.fateToBrake,Is.InRange(-1f,1f));
+                Assert.That(a.brakeToFate,Is.InRange(-1f,1f));
+                Assert.AreEqual(a.growthToFate,b.growthToFate);
+                Assert.AreEqual(a.brakeToGrowth,b.brakeToGrowth);
+            }
+        }
+
+        [Test]
+        public void RecurrentRegulationDependsOnPreviousExpressionState()
+        {
+            var gene=OpenMorphGenome.Founder(7).genes[0];
+            gene.growthToFate=.9f;
+            gene.brakeToGrowth=-.9f;
+            var low=new OpenMorphGRN.State {
+                growth=.1f,fate=.3f,brake=.2f
+            };
+            var high=new OpenMorphGRN.State {
+                growth=.9f,fate=.3f,brake=.8f
+            };
+            var a=OpenMorphGRN.Step(gene,low,.6f,.3f,.7f,.25f);
+            var b=OpenMorphGRN.Step(gene,high,.6f,.3f,.7f,.25f);
+            Assert.AreNotEqual(a.growth,b.growth);
+            Assert.AreNotEqual(a.fate,b.fate);
+            foreach(float v in new[]{a.growth,a.fate,a.brake,
+                b.growth,b.fate,b.brake})
+                Assert.That(v,Is.InRange(0f,1f));
+        }
+
+        [Test]
+        public void RecurrentGenomeDevelopmentIsBoundedConnectedAndRepeatable()
+        {
+            var genome=OpenMorphGenome.Founder(9100);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,repeat=2,
+                angle=75f,length=.85f,width=.15f
+            });
+            var a=OpenMorphTissue.Grow(genome,48,36,36,400,true,true);
+            var b=OpenMorphTissue.Grow(genome,48,36,36,400,true,true);
+            Assert.That(a.Occupied(),Is.InRange(1,400));
+            Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(a).components);
+            Assert.AreEqual(1f,OpenMorphPairMetrics.Compare(a,b).jaccard,.00001f);
+            for(int i=0;i<a.cells.Length;i++)
+            {
+                Assert.AreEqual(a.cells[i].fate,b.cells[i].fate);
+                Assert.AreEqual(a.cells[i].regulatoryGrowth,
+                    b.cells[i].regulatoryGrowth);
+                Assert.AreEqual(a.cells[i].regulatoryFate,
+                    b.cells[i].regulatoryFate);
+                Assert.AreEqual(a.cells[i].regulatoryBrake,
+                    b.cells[i].regulatoryBrake);
+            }
+            Assert.Throws<System.ArgumentException>(()=>
+                OpenMorphTissue.Grow(genome,48,36,8,400,false,true));
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
