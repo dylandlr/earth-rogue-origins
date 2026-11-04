@@ -66,10 +66,10 @@ namespace EarthRogueOrigins.Editor
                     if(part==10)alpha*=.42f;
                     pixels[y*W+x]=new Color(paint.r,paint.g,paint.b,alpha);
                 }
-                var texture=new Texture2D(W,H,TextureFormat.RGBA32,false);
-                texture.SetPixels32(pixels);texture.Apply(false,false);
-                File.WriteAllBytes(output,texture.EncodeToPNG());
-                UnityEngine.Object.DestroyImmediate(texture);
+                var partTexture=new Texture2D(W,H,TextureFormat.RGBA32,false);
+                partTexture.SetPixels32(pixels);partTexture.Apply(false,false);
+                File.WriteAllBytes(output,partTexture.EncodeToPNG());
+                UnityEngine.Object.DestroyImmediate(partTexture);
             }
             AssetDatabase.Refresh();
             var libraryPath=Folder+"/CarboniferousTetrapod.asset";
