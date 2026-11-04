@@ -1,3 +1,11 @@
+## Whole-body grounded stance v2.7
+- [x] Add coherent one-pixel mid-stance body compression without ankle drift
+- [x] Align translucent ground shadow to inherited near-foot contact plane
+- [x] Add compression and shadow-height regression tests
+- [x] Produce clearly labeled standalone torso/leg geometry replay
+- [ ] Run actual Unity C# four-frame whole-creature render and Edit Mode tests
+- [ ] Improve belly-to-leg occlusion and reduce mechanical joint appearance against approved art
+
 ## Creature gait v2.6
 - [x] Preserve fixed leg roots while adding independently lifted swing feet
 - [x] Alternate foreground fore/hind support through four walk poses
