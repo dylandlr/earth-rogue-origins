@@ -452,6 +452,52 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void FateOnlyMutationChangesDifferentiationWithoutChangingGrowth()
+        {
+            var original=OpenMorphGenome.Founder(9100);
+            original.genes[0].fateResponse=.12f;
+            var altered=original.Copy();
+            altered.genes[0].fateResponse=.98f;
+            original.Validate();altered.Validate();
+            var a=OpenMorphTissue.Grow(original,48,36,48,400,true);
+            var b=OpenMorphTissue.Grow(altered,48,36,48,400,true);
+            var overlap=OpenMorphPairMetrics.Compare(a,b);
+            Assert.AreEqual(a.Occupied(),b.Occupied());
+            Assert.AreEqual(1f,overlap.jaccard,.00001f);
+            Assert.AreEqual(a.prunedCells,b.prunedCells);
+            int changedFates=0;
+            for(int i=0;i<a.cells.Length;i++)
+            {
+                if(a.cells[i].fate!=b.cells[i].fate)changedFates++;
+                Assert.AreEqual(a.cells[i].energy,b.cells[i].energy);
+                Assert.AreEqual(a.cells[i].signalA,b.cells[i].signalA);
+                Assert.AreEqual(a.cells[i].signalB,b.cells[i].signalB);
+            }
+            Assert.Greater(changedFates,0,
+                "Fate-only allele must actually change local differentiation.");
+        }
+
+        [Test]
+        public void TissueFateRegulationIsGeneticallyIndependentOfTipResponse()
+        {
+            var g=OpenMorphGenome.Founder(81).genes[0];
+            var low=g.Copy();
+            var high=g.Copy();
+            low.fateResponse=0f;
+            high.fateResponse=1f;
+            Assert.AreNotEqual(
+                OpenMorphRegulation.Differentiate(low,.65f,.25f,.4f),
+                OpenMorphRegulation.Differentiate(high,.65f,.25f,.4f));
+            var original=OpenMorphRegulation.Evaluate(
+                low,.65f,.25f,.4f,.2f,.5f,.1f);
+            var variant=OpenMorphRegulation.Evaluate(
+                high,.65f,.25f,.4f,.2f,.5f,.1f);
+            Assert.AreEqual(original.growthMultiplier,variant.growthMultiplier);
+            Assert.AreEqual(original.tipBoost,variant.tipBoost);
+            Assert.AreEqual(original.inhibition,variant.inhibition);
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
