@@ -26,23 +26,45 @@ namespace EarthRogueOrigins.Editor
             var background=new Color32(31,38,36,255);
             for(int i=0;i<board.Length;i++)board[i]=background;
             var csv=new StringBuilder(
-                "index,seed,genes,segments,steps,occupied,structural,contractile,sensory,transport,storage\n");
+                "index,seed,genes,segments,steps,occupied,structural,contractile,sensory,transport,storage,arm,bbox_width,bbox_height\n");
 
+            // Four genotype-matched counterfactual pairs. Each pair has
+            // identical genome state and seed except for one inserted
+            // developmental branch. This directly tests whether new
+            // topology changes the grown cellular phenotype.
             for(int i=0;i<8;i++)
             {
-                int seed=9100+i*71;
+                int pair=i/2;
+                int seed=9100+pair*71;
                 var genome=OpenMorphGenome.Founder(seed);
-                for(int m=0;m<5+i*3;m++)
+                for(int m=0;m<8+pair*3;m++)
                     genome=genome.Mutate(seed*53+m*1013);
+                if((i%2)==1)
+                {
+                    int maxInnovation=0;
+                    foreach(var existing in genome.genes)
+                        maxInnovation=Math.Max(maxInnovation,existing.innovation);
+                    genome.genes.Add(new OpenMorphGenome.Gene {
+                        innovation=maxInnovation+1,
+                        parentInnovation=0,attachX=.6f,attachY=0f,
+                        angle=pair%2==0?75f:-75f,
+                        length=.85f,width=.15f,
+                        repeat=2,mirror=pair>=2,rigidity=.85f,pigment=.75f
+                    });
+                }
+                genome.Validate();
                 var field=OpenMorphTissue.Grow(genome,w,h,72);
                 var pixels=OpenMorphTissue.Render(field);
                 int col=i%4,row=1-i/4;
+                int minX=w,minY=h,maxX=-1,maxY=-1;
                 for(int y=0;y<h;y++)
                 for(int x=0;x<w;x++)
                 {
                     var pixel=pixels[y*w+x];
-                    if(pixel.a!=0)
-                        board[(row*h+y)*(w*4)+col*w+x]=pixel;
+                    if(pixel.a==0)continue;
+                    board[(row*h+y)*(w*4)+col*w+x]=pixel;
+                    minX=Math.Min(minX,x);maxX=Math.Max(maxX,x);
+                    minY=Math.Min(minY,y);maxY=Math.Max(maxY,y);
                 }
                 csv.Append(i).Append(',').Append(seed).Append(',')
                     .Append(genome.genes.Count).Append(',')
@@ -53,7 +75,11 @@ namespace EarthRogueOrigins.Editor
                     .Append(field.FateCount(OpenMorphTissue.Fate.Contractile)).Append(',')
                     .Append(field.FateCount(OpenMorphTissue.Fate.Sensory)).Append(',')
                     .Append(field.FateCount(OpenMorphTissue.Fate.Transport)).Append(',')
-                    .Append(field.FateCount(OpenMorphTissue.Fate.Storage)).AppendLine();
+                    .Append(field.FateCount(OpenMorphTissue.Fate.Storage)).Append(',')
+                    .Append((i%2)==0?"baseline":"added_branch").Append(',')
+                    .Append(maxX<minX?0:maxX-minX+1).Append(',')
+                    .Append(maxY<minY?0:maxY-minY+1)
+                    .AppendLine();
             }
             var tex=new Texture2D(w*4,h*2,TextureFormat.RGBA32,false);
             tex.filterMode=FilterMode.Point;
@@ -66,7 +92,7 @@ namespace EarthRogueOrigins.Editor
                 File.WriteAllText(folder+"/tissue_metrics.csv",csv.ToString());
                 File.WriteAllText(folder+"/provenance.txt",
                     "Unity C# OpenMorphGenome -> OpenMorphTissue.Grow -> Render\n"+
-                    "Diagnostic 2D tissue growth with inherited branching-guidance field.\n"+
+                    "Diagnostic 2D tissue growth; four matched baseline/added-branch pairs.\n"+
                     "NOT biological tissues, organs, viability or an evolved ecosystem.\n");
             }
             finally {UnityEngine.Object.DestroyImmediate(tex);}
