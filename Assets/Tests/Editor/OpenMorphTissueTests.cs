@@ -133,6 +133,39 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void BranchCounterfactualTracksActualTissueNotJustGeneCount()
+        {
+            var baseline=OpenMorphGenome.Founder(9100);
+            var branched=baseline.Copy();
+            branched.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                attachX=.6f,angle=75f,length=.85f,width=.15f,
+                rigidity=.85f,pigment=.75f,repeat=2
+            });
+            var source=OpenMorphTissue.Grow(baseline,64,48,72);
+            var changed=OpenMorphTissue.Grow(branched,64,48,72);
+            Assert.AreEqual(72,source.steps);
+            Assert.AreEqual(72,changed.steps);
+            // Record two measurable phenotypes; the visual acceptance
+            // gate is performed on the actual Unity exported pair.
+            int differentCells=0,differentOccupancy=0;
+            for(int i=0;i<source.cells.Length;i++)
+            {
+                if(source.cells[i].fate!=changed.cells[i].fate)
+                    differentCells++;
+                if((source.cells[i].fate==OpenMorphTissue.Fate.Empty)!=
+                   (changed.cells[i].fate==OpenMorphTissue.Fate.Empty))
+                    differentOccupancy++;
+            }
+            Assert.Greater(source.Occupied(),0);
+            Assert.Greater(changed.Occupied(),0);
+            Assert.Greater(differentCells,0,
+                "Adding a branch did not change developed tissue fates.");
+            Assert.Greater(differentOccupancy,0,
+                "Adding a branch changed color but not occupancy geometry.");
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
