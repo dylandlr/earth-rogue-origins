@@ -37,6 +37,11 @@ namespace EarthRogueOrigins.PixelCreatures
             public readonly Cell[] cells;
             public int steps;
             public int prunedCells;
+            // Observed development history, including the initial seed.
+            public int[] occupiedByTick;
+            public int[] proposedBirthsByTick;
+            public int[] acceptedBirthsByTick;
+            public int[] prunedByTick;
             public Field(int w,int h)
             {
                 if(w<8 || h<8 || w>256 || h>256)
@@ -75,6 +80,11 @@ namespace EarthRogueOrigins.PixelCreatures
             if(steps<0 || steps>256)throw new ArgumentOutOfRangeException(nameof(steps));
             genome.Validate();
             var field=new Field(width,height);
+            field.occupiedByTick=new int[steps+1];
+            field.proposedBirthsByTick=new int[steps];
+            field.acceptedBirthsByTick=new int[steps];
+            field.prunedByTick=new int[steps];
+            field.occupiedByTick[0]=1;
             int origin=(height/2)*width+width/2;
             field.cells[origin]=new Cell {
                 fate=Fate.Structural,signalA=1f,signalB=.15f,
@@ -257,6 +267,8 @@ namespace EarthRogueOrigins.PixelCreatures
                 // Avoid row-scan bias that would consistently favor the
                 // upper-left side of a developmental field.
                 int allowance=Math.Max(0,maxCells-existing);
+                field.proposedBirthsByTick[tick]=births.Count;
+                field.acceptedBirthsByTick[tick]=Math.Min(births.Count,allowance);
                 if(births.Count>allowance)
                 {
                     births.Sort((left,right)=>
@@ -309,10 +321,12 @@ namespace EarthRogueOrigins.PixelCreatures
                         next[candidate].fate=Fate.Empty;
                         next[candidate].energy=0f;
                         field.prunedCells++;
+                        field.prunedByTick[tick]++;
                     }
                 }
                 Array.Copy(next,field.cells,next.Length);
                 field.steps++;
+                field.occupiedByTick[tick+1]=field.Occupied();
             }
             return field;
         }
