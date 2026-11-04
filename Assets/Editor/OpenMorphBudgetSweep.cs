@@ -207,6 +207,7 @@ namespace EarthRogueOrigins.Editor
             finally { UnityEngine.Object.DestroyImmediate(regTex); }
 
             OpenMorphFateAudit.Export(folder,genomes);
+            OpenMorphGRNAudit.Export(folder,genomes);
 
             File.AppendAllText(folder+"/provenance.txt",
                 "Budgets 180/400/800, same 72 ticks and seed within "+
