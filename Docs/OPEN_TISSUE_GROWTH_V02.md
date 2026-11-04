@@ -1,3 +1,36 @@
+## v0.4 — Counterfactual developmental growth (committed; Unity result pending)
+
+The second **actual Unity** tissue sheet still produced eight compact
+rounded colonies (sizes 249–366 occupied pixels), even with 72 growth
+ticks. This is evidence that longer runtime and the branch guidance
+field alone were insufficient.
+
+### Changes
+
+- Reworked birth rules to permit low-signal cell fronts to advance
+  where inherited branch guidance is strong, while retaining local
+  adjacency and energy requirements.
+- Added provisional tissue energy recovery influenced by local
+  developmental signal and nearby occupied tissue. This is a modeling
+  intervention, **not a conserved nutrient-transport system**.
+- A new audit exports four matched baseline/added-branch pairs,
+  each pair having the same seed and previous mutation history.
+- Reports genotype, expressed segments, cell-fate counts,
+  bounding-box width/height and which counterfactual arm produced
+  the result. Added a regression test that demands a branch
+  mutation change actual occupancy, not just cell coloring.
+
+### Evaluation criteria
+
+Compare columns 1/2, 3/4, 5/6 and 7/8 in the new
+`actual_tissue_growth.png`. A useful v0.4 result is a
+clear branch-induced change in shape (preferably an elongation or
+new protrusion), rather than size or palette alone. Evidence must
+come from the user's real Unity export and metrics.
+
+The model still has neither mature cellular metabolism nor
+self-sustaining organs; failing morphology remains informative.
+
 ## v0.3 — Branch-coupled growth response (committed, pending Unity verification)
 
 The first actual Unity v0.2 contact sheet shows **eight compact tissue
