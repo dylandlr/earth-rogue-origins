@@ -533,10 +533,10 @@ namespace EarthRogueOrigins.PixelCreatures
                 if(r.pattern==MarkingPattern.SideFreckles && (py<y-h*.28f || py>y+h*.18f))
                     continue;
                 int radius=r.pattern==MarkingPattern.SideFreckles?1:1+rng.Next(3);
-                for(int dy=-radius;dy<=radius;dy++)
-                for(int dx=-radius;dx<=radius;dx++)
-                    if(dx*dx+dy*dy<=radius*radius)
-                        c.MarkBody(px+dx,py+dy,palette.pattern);
+                for(int spotY=-radius;spotY<=radius;spotY++)
+                for(int spotX=-radius;spotX<=radius;spotX++)
+                    if(spotX*spotX+spotY*spotY<=radius*radius)
+                        c.MarkBody(px+spotX,py+spotY,palette.pattern);
                 if(radius>=2)c.MarkBody(px-1,py+1,palette.light);
             }
         }
