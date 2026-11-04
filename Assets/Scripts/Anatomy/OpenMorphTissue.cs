@@ -74,7 +74,8 @@ namespace EarthRogueOrigins.PixelCreatures
             // field. Growth still occurs cell by cell, never by drawing
             // the segment envelopes directly into the tissue raster.
             var guide=OpenMorphGrowthGuide.Build(genome,width,height);
-            var rng=new System.Random(genome.seed);
+            // A cell/time-indexed stochastic field keeps counterfactuals
+            // paired even when a mutation changes how many births are eligible.
             for(int tick=0;tick<steps;tick++)
             {
                 for(int y=0;y<height;y++)
@@ -151,7 +152,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         // protrusions while retaining exact replay by seed.
                         float directionalChance=Mathf.Clamp01(
                             .10f+.19f*bias+.38f*guideStrength);
-                        if(canGrow && rng.NextDouble()<directionalChance)
+                        if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                             next[i]=new Cell {
                                 fate=ChooseFate(genome,x,y,width,height,a,b),
                                 signalA=Mathf.Clamp01(a+.18f),
@@ -168,6 +169,24 @@ namespace EarthRogueOrigins.PixelCreatures
                 field.steps++;
             }
             return field;
+        }
+
+        // Counterfactual common-random-number design: the same seed,
+        // position and tick always see the same random value, regardless
+        // of prior birth eligibility or the length of the genome.
+        static float Noise(int seed,int tick,int x,int y)
+        {
+            unchecked
+            {
+                uint h=(uint)seed;
+                h^=(uint)tick*0x9E3779B9u;
+                h^=(uint)x*0x85EBCA6Bu;
+                h^=(uint)y*0xC2B2AE35u;
+                h^=h>>16;h*=0x7FEB352Du;
+                h^=h>>15;h*=0x846CA68Bu;
+                h^=h>>16;
+                return (h&0x00FFFFFFu)*(1f/16777216f);
+            }
         }
 
         static float RuleBias(OpenMorphGenome genome,int x,int y,
