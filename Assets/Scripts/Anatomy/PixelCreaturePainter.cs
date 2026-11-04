@@ -477,11 +477,28 @@ namespace EarthRogueOrigins.PixelCreatures
                     continue;
                 }
                 interior[index]=true;
-                // This ramp uses coherent material zones rather than random
-                // texture noise: underside, midtone, dorsal and lit shoulder.
-                Color32 fill=y<cy-height*.08f?ramp.shadow:baseColor;
-                if(y>cy+height*.12f && x<cx+width*.24f)fill=ramp.light;
-                if(y>cy+height*.28f && x<cx-width*.12f)fill=ramp.highlight;
+                // Pigment follows the *local* dorsal silhouette instead
+                // of a horizontal threshold that created a rectangular
+                // bright plate on the marsh crawler's back.
+                Color32 fill=y<cy-height*.12f?ramp.shadow:baseColor;
+                float u=(x-left)/(float)Mathf.Max(1,right-left);
+                int dorsal=cy+Mathf.RoundToInt(
+                    PixelSilhouetteTemplates.Sample(top,u)*height*.5f);
+                int distanceFromBack=dorsal-y;
+                if(slot==PartSlot.Trunk)
+                {
+                    // Narrow, slightly asymmetric highlight along the nape
+                    // and upper back. Preserve olive/rust body midtones.
+                    if(distanceFromBack>=2 && distanceFromBack<=4 &&
+                       x>=cx-width*.37f && x<=cx+width*.21f)
+                        fill=ramp.light;
+                    if(distanceFromBack==2 && x>=cx-width*.24f &&
+                       x<=cx-width*.08f)
+                        fill=ramp.highlight;
+                }
+                else if(distanceFromBack>=2 && distanceFromBack<=4 &&
+                        x<cx+width*.18f)
+                    fill=ramp.light;
                 canvas.Put(x,y,fill);
             }
 
