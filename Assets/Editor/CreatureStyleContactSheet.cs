@@ -39,6 +39,7 @@ namespace EarthRogueOrigins.Editor
             var report=new StringBuilder(
                 "archetype,seed,visible_pixels,dominant_fraction,components,distinct_colors,min_x,min_y,max_x,max_y,aspect_ratio\n");
             int problems=0;
+            var failures=new StringBuilder();
             foreach(var archetype in Archetypes)
             {
                 int index=Array.IndexOf(Archetypes,archetype);
@@ -56,11 +57,22 @@ namespace EarthRogueOrigins.Editor
                     .Append(',').Append(metrics.horizontalToVerticalRatio.ToString("F3",
                         System.Globalization.CultureInfo.InvariantCulture)).AppendLine();
 
-                if(metrics.nonTransparentPixels<150 ||
-                   metrics.dominantFraction<.80f ||
-                   metrics.minX<=0 || metrics.maxX>=tileWidth-1 ||
+                var reasons=new StringBuilder();
+                if(metrics.nonTransparentPixels<150)
+                    reasons.Append("near-blank sprite; ");
+                if(metrics.dominantFraction<.80f)
+                    reasons.Append("disconnected silhouette (largest component "+
+                        metrics.dominantFraction.ToString("P1",
+                            System.Globalization.CultureInfo.InvariantCulture)+"); ");
+                if(metrics.minX<=0 || metrics.maxX>=tileWidth-1 ||
                    metrics.minY<=0 || metrics.maxY>=tileHeight-1)
+                    reasons.Append("sprite touches image boundary; ");
+                if(reasons.Length>0)
+                {
                     problems++;
+                    failures.Append(archetype).Append(": ")
+                        .Append(reasons).AppendLine();
+                }
                 int column=index%4,row=1-index/4;
                 for(int y=0;y<tileHeight;y++)
                 for(int x=0;x<tileWidth;x++)
@@ -87,6 +99,7 @@ namespace EarthRogueOrigins.Editor
                 File.WriteAllBytes(Folder+"/actual_csharp_full_creatures.png",
                     texture.EncodeToPNG());
                 File.WriteAllText(Folder+"/visual_metrics.csv",report.ToString());
+                File.WriteAllText(Folder+"/qa_failures.txt",failures.ToString());
                 File.WriteAllText(Folder+"/provenance.txt",
                     "Engine: Unity C# PixelCreaturePainter.RenderPixels\n"+
                     "Seed: 2046\nPixel format: 128x96 point-filtered RGBA32\n"+
@@ -95,7 +108,8 @@ namespace EarthRogueOrigins.Editor
             finally{UnityEngine.Object.DestroyImmediate(texture);}
             if(problems>0)
                 throw new InvalidOperationException(problems+
-                    " creature(s) failed initial full-sprite QA. Review "+Folder);
+                    " creature(s) failed initial full-sprite QA:\\n"+
+                    failures.ToString()+"Images and metrics were exported to "+Folder);
             Debug.Log("Actual full creature art review exported: "+Folder);
         }
     }
