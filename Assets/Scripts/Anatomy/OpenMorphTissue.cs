@@ -25,6 +25,8 @@ namespace EarthRogueOrigins.PixelCreatures
             public float signalA,signalB;
             public float energy;
             public int lineage;
+            // Active regulatory organizer, NOT an anatomical category.
+            public int organizerInnovation;
         }
 
         public sealed class Field
@@ -139,7 +141,9 @@ namespace EarthRogueOrigins.PixelCreatures
                             energy=Mathf.Clamp01(current.energy-.018f+
                                 .028f*bias+.025f*guide.activation[i]+
                                 .015f*(parents>0?nearbyEnergy/parents:0f)),
-                            lineage=current.lineage
+                            lineage=current.lineage,
+                            organizerInnovation=structured?
+                                organizers.innovation[i]:current.organizerInnovation
                         };
                     }
                     else
@@ -181,7 +185,9 @@ namespace EarthRogueOrigins.PixelCreatures
                                 signalA=Mathf.Clamp01(a+.18f),
                                 signalB=b,energy=Mathf.Min(.85f,
                                     bestEnergy*.86f+.09f*guideStrength),
-                                lineage=lineage
+                                lineage=lineage,
+                                organizerInnovation=structured?
+                                    organizers.innovation[i]:0
                             };
                         }
                         else next[i]=new Cell {
