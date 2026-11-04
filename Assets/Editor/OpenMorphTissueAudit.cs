@@ -26,7 +26,7 @@ namespace EarthRogueOrigins.Editor
             var background=new Color32(31,38,36,255);
             for(int i=0;i<board.Length;i++)board[i]=background;
             var csv=new StringBuilder(
-                "index,seed,genes,segments,steps,occupied,structural,contractile,sensory,transport,storage,arm,bbox_width,bbox_height\n");
+                "index,seed,genes,segments,steps,occupied,structural,contractile,sensory,transport,storage,arm,bbox_width,bbox_height,perimeter,components,holes,border_cells,compactness,fill_fraction\n");
 
             // Four genotype-matched counterfactual pairs. Each pair has
             // identical genome state and seed except for one inserted
@@ -66,6 +66,7 @@ namespace EarthRogueOrigins.Editor
                     minX=Math.Min(minX,x);maxX=Math.Max(maxX,x);
                     minY=Math.Min(minY,y);maxY=Math.Max(maxY,y);
                 }
+                var topology=OpenMorphTopologyMetrics.Analyze(field);
                 csv.Append(i).Append(',').Append(seed).Append(',')
                     .Append(genome.genes.Count).Append(',')
                     .Append(OpenMorphDevelopment.Grow(genome).Length).Append(',')
@@ -78,7 +79,15 @@ namespace EarthRogueOrigins.Editor
                     .Append(field.FateCount(OpenMorphTissue.Fate.Storage)).Append(',')
                     .Append((i%2)==0?"baseline":"added_branch").Append(',')
                     .Append(maxX<minX?0:maxX-minX+1).Append(',')
-                    .Append(maxY<minY?0:maxY-minY+1)
+                    .Append(maxY<minY?0:maxY-minY+1).Append(',')
+                    .Append(topology.perimeter).Append(',')
+                    .Append(topology.components).Append(',')
+                    .Append(topology.holes).Append(',')
+                    .Append(topology.borderCells).Append(',')
+                    .Append(topology.compactness.ToString("F5",
+                        System.Globalization.CultureInfo.InvariantCulture)).Append(',')
+                    .Append(topology.fillFraction.ToString("F5",
+                        System.Globalization.CultureInfo.InvariantCulture))
                     .AppendLine();
             }
             var tex=new Texture2D(w*4,h*2,TextureFormat.RGBA32,false);
