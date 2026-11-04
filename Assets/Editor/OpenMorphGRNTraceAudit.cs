@@ -19,9 +19,9 @@ namespace EarthRogueOrigins.Editor
             if(genomes==null || genomes.Length!=8)
                 throw new ArgumentException("Expected four matched genome pairs.");
             var rows=new StringBuilder(
-                "pair,seed,mode,tick,occupied,proposed_births,accepted_births,pruned_cells\n");
+                "pair,seed,mode,tick,occupied,proposed_births,accepted_births,pruned_cells,eligible_sites,mean_static_chance,mean_final_chance,inhibited_sites,boosted_sites\n");
             var outcomes=new StringBuilder(
-                "pair,seed,static_final,recurrent_final,static_peak,recurrent_peak,static_last_birth,recurrent_last_birth,static_pruned,recurrent_pruned\n");
+                "pair,seed,static_final,recurrent_final,static_peak,recurrent_peak,static_last_birth,recurrent_last_birth,static_pruned,recurrent_pruned,static_total_eligible,recurrent_total_eligible,recurrent_inhibited_sites,recurrent_boosted_sites,static_mean_chance,recurrent_mean_static_chance,recurrent_mean_final_chance\n");
             for(int pair=0;pair<4;pair++)
             {
                 var genome=genomes[pair*2];
@@ -39,7 +39,17 @@ namespace EarthRogueOrigins.Editor
                     .Append(LastBirth(staticField)).Append(',')
                     .Append(LastBirth(recurrent)).Append(',')
                     .Append(staticField.prunedCells).Append(',')
-                    .Append(recurrent.prunedCells).AppendLine();
+                    .Append(recurrent.prunedCells).Append(',')
+                    .Append(Sum(staticField.eligibleSitesByTick)).Append(',')
+                    .Append(Sum(recurrent.eligibleSitesByTick)).Append(',')
+                    .Append(Sum(recurrent.inhibitedSitesByTick)).Append(',')
+                    .Append(Sum(recurrent.boostedSitesByTick)).Append(',')
+                    .Append(Format(MeanChance(staticField.baseChanceSumByTick,
+                        staticField.eligibleSitesByTick))).Append(',')
+                    .Append(Format(MeanChance(recurrent.baseChanceSumByTick,
+                        recurrent.eligibleSitesByTick))).Append(',')
+                    .Append(Format(MeanChance(recurrent.finalChanceSumByTick,
+                        recurrent.eligibleSitesByTick))).AppendLine();
             }
             File.WriteAllText(folder+"/grn_growth_trace.csv",rows.ToString());
             File.WriteAllText(folder+"/grn_growth_outcomes.csv",outcomes.ToString());
@@ -59,8 +69,45 @@ namespace EarthRogueOrigins.Editor
                     .Append(field.occupiedByTick[t]).Append(',')
                     .Append(t==0?0:field.proposedBirthsByTick[t-1]).Append(',')
                     .Append(t==0?0:field.acceptedBirthsByTick[t-1]).Append(',')
-                    .Append(t==0?0:field.prunedByTick[t-1]).AppendLine();
+                    .Append(t==0?0:field.prunedByTick[t-1]).Append(',')
+                    .Append(t==0?0:field.eligibleSitesByTick[t-1]).Append(',')
+                    .Append(t==0?"0":Format(
+                        MeanChanceAt(field.baseChanceSumByTick,
+                            field.eligibleSitesByTick,t-1))).Append(',')
+                    .Append(t==0?"0":Format(
+                        MeanChanceAt(field.finalChanceSumByTick,
+                            field.eligibleSitesByTick,t-1))).Append(',')
+                    .Append(t==0?0:field.inhibitedSitesByTick[t-1]).Append(',')
+                    .Append(t==0?0:field.boostedSitesByTick[t-1]).AppendLine();
             }
+        }
+
+        static int Sum(int[] values)
+        {
+            int total=0;
+            foreach(int v in values)total+=v;
+            return total;
+        }
+
+        static float MeanChance(float[] totals,int[] counts)
+        {
+            float sum=0f;int n=0;
+            for(int i=0;i<totals.Length;i++)
+            {
+                sum+=totals[i];n+=counts[i];
+            }
+            return n==0?0f:sum/n;
+        }
+
+        static float MeanChanceAt(float[] totals,int[] counts,int index)
+        {
+            return counts[index]==0?0f:totals[index]/counts[index];
+        }
+
+        static string Format(float value)
+        {
+            return value.ToString("F6",
+                System.Globalization.CultureInfo.InvariantCulture);
         }
 
         static int Peak(OpenMorphTissue.Field field)
