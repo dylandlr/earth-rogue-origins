@@ -60,7 +60,7 @@ namespace EarthRogueOrigins.PixelCreatures
         /// </summary>
         public static Field Grow(OpenMorphGenome genome,
             int width=64,int height=48,int steps=32,
-            int maxCells=int.MaxValue)
+            int maxCells=int.MaxValue,bool structured=false)
         {
             if(maxCells<1)throw new ArgumentOutOfRangeException(nameof(maxCells));
             if(genome==null)throw new ArgumentNullException(nameof(genome));
@@ -77,6 +77,8 @@ namespace EarthRogueOrigins.PixelCreatures
             // field. Growth still occurs cell by cell, never by drawing
             // the segment envelopes directly into the tissue raster.
             var guide=OpenMorphGrowthGuide.Build(genome,width,height);
+            var organizers=structured?
+                OpenMorphOrganizers.Build(genome,width,height):null;
             // A cell/time-indexed stochastic field keeps counterfactuals
             // paired even when a mutation changes how many births are eligible.
             for(int tick=0;tick<steps;tick++)
@@ -159,6 +161,18 @@ namespace EarthRogueOrigins.PixelCreatures
                         // protrusions while retaining exact replay by seed.
                         float directionalChance=Mathf.Clamp01(
                             .10f+.19f*bias+.38f*guideStrength);
+                        if(structured)
+                        {
+                            // Local organizers regulate both where growth
+                            // may start and how strongly distal tips extend.
+                            float organizer=organizers.activation[i];
+                            float distal=organizers.distal[i];
+                            float suppressor=organizers.inhibition[i];
+                            canGrow=canGrow && organizer>.16f;
+                            directionalChance=Mathf.Clamp01(
+                                directionalChance*(.18f+.82f*organizer)+
+                                .20f*distal-.25f*suppressor);
+                        }
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
                             births.Add(i);
