@@ -29,6 +29,10 @@ namespace EarthRogueOrigins.PixelCreatures
             public float length=.2f,width=.15f;
             public float bend,rigidity=.5f;
             public float pigment=.5f;
+            // Evolvable gene regulation, not named anatomical structures.
+            public float growthResponse=.6f;
+            public float tipResponse=.55f;
+            public float inhibitionResponse=.45f;
             public Gene Copy() { return (Gene)MemberwiseClone(); }
         }
 
@@ -78,7 +82,10 @@ namespace EarthRogueOrigins.PixelCreatures
                    !FiniteRange(g.width,.02f,1f) ||
                    !FiniteRange(g.bend,-1f,1f) ||
                    !FiniteRange(g.rigidity,0f,1f) ||
-                   !FiniteRange(g.pigment,0f,1f))
+                   !FiniteRange(g.pigment,0f,1f) ||
+                   !FiniteRange(g.growthResponse,0f,1f) ||
+                   !FiniteRange(g.tipResponse,0f,1f) ||
+                   !FiniteRange(g.inhibitionResponse,0f,1f))
                     throw new InvalidOperationException("Invalid developmental parameter.");
             }
         }
@@ -138,6 +145,12 @@ namespace EarthRogueOrigins.PixelCreatures
                     (float)(rng.NextDouble()-.5)*45f,-180f,180f);
                 g.pigment=Mathf.Clamp01(g.pigment+
                     (float)(rng.NextDouble()-.5)*.22f);
+                g.growthResponse=Mathf.Clamp01(g.growthResponse+
+                    (float)(rng.NextDouble()-.5)*.40f);
+                g.tipResponse=Mathf.Clamp01(g.tipResponse+
+                    (float)(rng.NextDouble()-.5)*.40f);
+                g.inhibitionResponse=Mathf.Clamp01(g.inhibitionResponse+
+                    (float)(rng.NextDouble()-.5)*.40f);
             }
             else if(operation==3 && result.genes.Count>1)
             {
