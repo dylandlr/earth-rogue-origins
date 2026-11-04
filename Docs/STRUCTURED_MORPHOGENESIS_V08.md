@@ -1,3 +1,66 @@
+## v1.2 — Calibrated recurrent regulation and growth accounting
+
+The user uploaded two **actual Unity v1.1 C# renders**:
+`actual_grn_counterfactual.png` and
+`actual_grn_edge_ablation.png`. Qualitative inspection shows
+that the recurrent arms are much smaller than their nonrecurrent
+controls and several specimens barely develop. We do not yet have
+the matching v1.1 numeric CSVs in this conversation, so specific
+cell counts, expression averages or causal edge-ablation effects
+are **not established**. The polished fish/newt/arthropod comparison
+illustrations generated in the previous conversation are concept art,
+**not** output from this Unity system.
+
+### Identified mechanism
+
+The v1.1 birth equation first computed a low organizer-limited
+division chance, then multiplied that probability by
+`(.25+1.10*GRN.growth)` and subtracted
+`.20*GRN.brake`. Because static inhibition had already been
+applied, this compounded inhibition and could suppress otherwise
+viable division fronts.
+
+### v1.2 intervention
+
+- `OpenMorphGRN.ModulateGrowth` expresses recurrent regulation as a
+  bounded change to the existing static growth probability:
+  `clamp01(baseChance + .18*(growth-.5) - .10*(brake-.5))`.
+  Neutral expression leaves base probability invariant. Strong
+  positive/negative expression can still change growth without
+  applying the previous multiplicative bottleneck.
+- The deterministic cell/tick-indexed stochastic field and fixed
+  tissue budget remain unchanged, enabling paired comparisons.
+- `OpenMorphTissue.Field` now records per-tick occupancy, proposed
+  births, accepted births and pruned cells. These must satisfy
+  `occupied[t+1] = occupied[t] + acceptedBirths[t] - pruned[t]`.
+- `OpenMorphGRNTraceAudit` adds `grn_growth_trace.csv` and
+  `grn_growth_outcomes.csv` to the real Unity export, comparing
+  the same four baseline genomes in static structured mode versus
+  calibrated recurrent mode over 72 ticks with an 800-cell cap.
+- EditMode tests assert neutral GRN modulation, bounded changes and
+  per-tick birth/pruning accounting, in addition to existing
+  connectivity and deterministic replay tests.
+
+### Verification and next step
+
+```powershell
+git pull origin main
+.\scripts\export-open-tissue.ps1 -UnityEditor "C:\Program Files\Unity\Hub\Editor\6000.6.5f1\Editor\Unity.exe"
+```
+
+Upload `actual_grn_counterfactual.png`,
+`actual_grn_edge_ablation.png`,
+`grn_growth_outcomes.csv` and `grn_edge_ablation_metrics.csv`.
+Compare morphology with the v1.1 Unity renders, looking for colony
+recovery without becoming unbounded blobs. A useful result has
+connected organisms, no major new clipping, sufficient growth, and
+recurrent expression that alters tissue patterns or behaviors.
+High cell count by itself is not proof of anatomical novelty.
+
+No v1.2 Unity compilation, test execution or rendered image has
+yet been verified. Conserved metabolism and functional tissue
+physics remain future work.
+
 ## v1.1 — Recurrent heritable gene regulation (committed; real Unity export pending)
 
 The user's v1.0 actual Unity fate-only experiment passed its strict
