@@ -1,3 +1,15 @@
+## Recurrent gene regulatory development v1.1
+- [x] Verify fate-only v1.0 Unity experiment: 4/4 paired occupancy masks identical, tissue classifications changed
+- [x] Add six signed, heritable regulatory interactions between growth, fate and brake channels
+- [x] Implement per-cell deterministic recurrent state, inherited at division
+- [x] Keep legacy and non-recurrent structured development as frozen controls
+- [x] Export static-vs-recurrent and signed-edge ablation Unity contact sheets and metrics
+- [x] Add recurrent state, bounded alleles, determinism and connectivity regression tests
+- [ ] Execute Unity compilation and EditMode tests for v1.1
+- [ ] Review real Unity GRN audit and signed-edge ablation results
+- [ ] Add spatially heterogeneous cell-to-cell network expression and mechanistic fate functions
+- [ ] Add explicit resource conservation and survival-based population evolution
+
 ## Evolvable regulatory morphology v0.9
 - [x] Review actual v0.8 organizer contact sheet and metrics: 8/8 connected, no border contact, weak pruning and persistent mass confounding
 - [x] Add heritable bounded growth/tip/inhibition regulation coefficients to each developmental gene
