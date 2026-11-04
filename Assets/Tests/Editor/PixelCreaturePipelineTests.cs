@@ -659,8 +659,10 @@ namespace EarthRogueOrigins.Tests
                 if(p.slot==PartSlot.NeckBlend)neckOrder=p.drawOrder;
                 if(p.slot==PartSlot.HipBlend)hipOrder=p.drawOrder;
             }
-            Assert.Less(neckOrder,headOrder);
-            Assert.Less(headOrder,faceOrder);
+            // The neck bridge now closes the head/torso seam after the
+            // head outline, without painting over the face or eye.
+            Assert.Less(headOrder,neckOrder);
+            Assert.Less(neckOrder,faceOrder);
             Assert.Less(faceOrder,eyeOrder);
             Assert.Less(hipOrder,eyeOrder);
         }
