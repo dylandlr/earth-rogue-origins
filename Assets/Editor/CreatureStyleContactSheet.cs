@@ -108,7 +108,7 @@ namespace EarthRogueOrigins.Editor
             finally{UnityEngine.Object.DestroyImmediate(texture);}
             if(problems>0)
                 throw new InvalidOperationException(problems+
-                    " creature(s) failed initial full-sprite QA:\\n"+
+                    " creature(s) failed initial full-sprite QA:\n"+
                     failures.ToString()+"Images and metrics were exported to "+Folder);
             Debug.Log("Actual full creature art review exported: "+Folder);
         }
