@@ -1033,6 +1033,46 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void WalkingToesStayCompactAcrossAnatomyStyles()
+        {
+            foreach(PartStyle style in new[]{
+                PartStyle.Rounded,PartStyle.Robust,
+                PartStyle.Slender,PartStyle.Webbed})
+            {
+                var toes=PixelDetailGrammar.FootToes(64,26,style);
+                Assert.AreEqual(4,toes.Length);
+                int left=128,right=0;
+                foreach(var toe in toes)
+                {
+                    left=Mathf.Min(left,toe.x);
+                    right=Mathf.Max(right,toe.x);
+                    Assert.That(toe.y,Is.InRange(24,26));
+                }
+                int maxSpread=style==PartStyle.Webbed?14:
+                    style==PartStyle.Robust?10:
+                    style==PartStyle.Slender?6:8;
+                Assert.LessOrEqual(right-left,maxSpread);
+            }
+        }
+
+        [Test]
+        public void SquatTetrapodLegRootIsBroaderThanDistalShin()
+        {
+            foreach(PartStyle style in new[]{
+                PartStyle.Rounded,PartStyle.Robust,PartStyle.Slender})
+            foreach(bool farSide in new[]{false,true})
+            {
+                var limb=PixelLimbSilhouette.Build(42,44,15,
+                    style,0,true,farSide);
+                Assert.GreaterOrEqual(limb.upperRadius,limb.lowerRadius);
+                Assert.Greater(limb.root.y,limb.knee.y);
+                Assert.Greater(limb.knee.y,limb.ankle.y);
+                var upper=PixelLimbSilhouette.UpperPolygon(limb);
+                Assert.GreaterOrEqual(upper.Length,5);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
