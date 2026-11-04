@@ -1124,6 +1124,48 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void ForegroundThighCatchlightStaysNearShoulder()
+        {
+            foreach(PartStyle style in new[]{
+                PartStyle.Slender,PartStyle.Rounded,
+                PartStyle.Robust,PartStyle.Webbed})
+            foreach(int legHeight in new[]{10,14,18,23})
+            foreach(int stride in new[]{-3,0,3})
+            {
+                var shape=PixelLimbSilhouette.Build(
+                    45,43,legHeight,style,stride,true,false);
+                var highlight=PixelLimbSilhouette.ShoulderHighlight(shape);
+                Assert.AreEqual(2,highlight.Length);
+                Assert.AreEqual(shape.root.y,highlight[0].y);
+                Assert.Greater(highlight[0].y,highlight[1].y);
+                int thighHeight=shape.root.y-shape.knee.y;
+                Assert.LessOrEqual(highlight[0].y-highlight[1].y,
+                    Mathf.Max(2,thighHeight/3));
+                Assert.GreaterOrEqual(highlight[1].y,shape.knee.y+1);
+                Assert.LessOrEqual(Mathf.Abs(highlight[1].x-shape.root.x),
+                    Mathf.Abs(shape.knee.x-shape.root.x)+1);
+            }
+        }
+
+        [Test]
+        public void CompactThighHighlightsKeepFullCreatureConnected()
+        {
+            foreach(CreatureArchetype archetype in new[]{
+                CreatureArchetype.MarshCrawler,CreatureArchetype.ClayRunner,
+                CreatureArchetype.SlateNewt,CreatureArchetype.PaleJuvenile,
+                CreatureArchetype.ArmoredCrawler})
+            foreach(int frame in new[]{0,1,2,3})
+            {
+                var r=PixelArtDirection.Hero(archetype,2046);
+                var pixels=PixelCreaturePainter.RenderPixels(r,frame,false);
+                var metrics=PixelCreatureVisualMetrics.Analyze(pixels);
+                Assert.Greater(metrics.nonTransparentPixels,150);
+                Assert.Greater(metrics.dominantFraction,.9f,
+                    archetype+" frame "+frame+" has detached anatomy");
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
