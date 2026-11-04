@@ -27,6 +27,7 @@ namespace EarthRogueOrigins.PixelCreatures
             public int lineage;
             // Active regulatory organizer, NOT an anatomical category.
             public int organizerInnovation;
+            public int age;
         }
 
         public sealed class Field
@@ -82,6 +83,8 @@ namespace EarthRogueOrigins.PixelCreatures
             var guide=OpenMorphGrowthGuide.Build(genome,width,height);
             var organizers=structured?
                 OpenMorphOrganizers.Build(genome,width,height):null;
+            var regulation=structured?
+                OpenMorphRegulation.BuildLookup(genome,organizers):null;
             // A cell/time-indexed stochastic field keeps counterfactuals
             // paired even when a mutation changes how many births are eligible.
             for(int tick=0;tick<steps;tick++)
@@ -144,7 +147,8 @@ namespace EarthRogueOrigins.PixelCreatures
                                 .015f*(parents>0?nearbyEnergy/parents:0f)),
                             lineage=current.lineage,
                             organizerInnovation=structured?
-                                organizers.innovation[i]:current.organizerInnovation
+                                organizers.innovation[i]:current.organizerInnovation,
+                            age=current.age+1
                         };
                     }
                     else
@@ -173,10 +177,15 @@ namespace EarthRogueOrigins.PixelCreatures
                             float organizer=organizers.activation[i];
                             float distal=organizers.distal[i];
                             float suppressor=organizers.inhibition[i];
+                            var response=OpenMorphRegulation.Evaluate(
+                                regulation[i],a,b,distal,suppressor,
+                                parents*.25f,0f);
                             canGrow=canGrow && organizer>.16f;
                             directionalChance=Mathf.Clamp01(
-                                directionalChance*(.18f+.82f*organizer)+
-                                .20f*distal-.25f*suppressor);
+                                directionalChance*(.18f+.82f*organizer)*
+                                response.growthMultiplier+
+                                .30f*response.tipBoost-
+                                .27f*response.inhibition);
                         }
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
@@ -188,7 +197,8 @@ namespace EarthRogueOrigins.PixelCreatures
                                     bestEnergy*.86f+.09f*guideStrength),
                                 lineage=lineage,
                                 organizerInnovation=structured?
-                                    organizers.innovation[i]:0
+                                    organizers.innovation[i]:0,
+                                age=0
                             };
                         }
                         else next[i]=new Cell {
