@@ -568,6 +568,35 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void NeutralGRNLeavesStructuredBirthProbabilityUnchanged()
+        {
+            var neutral=new OpenMorphGRN.State {
+                growth=.5f,brake=.5f,fate=.2f
+            };
+            foreach(float chance in new[]{0f,.01f,.1f,.3f,.7f,1f})
+                Assert.AreEqual(chance,
+                    OpenMorphGRN.ModulateGrowth(chance,neutral),.000001f);
+        }
+
+        [Test]
+        public void GRNModulationIsBoundedAndNotADoubleSuppression()
+        {
+            var low=new OpenMorphGRN.State {growth=0f,brake=1f};
+            var high=new OpenMorphGRN.State {growth=1f,brake=0f};
+            foreach(float chance in new[]{0f,.03f,.1f,.2f,.5f,1f})
+            {
+                var down=OpenMorphGRN.ModulateGrowth(chance,low);
+                var up=OpenMorphGRN.ModulateGrowth(chance,high);
+                Assert.That(down,Is.InRange(0f,1f));
+                Assert.That(up,Is.InRange(0f,1f));
+                Assert.LessOrEqual(down,chance);
+                Assert.GreaterOrEqual(up,chance);
+                Assert.LessOrEqual(chance-down,.14f+.00001f);
+                Assert.LessOrEqual(up-chance,.14f+.00001f);
+            }
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
