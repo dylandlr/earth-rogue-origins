@@ -974,6 +974,65 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void OrganicTetrapodTailTapersAndBendsWithoutMovingItsRoot()
+        {
+            foreach(int width in new[]{13,19,25,29})
+            foreach(int wave in new[]{-6,-3,0,3,6})
+            {
+                var rest=PixelTetrapodTail.Build(94,52,width,0);
+                var tail=PixelTetrapodTail.Build(94,52,width,wave);
+                Assert.AreEqual(12,tail.outer.Length);
+                Assert.Greater(tail.skin.Length,8);
+                // Waving happens near the tip; the first station is fixed.
+                Assert.AreEqual(rest.outer[0],tail.outer[0]);
+                Assert.AreEqual(rest.outer[tail.outer.Length-1],
+                    tail.outer[tail.outer.Length-1]);
+                Assert.AreEqual(rest.outer[5].y+wave,tail.outer[5].y);
+                Assert.Greater(tail.outer[1].y-tail.outer[10].y,
+                    tail.outer[4].y-tail.outer[7].y,
+                    "Distal tail should taper relative to its fleshy base");
+                foreach(var vertex in tail.outer)
+                {
+                    Assert.That(vertex.x,Is.InRange(0,127));
+                    Assert.That(vertex.y,Is.InRange(0,95));
+                }
+                foreach(var vertex in tail.skin)
+                {
+                    Assert.That(vertex.x,Is.InRange(0,127));
+                    Assert.That(vertex.y,Is.InRange(0,95));
+                }
+            }
+        }
+
+        [Test]
+        public void TetrapodTailRootStaysInsideInheritedRump()
+        {
+            foreach(float length in new[]{0f,.25f,.5f,.75f,1f})
+            foreach(float tailLength in new[]{0f,.5f,1f})
+            {
+                var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+                r.trunkLength=length;r.tailLength=tailLength;
+                var parts=PixelCreatureDevelopment.Layout(r);
+                PixelPartDescriptor torso=null,tail=null;
+                foreach(var p in parts)
+                {
+                    if(p.slot==PartSlot.Trunk)torso=p;
+                    if(p.slot==PartSlot.Tail)tail=p;
+                }
+                Assert.NotNull(torso);Assert.NotNull(tail);
+                int rump=torso.anchor.x+torso.extent.x/2;
+                var shape=PixelTetrapodTail.Build(tail.anchor.x,
+                    tail.anchor.y,tail.extent.x,0);
+                Assert.LessOrEqual(shape.outer[0].x,rump);
+                Assert.Greater(shape.outer[5].x,rump);
+                var pixels=PixelCreaturePainter.RenderPixels(r);
+                var metrics=PixelCreatureVisualMetrics.Analyze(pixels);
+                Assert.Less(metrics.maxX,127);
+                Assert.Greater(metrics.dominantFraction,.9f);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
