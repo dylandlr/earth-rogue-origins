@@ -1,3 +1,11 @@
+## Full-creature visual QA v2.9
+- [x] Compute connected pixels, geometry bounds, colors and aspect ratio on final rasterized sprites
+- [x] Add authentic C# 8-archetype contact sheet and individual transparent PNG export
+- [x] Add pixel-metric regression tests and a Windows Unity batch export script
+- [ ] Execute Unity 6 renderer and automated Edit Mode tests
+- [ ] Review actual all-parts-composited creatures at gameplay scale against approved concept
+- [ ] Fix ranked visual defects only after measured source-output review
+
 ## Creature joint integration v2.8
 - [x] Replace oval shoulder/hip caps with asymmetric root-following skin folds
 - [x] Use existing shadow/skin/highlight ramps to integrate limb joins
