@@ -217,10 +217,14 @@ namespace EarthRogueOrigins.PixelCreatures
 
                 case PartSlot.ShoulderBlend:
                 case PartSlot.HipBlend:
-                    // Joint cap is painted *after* the foreground limb, hiding
-                    // its polygonal origin in the torso instead of leaving a seam.
-                    Ellipse(c,x,y,Mathf.Max(3,w/2),Mathf.Max(3,h/2),palette.shadow);
-                    Ellipse(c,x-1,y+2,Mathf.Max(2,w/2-2),Mathf.Max(2,h/2-2),r.baseColor);
+                    // An asymmetric skin fold grows from the belly over the
+                    // leg root. No isolated oval patch or circular outline.
+                    var fold=PixelJointTransition.Build(
+                        x,y,w,h,d.slot==PartSlot.HipBlend);
+                    Polygon(c,fold.outer,palette.shadow);
+                    Polygon(c,fold.inner,r.baseColor);
+                    Line(c,fold.highlightStart.x,fold.highlightStart.y,
+                        fold.highlightEnd.x,fold.highlightEnd.y,palette.light,1);
                     break;
 
                 case PartSlot.Eye:
