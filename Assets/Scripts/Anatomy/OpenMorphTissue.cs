@@ -10,6 +10,8 @@ namespace EarthRogueOrigins.PixelCreatures
     /// </summary>
     public static class OpenMorphTissue
     {
+        static readonly int[] NeighborX={-1,1,0,0};
+        static readonly int[] NeighborY={0,0,-1,1};
         public enum Fate : byte
         {
             Empty=0, Structural=1, Contractile=2, Sensory=3,
@@ -80,11 +82,9 @@ namespace EarthRogueOrigins.PixelCreatures
                     int neighbors=0,parents=0;
                     float bestEnergy=-1f;
                     int lineage=0;
-                    int[] dx={-1,1,0,0};
-                    int[] dy={0,0,-1,1};
                     for(int k=0;k<4;k++)
                     {
-                        int nx=x+dx[k],ny=y+dy[k];
+                        int nx=x+NeighborX[k],ny=y+NeighborY[k];
                         if(nx<0 || ny<0 || nx>=width || ny>=height)continue;
                         var other=field.cells[ny*width+nx];
                         sumA+=other.signalA;
