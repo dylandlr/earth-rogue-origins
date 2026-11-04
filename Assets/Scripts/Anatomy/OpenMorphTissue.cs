@@ -42,6 +42,9 @@ namespace EarthRogueOrigins.PixelCreatures
             public int[] proposedBirthsByTick;
             public int[] acceptedBirthsByTick;
             public int[] prunedByTick;
+            public int[] eligibleSitesByTick;
+            public int[] inhibitedSitesByTick,boostedSitesByTick;
+            public float[] baseChanceSumByTick,finalChanceSumByTick;
             public Field(int w,int h)
             {
                 if(w<8 || h<8 || w>256 || h>256)
@@ -84,6 +87,11 @@ namespace EarthRogueOrigins.PixelCreatures
             field.proposedBirthsByTick=new int[steps];
             field.acceptedBirthsByTick=new int[steps];
             field.prunedByTick=new int[steps];
+            field.eligibleSitesByTick=new int[steps];
+            field.inhibitedSitesByTick=new int[steps];
+            field.boostedSitesByTick=new int[steps];
+            field.baseChanceSumByTick=new float[steps];
+            field.finalChanceSumByTick=new float[steps];
             field.occupiedByTick[0]=1;
             int origin=(height/2)*width+width/2;
             field.cells[origin]=new Cell {
@@ -222,6 +230,7 @@ namespace EarthRogueOrigins.PixelCreatures
                                 .30f*response.tipBoost-
                                 .27f*response.inhibition);
                         }
+                        float staticChance=directionalChance;
                         var birthExpression=recurrentRegulation?
                             OpenMorphGRN.Step(regulation[i],parentRegulation,
                                 a,b,structured?organizers.distal[i]:0f,
@@ -235,6 +244,16 @@ namespace EarthRogueOrigins.PixelCreatures
                             // probability around a neutral 0.5 state.
                             directionalChance=OpenMorphGRN.ModulateGrowth(
                                 directionalChance,birthExpression);
+                        }
+                        if(canGrow)
+                        {
+                            field.eligibleSitesByTick[tick]++;
+                            field.baseChanceSumByTick[tick]+=staticChance;
+                            field.finalChanceSumByTick[tick]+=directionalChance;
+                            if(directionalChance+0.000001f<staticChance)
+                                field.inhibitedSitesByTick[tick]++;
+                            else if(directionalChance>staticChance+0.000001f)
+                                field.boostedSitesByTick[tick]++;
                         }
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
