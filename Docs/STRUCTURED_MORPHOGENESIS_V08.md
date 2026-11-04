@@ -1,3 +1,56 @@
+## v1.3 — Growth opportunity attribution (committed; Unity audit pending)
+
+The actual v1.2 `grn_growth_outcomes.csv` and
+`grn_growth_trace.csv` show the calibrated recurrent model no longer
+collapses globally. Final static/recurrent occupied cells by pair were
+121/122, 174/173, 248/190, and 238/235. All recurrent runs still
+had successful divisions through ticks 70–72. Every proposed birth
+was accepted, and cell accounting reconciled; the 800-cell cap did not
+cause these differences.
+
+Pair 3 is an outlier: at ticks 10/20/30 its static run occupied
+15/52/123 cells against recurrent 11/26/52. At tick 72 it finished
+248 versus 190 cells (−23.4%). A blanket GRN stimulation would be
+unjustified because the other three pairs are close to static.
+
+### Diagnostics added
+
+The `OpenMorphTissue` development ledger now records for each tick:
+
+- number of locally eligible sites (after the common organizer gate),
+- mean structured/static division probability at those sites,
+- mean probability after recurrent GRN modulation,
+- number of eligible cells whose probability decreased or increased,
+- proposed and accepted divisions, pruning, and occupied cells.
+
+`OpenMorphGRNTraceAudit` includes these columns in
+`grn_growth_trace.csv` and aggregate opportunity/probability
+columns in `grn_growth_outcomes.csv`. These are read-only
+measurements; the simulation's birth decisions are unchanged.
+
+The analytical decision rule is:
+- If pair 3 has similar eligible-site counts but materially lower
+  recurrent final chance, GRN modulation directly suppresses
+  proposed divisions.
+- If pair 3 develops far fewer eligible sites while the within-arm
+  probability remains comparable, earlier morphology changed the
+  future opportunity frontier.
+- Both may occur and require additional matched-state
+  counterfactual analysis. Dynamic growth paths cannot by
+  themselves prove the causal contribution of a single regulatory
+  edge.
+
+Tests check probability bounds, opportunity accounting and that
+static mode leaves base and final probability identical.
+
+### Validation
+
+Run `scripts/export-open-tissue.ps1` again in Unity 6 and
+upload `grn_growth_outcomes.csv` and
+`grn_growth_trace.csv`. Unity execution and the added tests have
+not yet been verified. Do not infer functional physiology or
+open-ended evolution from occupancy counts alone.
+
 ## v1.2 — Calibrated recurrent regulation and growth accounting
 
 The user uploaded two **actual Unity v1.1 C# renders**:
