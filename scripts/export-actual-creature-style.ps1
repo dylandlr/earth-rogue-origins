@@ -22,14 +22,19 @@ if($otherEditors.Count -gt 0){
     throw "Unity is already running this project (PID(s): $ids). Close that Unity Editor window and retry the batch export."
 }
 $log=Join-Path $output 'unity-export.log'
-$sheet=Join-Path $output 'actual_csharp_full_creatures.png'
-$csv=Join-Path $output 'visual_metrics.csv'
-# A previous run's logfile is not evidence that this invocation compiled.
-# Remove it to make a new Editor launch provable.
-Remove-Item -LiteralPath $log,$sheet,$csv -ErrorAction SilentlyContinue
+# Give each export a unique destination to avoid mapped PNG file locks.
+$runId='run-'+(Get-Date -Format 'yyyyMMdd-HHmmss-fff')+'-'+[System.Guid]::NewGuid().ToString('N').Substring(0,6)
+$runOutput=Join-Path $output $runId
+New-Item -ItemType Directory -Force -Path $runOutput | Out-Null
+$sheet=Join-Path $runOutput 'actual_csharp_full_creatures.png'
+$csv=Join-Path $runOutput 'visual_metrics.csv'
+$env:ERO_CREATURE_EXPORT_DIR=$runOutput
+# Previous log entries are not evidence of this Unity run.
+Remove-Item -LiteralPath $log -ErrorAction SilentlyContinue
 Write-Host "Launching Unity Editor: $UnityEditor"
 Write-Host "Project: $project"
 Write-Host "Log: $log"
+Write-Host "New capture directory: $runOutput"
 # Wait for the actual Unity GUI process to finish initialization.
 $stdout=Join-Path $output 'unity-stdout.txt'
 $stderr=Join-Path $output 'unity-stderr.txt'
@@ -72,5 +77,6 @@ foreach($row in $rows){
     }
 }
 Write-Host "Actual C# full-creature sheet: $sheet"
+Write-Host "New capture directory: $runOutput"
 Write-Host "Metrics: $csv"
 Write-Host "This is a renderer asset capture, not an in-game scene screenshot."
