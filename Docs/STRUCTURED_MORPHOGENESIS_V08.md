@@ -1,3 +1,60 @@
+## v1.0 — Decoupling regulatory differentiation from proliferation
+
+The **actual v0.9 Unity** `actual_regulatory_counterfactual.png` and
+`regulatory_counterfactual_metrics.csv` contain four pairs. Altering
+growth/tip/inhibition regulatory alleles produced:
+
+| Pair | Original | Regulatory variant | Occupancy IoU |
+|---|---:|---:|---:|
+| 1 | 121 | 126 | 0.96032 |
+| 2 | 174 | 187 | 0.93048 |
+| 3 | 248 | 286 | 0.86713 |
+| 4 | 238 | 259 | 0.91892 |
+
+Every original occupied cell was included in its modified counterpart,
+so the experimental regulatory change added tissue rather than
+repatterning an existing anatomy. Neither clipping nor disconnection
+occurred. The v0.9 evidence does **not** establish structurally
+innovative organs or a reliable cell fate change.
+
+The new milestone adds an **independent inherited fateResponse
+allele**, separated from `growthResponse`, `tipResponse` and
+`inhibitionResponse`. Structured tissue development now reads a
+per-cell gene-associated fate response to local morphogens.
+A deliberately elementary five-bin fate classifier maps the response
+to candidate tissue labels (storage, structural, contractile,
+transport, sensory). This is **not a GRN, active physiology, or proof
+these cells work**. It only establishes independent genetically
+controllable differentiation before a more expressive regulatory
+network is introduced.
+
+A new real Unity audit outputs:
+- `actual_fate_only_counterfactual.png`
+- `fate_only_metrics.csv`
+
+Each pair is the same original genome, with the same topology, seed,
+timesteps, growth alleles, budget, inhibition, and organizer geometry.
+The variant changes **only fateResponse** to a strong expression
+value. Any final occupancy difference would be a bug in that
+isolation experiment; cell fate differences are expected and must
+be verified by the actual Unity output. New EditMode tests assert
+identity of the occupancy masks, cell energy and morphogen signals,
+while demanding at least one fate difference.
+
+Next true GRN priorities:
+1. Regulatory network edges with variable expression thresholds,
+   sign, and time-dependent activity, not fixed five-bin tissue fates.
+2. A causal trace showing which regulatory interactions produced a
+   differentiated cell, independent of morphology.
+3. Cell fates that affect mechanics, energy transport and sensing
+   rather than just colors.
+4. Evolution across varied selective environments using actual
+   reproductive success rather than silhouette aesthetics.
+
+**Execution status:** The code was committed and source-reviewed;
+the Unity compilation/tests and fate-only contact sheet have not
+been executed in this environment.
+
 ## v0.9 — Heritable local regulatory response (committed; Unity result pending)
 
 The actual v0.8 structured growth render and `organized_800_metrics.csv`
