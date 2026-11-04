@@ -16,6 +16,17 @@ namespace EarthRogueOrigins.PixelCreatures
             public float growth,fate,brake;
         }
 
+        // Experimental interventions on the birth decision only.
+        // The recurrent expression dynamics and differentiated fates
+        // remain identical at the same local state.
+        public enum BirthChannel
+        {
+            Full=0,
+            GrowthOnly=1,
+            BrakeOnly=2,
+            Neutral=3
+        }
+
         public static State Step(OpenMorphGenome.Gene gene,
             State previous,float signalA,float signalB,
             float tip,float crowding)
@@ -55,9 +66,23 @@ namespace EarthRogueOrigins.PixelCreatures
         /// </summary>
         public static float ModulateGrowth(float baseChance,State state)
         {
-            return Mathf.Clamp01(Mathf.Clamp01(baseChance)+
-                .18f*(Mathf.Clamp01(state.growth)-.5f)-
-                .10f*(Mathf.Clamp01(state.brake)-.5f));
+            return ModulateGrowth(baseChance,state,BirthChannel.Full);
+        }
+
+        public static float ModulateGrowth(float baseChance,State state,
+            BirthChannel channel)
+        {
+            float growth=.18f*(Mathf.Clamp01(state.growth)-.5f);
+            float brake=-.10f*(Mathf.Clamp01(state.brake)-.5f);
+            switch(channel)
+            {
+                case BirthChannel.Full:break;
+                case BirthChannel.GrowthOnly:brake=0f;break;
+                case BirthChannel.BrakeOnly:growth=0f;break;
+                case BirthChannel.Neutral:growth=0f;brake=0f;break;
+                default:throw new ArgumentOutOfRangeException(nameof(channel));
+            }
+            return Mathf.Clamp01(Mathf.Clamp01(baseChance)+growth+brake);
         }
 
         public static OpenMorphTissue.Fate Differentiate(State state)
