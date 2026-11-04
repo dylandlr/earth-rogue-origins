@@ -167,7 +167,11 @@ namespace EarthRogueOrigins.PixelCreatures
                 response+=spatial*chemistry*(1f+gene.repeat*.1f);
                 weight+=spatial*(1f+gene.repeat*.1f);
             }
-            return Mathf.Clamp01(weight>0?response/weight:0f);
+            // Preserve absolute spatial influence. Dividing only by the
+            // weights made a single-gene genome respond equally strongly at
+            // every distance, effectively erasing the growth field.
+            float local=weight>0?response/weight:0f;
+            return Mathf.Clamp01(local*Mathf.Clamp01(weight));
         }
 
         static Fate ChooseFate(OpenMorphGenome genome,int x,int y,
