@@ -200,8 +200,10 @@ namespace EarthRogueOrigins.PixelCreatures
                 P(PartSlot.FaceDetails,r.headStyle,headX,headY,headWidth,bodyDepth-3,8),
                 P(PartSlot.ForeLeg,r.limbStyle,foreX,rootY,12,limbHeight,9),
                 P(PartSlot.HindLeg,r.limbStyle,rearX,rootY,12,limbHeight,9),
-                P(PartSlot.ShoulderBlend,PartStyle.Rounded,foreX,rootY,11,8,10),
-                P(PartSlot.HipBlend,PartStyle.Rounded,rearX,rootY,11,8,10),
+                P(PartSlot.ShoulderBlend,PartStyle.Rounded,foreX,rootY,
+                    squat?13:11,squat?9:8,10),
+                P(PartSlot.HipBlend,PartStyle.Rounded,rearX,rootY,
+                    squat?13:11,squat?9:8,10),
                 P(PartSlot.Eye,PartStyle.Rounded,face.eye.x,face.eye.y,3,3,12)
             };
         }
