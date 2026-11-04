@@ -21,13 +21,13 @@ namespace EarthRogueOrigins.PixelCreatures
             int footLift=0)
         {
             int h=Mathf.Max(9,extentHeight);
-            int upper=style==PartStyle.Robust?5:
-                style==PartStyle.Slender?3:4;
+            int upper=style==PartStyle.Robust?6:
+                style==PartStyle.Slender?3:5;
             if(farSide)upper=Mathf.Max(2,upper-1);
             int lower=Mathf.Max(2,upper-1);
             int ankleX=x+distalStride+(foreleg?-2:2);
-            int kneeX=Mathf.RoundToInt(Mathf.Lerp(x,ankleX,.46f))+
-                (foreleg?2:-2);
+            int kneeX=Mathf.RoundToInt(Mathf.Lerp(x,ankleX,.56f))+
+                (foreleg?1:-1);
             int lift=Mathf.Clamp(footLift,0,3);
             int kneeY=y-Mathf.RoundToInt(h*.55f)+lift/2;
             return new Shape {
