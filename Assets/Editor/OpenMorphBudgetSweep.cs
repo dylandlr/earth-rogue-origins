@@ -82,6 +82,57 @@ namespace EarthRogueOrigins.Editor
                 finally {UnityEngine.Object.DestroyImmediate(tex);}
             }
             File.WriteAllText(folder+"/budget_sweep_metrics.csv",csv.ToString());
+
+            // Direct counterfactual of the growth mechanism itself.
+            // Keep seed, genotype, 800-cell maximum and tick count fixed.
+            // The only changed variable is developmental organization.
+            var structuredBoard=new Color32[Width*4*Height*2];
+            var organizedCsv=new StringBuilder(
+                "index,seed,arm,mode,occupied,border_cells,components,holes,perimeter,compactness,legacy_vs_organized_iou\n");
+            for(int i=0;i<structuredBoard.Length;i++)
+                structuredBoard[i]=bg;
+            for(int i=0;i<8;i++)
+            {
+                var baseline=OpenMorphTissue.Grow(
+                    genomes[i],Width,Height,72,800);
+                var structured=OpenMorphTissue.Grow(
+                    genomes[i],Width,Height,72,800,true);
+                var metrics=OpenMorphTopologyMetrics.Analyze(structured);
+                var delta=OpenMorphPairMetrics.Compare(baseline,structured);
+                var pixels=OpenMorphTissue.Render(structured);
+                int col=i%4,row=1-i/4;
+                for(int y=0;y<Height;y++)
+                for(int x=0;x<Width;x++)
+                {
+                    var pixel=pixels[y*Width+x];
+                    if(pixel.a!=0)
+                        structuredBoard[(row*Height+y)*(Width*4)+col*Width+x]=pixel;
+                }
+                organizedCsv.Append(i).Append(',').Append(genomes[i].seed).Append(',')
+                    .Append((i%2)==0?"baseline":"added_branch").Append(',')
+                    .Append("organized").Append(',')
+                    .Append(metrics.occupied).Append(',')
+                    .Append(metrics.borderCells).Append(',')
+                    .Append(metrics.components).Append(',')
+                    .Append(metrics.holes).Append(',')
+                    .Append(metrics.perimeter).Append(',')
+                    .Append(Format(metrics.compactness)).Append(',')
+                    .Append(Format(delta.jaccard)).AppendLine();
+            }
+            var organizedTexture=new Texture2D(Width*4,Height*2,
+                TextureFormat.RGBA32,false);
+            organizedTexture.filterMode=FilterMode.Point;
+            organizedTexture.SetPixels32(structuredBoard);
+            organizedTexture.Apply(false,false);
+            try
+            {
+                File.WriteAllBytes(folder+"/actual_organized_800_tissue.png",
+                    organizedTexture.EncodeToPNG());
+                File.WriteAllText(folder+"/organized_800_metrics.csv",
+                    organizedCsv.ToString());
+            }
+            finally { UnityEngine.Object.DestroyImmediate(organizedTexture); }
+
             File.AppendAllText(folder+"/provenance.txt",
                 "Budgets 180/400/800, same 72 ticks and seed within "+
                 "each pair. No scale normalization; pairwise "+
