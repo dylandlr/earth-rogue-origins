@@ -78,7 +78,28 @@ namespace EarthRogueOrigins.PixelCreatures
             recipe.Validate();
             var pixels=new Color32[Width*Height];
             if(recipe.plan==CreaturePlan.Fish)return pixels;
+            // Resolve the anatomical ground plane from the same near-side
+            // feet used by the gait renderer. A fixed Y=23 shadow floated
+            // beneath short-legged animals and clipped long-legged ones.
             int cx=62,cy=23;
+            if(recipe.plan==CreaturePlan.Tetrapod)
+            {
+                var parts=PixelCreatureDevelopment.Layout(recipe);
+                int contacts=0,contactY=0;
+                foreach(var part in parts)
+                {
+                    if((part.slot!=PartSlot.ForeLeg &&
+                        part.slot!=PartSlot.HindLeg) || part.drawOrder!=9)
+                        continue;
+                    var foot=PixelLimbSilhouette.Build(part.anchor.x,
+                        part.anchor.y,part.extent.y,part.style,0,
+                        part.slot==PartSlot.ForeLeg,false);
+                    contactY+=foot.ankle.y-3;
+                    contacts++;
+                }
+                if(contacts>0)cy=Mathf.Clamp(
+                    Mathf.RoundToInt(contactY/(float)contacts)-2,5,Height-6);
+            }
             int rx=Mathf.RoundToInt(Mathf.Lerp(25f,38f,recipe.trunkLength));
             int ry=Mathf.RoundToInt(Mathf.Lerp(3f,5f,recipe.trunkDepth));
             for(int y=-ry-2;y<=ry+2;y++)
