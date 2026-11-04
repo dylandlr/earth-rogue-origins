@@ -182,10 +182,11 @@ namespace EarthRogueOrigins.PixelCreatures
                 P(PartSlot.Trunk,r.trunkStyle,trunkX,trunkY,bodyLength,bodyDepth,2),
                 P(PartSlot.TailRootBlend,PartStyle.Rounded,rootX,51,13,11,3),
                 P(PartSlot.Markings,PartStyle.Rounded,trunkX,trunkY,bodyLength,bodyDepth,4),
-                // Neck is occluded by the head, never painted over the face.
-                P(PartSlot.NeckBlend,PartStyle.Rounded,neckX,51,13,10,5),
-                P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,6),
-                P(PartSlot.Head,r.headStyle,headX,headY,headWidth,bodyDepth-3,7),
+                P(PartSlot.Armor,PartStyle.Plated,64,37,bodyLength,bodyDepth,5),
+                P(PartSlot.Head,r.headStyle,headX,headY,headWidth,bodyDepth-3,6),
+                // A skin bridge painted over the back-of-head outline hides
+                // the black vertical seam. Facial landmarks draw afterward.
+                P(PartSlot.NeckBlend,PartStyle.Rounded,neckX,51,13,10,7),
                 P(PartSlot.FaceDetails,r.headStyle,headX,headY,headWidth,bodyDepth-3,8),
                 P(PartSlot.ForeLeg,r.limbStyle,foreX,rootY,12,limbHeight,9),
                 P(PartSlot.HindLeg,r.limbStyle,rearX,rootY,12,limbHeight,9),
