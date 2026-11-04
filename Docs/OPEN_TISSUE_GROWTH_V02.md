@@ -1,3 +1,41 @@
+## v0.6 — Equal-mass morphology counterfactual (committed, Unity result pending)
+
+The fourth real Unity tissue sheet repeats the v0.4 finding under v0.5's
+cell/tick-indexed random field: branch-added genomes occupied 1,678,
+1,355, 820 and 1,043 cells compared with corresponding baselines of
+1,070, 375, 202 and 321 cells. Several reached the image boundary.
+Mass differences dominate the outcome.
+
+The v0.6 audit therefore exports **two real Unity contact sheets** from
+the same paired genome experiment:
+
+- `actual_tissue_growth.png` retains the unrestricted 72-step result
+  and `tissue_metrics.csv` for longitudinal comparability.
+- `actual_equal_budget_tissue.png` develops each organism at most 180
+  occupied cells, using 72 steps and identical per-cell/tick randomness.
+  `equal_budget_metrics.csv` reports final count, perimeter, boundary
+  contact, connected components, cavities, compactness and bounding box.
+
+The shared cell budget is **an experimental growth cap**, not yet a
+physiologically conserved energy or nutrient budget. It prevents
+uncapped area from confounding comparisons but does not measure
+metabolic viability or functional novelty. New tissue is still grown
+by adjacent-cell divisions.
+
+When a tick proposes more cells than the remaining allowance, a
+stable per-cell/tick randomized ranking chooses which births occur.
+The ranking deliberately avoids favoring the left side of the grid
+merely because raster traversal proceeds left-to-right.
+
+Added tests check connectivity, budget adherence, deterministic
+replay, equivalence of explicit/unlimited mode, and invalid caps.
+Unit tests and actual Unity v0.6 exports remain **unexecuted** here.
+
+The next review must distinguish differences in shape **at equal
+occupied mass** and should flag test pairs that fail to reach 180
+cells, or reach the world boundary. Only then should we introduce
+conserved resource flux and true tissue death/repair.
+
 ## v0.5 — Counterfactual controls and quantitative anatomy (committed)
 
 The third **actual Unity** sheet establishes morphological sensitivity: for
