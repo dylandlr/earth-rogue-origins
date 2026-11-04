@@ -91,6 +91,48 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void BranchGenesChangeTheMorphogenFieldAwayFromOrigin()
+        {
+            var founder=OpenMorphGenome.Founder(77);
+            var branched=founder.Copy();
+            branched.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                angle=85f,attachX=.7f,length=.85f,width=.20f,
+                repeat=2,mirror=true,rigidity=.9f
+            });
+            var plain=OpenMorphGrowthGuide.Build(founder,64,48);
+            var extended=OpenMorphGrowthGuide.Build(branched,64,48);
+            int changed=0;
+            float maxChange=0f;
+            for(int i=0;i<plain.activation.Length;i++)
+            {
+                float difference=extended.activation[i]-plain.activation[i];
+                if(difference>.05f)changed++;
+                maxChange=Mathf.Max(maxChange,difference);
+                Assert.That(extended.activation[i],Is.InRange(0f,1f));
+            }
+            Assert.Greater(changed,20,
+                "Added branches must change growth guidance beyond the original body.");
+            Assert.Greater(maxChange,.1f);
+        }
+
+        [Test]
+        public void GrowthGuideIsDeterministicAndDependsOnStructure()
+        {
+            var genome=OpenMorphGenome.Founder(19);
+            for(int i=0;i<12;i++)genome=genome.Mutate(900+i*311);
+            var a=OpenMorphGrowthGuide.Build(genome,48,36);
+            var b=OpenMorphGrowthGuide.Build(genome,48,36);
+            Assert.AreEqual(a.activation.Length,b.activation.Length);
+            for(int i=0;i<a.activation.Length;i++)
+            {
+                Assert.AreEqual(a.activation[i],b.activation[i]);
+                Assert.AreEqual(a.innovation[i],b.innovation[i]);
+            }
+            Assert.Greater(a.At(24,18),0f);
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
