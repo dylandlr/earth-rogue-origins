@@ -1166,6 +1166,56 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void ForeAndHindLimbsLeanInOppositeAnatomicalDirections()
+        {
+            foreach(PartStyle style in new[]{
+                PartStyle.Rounded,PartStyle.Robust,
+                PartStyle.Slender,PartStyle.Webbed})
+            foreach(int height in new[]{10,15,19,23})
+            foreach(int stride in new[]{-3,0,3})
+            {
+                var front=PixelLimbSilhouette.Build(
+                    45,44,height,style,stride,true,false);
+                var rear=PixelLimbSilhouette.Build(
+                    75,44,height,style,stride,false,false);
+                Assert.Less(front.knee.x,front.root.x);
+                Assert.Greater(rear.knee.x,rear.root.x);
+                Assert.That(front.ankle.x-front.root.x,Is.InRange(-9,9));
+                Assert.That(rear.ankle.x-rear.root.x,Is.InRange(-9,9));
+                Assert.Greater(front.root.y,front.knee.y);
+                Assert.Greater(front.knee.y,front.ankle.y);
+                Assert.Greater(rear.root.y,rear.knee.y);
+                Assert.Greater(rear.knee.y,rear.ankle.y);
+                Assert.AreEqual(8,
+                    PixelLimbSilhouette.UpperPolygon(front).Length);
+                Assert.AreEqual(8,
+                    PixelLimbSilhouette.LowerPolygon(rear).Length);
+            }
+        }
+
+        [Test]
+        public void CurvedLimbsPreserveCreatureConnectivityAcrossGait()
+        {
+            foreach(CreatureArchetype archetype in new[]{
+                CreatureArchetype.MarshCrawler,
+                CreatureArchetype.ClayRunner,
+                CreatureArchetype.SlateNewt,
+                CreatureArchetype.PaleJuvenile,
+                CreatureArchetype.ArmoredCrawler})
+            foreach(int frame in new[]{0,1,2,3})
+            {
+                var recipe=PixelArtDirection.Hero(archetype,2046);
+                var pixels=PixelCreaturePainter.RenderPixels(recipe,frame,false);
+                var metrics=PixelCreatureVisualMetrics.Analyze(pixels);
+                Assert.Greater(metrics.nonTransparentPixels,150);
+                Assert.Greater(metrics.dominantFraction,.90f,
+                    archetype+" gait frame "+frame+" detached the limbs");
+                Assert.Greater(metrics.minX,0);
+                Assert.Less(metrics.maxX,127);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
