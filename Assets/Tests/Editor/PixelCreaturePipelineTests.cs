@@ -741,6 +741,48 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void WalkAlwaysHasPlantedSupportAndAlternatingSwingFeet()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,661);
+            int previousContactY=int.MinValue;
+            for(int phase=0;phase<PixelCreaturePoses.Frames;phase++)
+            {
+                var parts=PixelCreaturePoses.Layout(recipe,phase,false);
+                int planted=0,swings=0;
+                foreach(var p in parts)
+                {
+                    if(p.slot!=PartSlot.ForeLeg&&p.slot!=PartSlot.HindLeg)continue;
+                    if(p.footLift==0)planted++;
+                    if(p.footLift>0)swings++;
+                    var shape=PixelLimbSilhouette.Build(p.anchor.x,p.anchor.y,
+                        p.extent.y,p.style,p.mirrorGroup,
+                        p.slot==PartSlot.ForeLeg,p.drawOrder<2,p.footLift);
+                    if(p.footLift==0)
+                    {
+                        if(previousContactY==int.MinValue)previousContactY=shape.ankle.y;
+                        Assert.AreEqual(previousContactY,shape.ankle.y,
+                            "Planted foot contact height drifted at phase "+phase);
+                    }
+                }
+                Assert.GreaterOrEqual(planted,1,"No support foot at phase "+phase);
+                if(phase==1 || phase==3)Assert.GreaterOrEqual(swings,1);
+            }
+        }
+
+        [Test]
+        public void SwingFootLiftsWithoutDisplacingTheShoulder()
+        {
+            var still=PixelLimbSilhouette.Build(
+                44,43,18,PartStyle.Robust,3,true,false,0);
+            var raised=PixelLimbSilhouette.Build(
+                44,43,18,PartStyle.Robust,3,true,false,2);
+            Assert.AreEqual(still.root,raised.root);
+            Assert.AreEqual(still.ankle.x,raised.ankle.x);
+            Assert.AreEqual(still.ankle.y+2,raised.ankle.y);
+            Assert.Less(raised.ankle.y,raised.root.y);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
