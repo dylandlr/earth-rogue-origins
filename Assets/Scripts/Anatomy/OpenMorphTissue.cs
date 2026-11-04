@@ -74,7 +74,9 @@ namespace EarthRogueOrigins.PixelCreatures
         public static Field Grow(OpenMorphGenome genome,
             int width=64,int height=48,int steps=32,
             int maxCells=int.MaxValue,bool structured=false,
-            bool recurrentRegulation=false)
+            bool recurrentRegulation=false,
+            OpenMorphGRN.BirthChannel birthChannel=
+                OpenMorphGRN.BirthChannel.Full)
         {
             if(maxCells<1)throw new ArgumentOutOfRangeException(nameof(maxCells));
             if(recurrentRegulation && !structured)
@@ -243,7 +245,7 @@ namespace EarthRogueOrigins.PixelCreatures
                             // Recurrent expression now modulates the same
                             // probability around a neutral 0.5 state.
                             directionalChance=OpenMorphGRN.ModulateGrowth(
-                                directionalChance,birthExpression);
+                                directionalChance,birthExpression,birthChannel);
                         }
                         if(canGrow)
                         {
