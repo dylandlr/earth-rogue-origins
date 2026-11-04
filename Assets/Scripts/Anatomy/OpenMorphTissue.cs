@@ -28,6 +28,7 @@ namespace EarthRogueOrigins.PixelCreatures
             // Active regulatory organizer, NOT an anatomical category.
             public int organizerInnovation;
             public int age;
+            public float regulatoryGrowth,regulatoryFate,regulatoryBrake;
         }
 
         public sealed class Field
@@ -64,9 +65,12 @@ namespace EarthRogueOrigins.PixelCreatures
         /// </summary>
         public static Field Grow(OpenMorphGenome genome,
             int width=64,int height=48,int steps=32,
-            int maxCells=int.MaxValue,bool structured=false)
+            int maxCells=int.MaxValue,bool structured=false,
+            bool recurrentRegulation=false)
         {
             if(maxCells<1)throw new ArgumentOutOfRangeException(nameof(maxCells));
+            if(recurrentRegulation && !structured)
+                throw new ArgumentException("Recurrent regulation requires structured growth.");
             if(genome==null)throw new ArgumentNullException(nameof(genome));
             if(steps<0 || steps>256)throw new ArgumentOutOfRangeException(nameof(steps));
             genome.Validate();
@@ -103,6 +107,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     float bestEnergy=-1f;
                     float nearbyEnergy=0f;
                     int lineage=0;
+                    OpenMorphGRN.State parentRegulation=new OpenMorphGRN.State();
                     for(int k=0;k<4;k++)
                     {
                         int nx=x+NeighborX[k],ny=y+NeighborY[k];
@@ -119,6 +124,11 @@ namespace EarthRogueOrigins.PixelCreatures
                             {
                                 bestEnergy=other.energy;
                                 lineage=other.lineage;
+                                parentRegulation=new OpenMorphGRN.State {
+                                    growth=other.regulatoryGrowth,
+                                    fate=other.regulatoryFate,
+                                    brake=other.regulatoryBrake
+                                };
                             }
                         }
                     }
@@ -135,8 +145,17 @@ namespace EarthRogueOrigins.PixelCreatures
                             guide.activation[i]*.90f);
                         a=Mathf.Clamp01(a+.12f+.10f*bias);
                         b=Mathf.Clamp01(b+.035f+.07f*(1f-bias));
+                        var expression=recurrentRegulation?
+                            OpenMorphGRN.Step(regulation[i],
+                                new OpenMorphGRN.State {
+                                    growth=current.regulatoryGrowth,
+                                    fate=current.regulatoryFate,
+                                    brake=current.regulatoryBrake
+                                },a,b,organizers.distal[i],parents*.25f):
+                            new OpenMorphGRN.State();
                         next[i]=new Cell {
-                            fate=structured?
+                            fate=recurrentRegulation?
+                                OpenMorphGRN.Differentiate(expression):structured?
                                 OpenMorphRegulation.Differentiate(
                                     regulation[i],a,b,organizers.distal[i]):
                                 ChooseFate(genome,x,y,width,height,a,b),
@@ -151,7 +170,10 @@ namespace EarthRogueOrigins.PixelCreatures
                             lineage=current.lineage,
                             organizerInnovation=structured?
                                 organizers.innovation[i]:current.organizerInnovation,
-                            age=current.age+1
+                            age=current.age+1,
+                            regulatoryGrowth=expression.growth,
+                            regulatoryFate=expression.fate,
+                            regulatoryBrake=expression.brake
                         };
                     }
                     else
@@ -190,11 +212,20 @@ namespace EarthRogueOrigins.PixelCreatures
                                 .30f*response.tipBoost-
                                 .27f*response.inhibition);
                         }
+                        var birthExpression=recurrentRegulation?
+                            OpenMorphGRN.Step(regulation[i],parentRegulation,
+                                a,b,structured?organizers.distal[i]:0f,
+                                parents*.25f):new OpenMorphGRN.State();
+                        if(recurrentRegulation)
+                            directionalChance=Mathf.Clamp01(
+                                directionalChance*(.25f+1.10f*birthExpression.growth)-
+                                .20f*birthExpression.brake);
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
                             births.Add(i);
                             next[i]=new Cell {
-                                fate=structured?
+                                fate=recurrentRegulation?
+                                    OpenMorphGRN.Differentiate(birthExpression):structured?
                                 OpenMorphRegulation.Differentiate(
                                     regulation[i],a,b,organizers.distal[i]):
                                 ChooseFate(genome,x,y,width,height,a,b),
@@ -204,7 +235,10 @@ namespace EarthRogueOrigins.PixelCreatures
                                 lineage=lineage,
                                 organizerInnovation=structured?
                                     organizers.innovation[i]:0,
-                                age=0
+                                age=0,
+                                regulatoryGrowth=birthExpression.growth,
+                                regulatoryFate=birthExpression.fate,
+                                regulatoryBrake=birthExpression.brake
                             };
                         }
                         else next[i]=new Cell {
