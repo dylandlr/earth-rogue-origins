@@ -85,6 +85,7 @@ namespace EarthRogueOrigins.PixelCreatures
                     float sumA=0f,sumB=0f;
                     int neighbors=0,parents=0;
                     float bestEnergy=-1f;
+                    float nearbyEnergy=0f;
                     int lineage=0;
                     for(int k=0;k<4;k++)
                     {
@@ -97,6 +98,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         if(other.fate!=Fate.Empty)
                         {
                             parents++;
+                            nearbyEnergy+=other.energy;
                             if(other.energy>bestEnergy)
                             {
                                 bestEnergy=other.energy;
@@ -120,7 +122,13 @@ namespace EarthRogueOrigins.PixelCreatures
                         next[i]=new Cell {
                             fate=ChooseFate(genome,x,y,width,height,a,b),
                             signalA=a,signalB=b,
-                            energy=Mathf.Clamp01(current.energy-.012f+.022f*bias),
+                            // A provisional colony-wide resource supply:
+                            // roots and connected active tissue recover energy.
+                            // This is deliberately NOT a conserved metabolism
+                            // model; that is a separate simulation milestone.
+                            energy=Mathf.Clamp01(current.energy-.018f+
+                                .028f*bias+.025f*guide.activation[i]+
+                                .015f*(parents>0?nearbyEnergy/parents:0f)),
                             lineage=current.lineage
                         };
                     }
@@ -131,15 +139,24 @@ namespace EarthRogueOrigins.PixelCreatures
                         float bias=Mathf.Max(
                             RuleBias(genome,x,y,width,height,a,b)*.62f,
                             guide.activation[i]*.90f);
-                        bool canGrow=parents>0 && bestEnergy>.12f &&
-                            bias>.19f && a>.11f;
+                        // Growing from a single nutrient-limited seed
+                        // used to halt at an ~10-cell radius. Let responsive
+                        // branch-front cells advance at low morphogen levels;
+                        // only connected, energy-bearing tissue can divide.
+                        float guideStrength=guide.activation[i];
+                        bool canGrow=parents>0 && bestEnergy>.08f &&
+                            ((guideStrength>.24f && a>.035f) ||
+                             (bias>.19f && a>.11f));
                         // Deterministic seeded stochasticity permits distinct
                         // protrusions while retaining exact replay by seed.
-                        if(canGrow && rng.NextDouble()<.23+.22*bias)
+                        float directionalChance=Mathf.Clamp01(
+                            .10f+.19f*bias+.38f*guideStrength);
+                        if(canGrow && rng.NextDouble()<directionalChance)
                             next[i]=new Cell {
                                 fate=ChooseFate(genome,x,y,width,height,a,b),
                                 signalA=Mathf.Clamp01(a+.18f),
-                                signalB=b,energy=Mathf.Min(.8f,bestEnergy*.84f),
+                                signalB=b,energy=Mathf.Min(.85f,
+                                    bestEnergy*.86f+.09f*guideStrength),
                                 lineage=lineage
                             };
                         else next[i]=new Cell {
