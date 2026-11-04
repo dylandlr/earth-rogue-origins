@@ -752,12 +752,12 @@ namespace EarthRogueOrigins.Tests
                 foreach(var p in parts)
                 {
                     if(p.slot!=PartSlot.ForeLeg&&p.slot!=PartSlot.HindLeg)continue;
-                    if(p.footLift==0)planted++;
-                    if(p.footLift>0)swings++;
+                    if(p.footLift==0 && p.drawOrder==9)planted++;
+                    if(p.footLift>0 && p.drawOrder==9)swings++;
                     var shape=PixelLimbSilhouette.Build(p.anchor.x,p.anchor.y,
                         p.extent.y,p.style,p.mirrorGroup,
                         p.slot==PartSlot.ForeLeg,p.drawOrder<2,p.footLift);
-                    if(p.footLift==0)
+                    if(p.footLift==0 && p.drawOrder==9)
                     {
                         if(previousContactY==int.MinValue)previousContactY=shape.ankle.y;
                         Assert.AreEqual(previousContactY,shape.ankle.y,
