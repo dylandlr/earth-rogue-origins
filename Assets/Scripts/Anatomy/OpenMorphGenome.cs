@@ -98,7 +98,7 @@ namespace EarthRogueOrigins.PixelCreatures
             var rng=new System.Random(randomSeed);
             var result=Copy();
             result.seed=randomSeed;
-            int operation=rng.Next(4);
+            int operation=rng.Next(5);
             if(operation==0 && result.genes.Count<MaxGenes)
             {
                 var parent=result.genes[rng.Next(result.genes.Count)];
@@ -138,6 +138,17 @@ namespace EarthRogueOrigins.PixelCreatures
                     (float)(rng.NextDouble()-.5)*45f,-180f,180f);
                 g.pigment=Mathf.Clamp01(g.pigment+
                     (float)(rng.NextDouble()-.5)*.22f);
+            }
+            else if(operation==3 && result.genes.Count>1)
+            {
+                // Structural reconnection only chooses earlier genes, so
+                // mutations cannot introduce a cyclic growth graph.
+                int childIndex=rng.Next(1,result.genes.Count);
+                int parentIndex=rng.Next(childIndex);
+                var child=result.genes[childIndex];
+                child.parentInnovation=result.genes[parentIndex].innovation;
+                child.attachX=(float)(rng.NextDouble()*1.8-.9);
+                child.attachY=(float)(rng.NextDouble()*1.8-.9);
             }
             else
             {
