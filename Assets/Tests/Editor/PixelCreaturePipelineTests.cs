@@ -897,6 +897,50 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void FishFinsFollowTailAndDorsalSurfaceWithoutClipping()
+        {
+            foreach(float tailLength in new[]{0f,.25f,.5f,.75f,1f})
+            foreach(float finSize in new[]{0f,.5f,1f})
+            foreach(float trunkDepth in new[]{0f,.5f,1f})
+            {
+                var r=PixelArtDirection.Hero(CreatureArchetype.PaddleFish,2046);
+                r.tailLength=tailLength;
+                r.finSize=finSize;
+                r.trunkDepth=trunkDepth;
+                var parts=PixelCreatureDevelopment.Layout(r);
+                PixelPartDescriptor tail=null,caudal=null,dorsal=null,trunk=null;
+                foreach(var p in parts)
+                {
+                    if(p.slot==PartSlot.Tail)tail=p;
+                    if(p.slot==PartSlot.Trunk)trunk=p;
+                    if(p.slot==PartSlot.Fin && p.drawOrder==1)caudal=p;
+                    if(p.slot==PartSlot.Fin && p.drawOrder==3)dorsal=p;
+                }
+                Assert.NotNull(tail);Assert.NotNull(caudal);
+                Assert.NotNull(trunk);Assert.NotNull(dorsal);
+                int tailEnd=tail.anchor.x+tail.extent.x/2;
+                int caudalStart=caudal.anchor.x-caudal.extent.x/2;
+                int caudalEnd=caudal.anchor.x+caudal.extent.x/2;
+                Assert.LessOrEqual(caudalStart,tailEnd);
+                Assert.Less(caudalEnd,127,
+                    "Caudal fin clipped by right edge");
+                Assert.That(dorsal.anchor.x,Is.InRange(
+                    trunk.anchor.x-trunk.extent.x/2,
+                    trunk.anchor.x+trunk.extent.x/2));
+                Assert.Greater(dorsal.anchor.y,trunk.anchor.y);
+                // Dorsal fin must overlap the torso's upper edge,
+                // rather than floating below the belly as before.
+                Assert.GreaterOrEqual(
+                    dorsal.anchor.y-dorsal.extent.y/2,
+                    trunk.anchor.y);
+                var pixels=PixelCreaturePainter.RenderPixels(r);
+                var metrics=PixelCreatureVisualMetrics.Analyze(pixels);
+                Assert.Less(metrics.maxX,127);
+                Assert.Greater(metrics.nonTransparentPixels,150);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
