@@ -1273,6 +1273,76 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void TetrapodMassExpressionSeparatesAmphibianFromRunner()
+        {
+            var robust=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+            var slender=robust.Copy();
+            slender.trunkStyle=PartStyle.Slender;
+            foreach(float depth in new[]{0f,.5f,1f})
+            foreach(float leg in new[]{0f,.5f,1f})
+            {
+                robust.trunkDepth=slender.trunkDepth=depth;
+                robust.legLength=slender.legLength=leg;
+                int nominalDepth=Mathf.RoundToInt(Mathf.Lerp(15,27,depth));
+                int nominalHead=Mathf.RoundToInt(Mathf.Lerp(16,24,robust.headSize));
+                var heavy=PixelTetrapodMass.Resolve(robust,nominalDepth,nominalHead);
+                var lean=PixelTetrapodMass.Resolve(slender,nominalDepth,nominalHead);
+                Assert.Greater(heavy.squat,lean.squat);
+                Assert.Greater(heavy.bodyDepth,lean.bodyDepth);
+                Assert.Greater(heavy.headX,lean.headX);
+                Assert.Greater(heavy.headWidth,lean.headWidth);
+                Assert.Less(heavy.legHeight,lean.legHeight);
+                Assert.Less(heavy.foreStation,lean.foreStation);
+                Assert.Less(heavy.rearStation,lean.rearStation);
+                Assert.Less(heavy.rootDepthRatio,lean.rootDepthRatio);
+                Assert.Greater(heavy.jointWidth,lean.jointWidth);
+                Assert.Greater(heavy.jointHeight,lean.jointHeight);
+            }
+        }
+
+        [Test]
+        public void TetrapodMassFamilyKeepsHeadLegAndJointAttachmentsCoherent()
+        {
+            foreach(CreatureArchetype archetype in new[]{
+                CreatureArchetype.MarshCrawler,CreatureArchetype.ClayRunner,
+                CreatureArchetype.SlateNewt,CreatureArchetype.PaleJuvenile,
+                CreatureArchetype.ArmoredCrawler})
+            foreach(float depth in new[]{0f,.5f,1f})
+            {
+                var recipe=PixelArtDirection.Hero(archetype,2046);
+                recipe.trunkDepth=depth;
+                var parts=PixelCreatureDevelopment.Layout(recipe);
+                PixelPartDescriptor trunk=null,head=null,neck=null,
+                    fore=null,hind=null,shoulder=null,hip=null;
+                foreach(var part in parts)
+                {
+                    if(part.slot==PartSlot.Trunk)trunk=part;
+                    if(part.slot==PartSlot.Head)head=part;
+                    if(part.slot==PartSlot.NeckBlend)neck=part;
+                    if(part.slot==PartSlot.ForeLeg&&part.drawOrder==9)fore=part;
+                    if(part.slot==PartSlot.HindLeg&&part.drawOrder==9)hind=part;
+                    if(part.slot==PartSlot.ShoulderBlend)shoulder=part;
+                    if(part.slot==PartSlot.HipBlend)hip=part;
+                }
+                Assert.NotNull(trunk);Assert.NotNull(head);
+                Assert.NotNull(neck);Assert.NotNull(fore);
+                Assert.NotNull(hind);Assert.NotNull(shoulder);Assert.NotNull(hip);
+                Assert.AreEqual(fore.anchor,shoulder.anchor);
+                Assert.AreEqual(hind.anchor,hip.anchor);
+                Assert.Less(fore.anchor.x,hind.anchor.x);
+                Assert.Less(head.anchor.x,trunk.anchor.x);
+                int headRight=head.anchor.x+head.extent.x/2;
+                Assert.LessOrEqual(neck.anchor.x-neck.extent.x/2,headRight+1);
+                var metrics=PixelCreatureVisualMetrics.Analyze(
+                    PixelCreaturePainter.RenderPixels(recipe));
+                Assert.Greater(metrics.nonTransparentPixels,150);
+                Assert.Greater(metrics.dominantFraction,.8f);
+                Assert.Greater(metrics.minX,0);
+                Assert.Less(metrics.maxX,127);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
