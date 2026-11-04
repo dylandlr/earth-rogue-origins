@@ -233,7 +233,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         bool farSide=d.drawOrder<2;
                         bool foreleg=d.slot==PartSlot.ForeLeg;
                         var shape=PixelLimbSilhouette.Build(
-                            x,y,h,d.style,d.mirrorGroup,foreleg,farSide);
+                            x,y,h,d.style,d.mirrorGroup,foreleg,farSide,d.footLift);
                         // The far leg is darker and narrower. Near legs use a
                         // shaded shoulder and an independently bent shin.
                         Color32 skin=farSide?palette.shadow:r.baseColor;
