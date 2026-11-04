@@ -314,6 +314,50 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void AxialAndTipOrganizerFieldsAreBoundedAndDeterministic()
+        {
+            var genome=OpenMorphGenome.Founder(601);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,length=.9f,width=.12f,
+                angle=65f,repeat=2,mirror=true
+            });
+            var a=OpenMorphOrganizers.Build(genome,64,48);
+            var b=OpenMorphOrganizers.Build(genome,64,48);
+            Assert.Less(a.axial[24*64],a.axial[24*64+63]);
+            int tipCells=0,activeCells=0;
+            for(int i=0;i<a.activation.Length;i++)
+            {
+                Assert.That(a.activation[i],Is.InRange(0f,1f));
+                Assert.That(a.distal[i],Is.InRange(0f,1f));
+                Assert.That(a.inhibition[i],Is.InRange(0f,1f));
+                Assert.AreEqual(a.activation[i],b.activation[i]);
+                Assert.AreEqual(a.distal[i],b.distal[i]);
+                Assert.AreEqual(a.innovation[i],b.innovation[i]);
+                if(a.distal[i]>.15f)tipCells++;
+                if(a.activation[i]>.15f)activeCells++;
+            }
+            Assert.Greater(tipCells,0);
+            Assert.Greater(activeCells,tipCells);
+        }
+
+        [Test]
+        public void StructuredGrowthMaintainsBudgetConnectivityAndReplay()
+        {
+            var genome=OpenMorphGenome.Founder(9100);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,attachX=.6f,
+                angle=75f,length=.85f,width=.15f,
+                rigidity=.85f,repeat=2
+            });
+            var first=OpenMorphTissue.Grow(genome,64,48,72,800,true);
+            var again=OpenMorphTissue.Grow(genome,64,48,72,800,true);
+            Assert.That(first.Occupied(),Is.InRange(1,800));
+            Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(first).components);
+            Assert.AreEqual(1f,
+                OpenMorphPairMetrics.Compare(first,again).jaccard,.00001f);
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
