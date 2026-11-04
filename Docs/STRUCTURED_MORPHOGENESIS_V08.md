@@ -1,3 +1,69 @@
+## v1.1 — Recurrent heritable gene regulation (committed; real Unity export pending)
+
+The user's v1.0 actual Unity fate-only experiment passed its strict
+geometry-isolation gate for all four pairs:
+
+| Pair | Occupied in each arm | Occupancy IoU | Cells with changed fate |
+|---|---:|---:|---:|
+| 1 | 121 | 1.000 | 121 |
+| 2 | 174 | 1.000 | 174 |
+| 3 | 248 | 1.000 | 248 |
+| 4 | 238 | 1.000 | 238 |
+
+All arms remained connected, and each pair had the same pruning
+count. This verifies independent genetic control over **candidate fate
+labels**, not mechanical, metabolic or sensory functionality.
+
+### New implementation
+
+- `OpenMorphGenome.Gene` now contains six signed, independently
+  mutable and heritable gene-to-gene regulatory couplings among
+  *growth*, *fate*, and *brake* expression channels.
+- `OpenMorphGRN.Step` is a per-cell **synchronous recurrent update**.
+  It reads the preceding tick's expression state alongside chemical
+  signals, local organizer-tip activity, and neighboring-cell
+  crowding. It returns bounded expression values in [0,1].
+- `OpenMorphTissue.Grow(..., structured:true,
+  recurrentRegulation:true)` is opt-in, retaining all earlier
+  fixed-regulation experiments for reproducible comparisons. Newborn
+  cells inherit the selected parent's expression state as input to
+  their own first GRN step.
+- `OpenMorphGRNAudit` exports
+  `actual_grn_counterfactual.png` and
+  `grn_counterfactual_metrics.csv`, comparing static structured
+  regulation with recurrent regulation on identical genes, seed, 72
+  ticks and the same 800-cell cap.
+- `OpenMorphGRNEdgeAudit` exports
+  `actual_grn_edge_ablation.png` and
+  `grn_edge_ablation_metrics.csv`. Both arms use the recurrent
+  model. The control disables only the six signed interactions,
+  leaving organizer geometry, baseline expression alleles, seed,
+  development time and cell cap unchanged.
+- Tests check signed allele bounds/copy inheritance, sensitivity to
+  previous expression states, deterministic tissue replay,
+  boundedness and connectivity.
+
+### Interpretation
+
+A v1.1 success requires actual changes in per-cell regulatory
+expression and/or fate patterns that survive controlled comparison.
+An increased cell count alone is not evidence of organogenesis.
+The edge-ablation study asks whether gene-to-gene interactions
+cause differences beyond simply adding recurrence.
+
+This is an intentionally small, hand-designed 3-channel GRN
+with evolvable interaction weights. It is **not** a biological
+transcription model, an open-ended evolving ecosystem, or a working
+metabolism. Functional tissue mechanics and conserved resource
+flows remain unimplemented.
+
+### Unity acceptance
+
+Run the existing `scripts/export-open-tissue.ps1` command and inspect
+both new images and CSV files. Unity compilation and the EditMode suite
+have not yet run in the current session. Treat all predictions about
+the appearance of recurrent morphogenesis as unverified until that run.
+
 ## v1.0 — Decoupling regulatory differentiation from proliferation
 
 The **actual v0.9 Unity** `actual_regulatory_counterfactual.png` and
