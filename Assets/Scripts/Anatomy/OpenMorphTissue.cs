@@ -136,7 +136,10 @@ namespace EarthRogueOrigins.PixelCreatures
                         a=Mathf.Clamp01(a+.12f+.10f*bias);
                         b=Mathf.Clamp01(b+.035f+.07f*(1f-bias));
                         next[i]=new Cell {
-                            fate=ChooseFate(genome,x,y,width,height,a,b),
+                            fate=structured?
+                                OpenMorphRegulation.Differentiate(
+                                    regulation[i],a,b,organizers.distal[i]):
+                                ChooseFate(genome,x,y,width,height,a,b),
                             signalA=a,signalB=b,
                             // A provisional colony-wide resource supply:
                             // roots and connected active tissue recover energy.
@@ -191,7 +194,10 @@ namespace EarthRogueOrigins.PixelCreatures
                         {
                             births.Add(i);
                             next[i]=new Cell {
-                                fate=ChooseFate(genome,x,y,width,height,a,b),
+                                fate=structured?
+                                OpenMorphRegulation.Differentiate(
+                                    regulation[i],a,b,organizers.distal[i]):
+                                ChooseFate(genome,x,y,width,height,a,b),
                                 signalA=Mathf.Clamp01(a+.18f),
                                 signalB=b,energy=Mathf.Min(.85f,
                                     bestEnergy*.86f+.09f*guideStrength),
