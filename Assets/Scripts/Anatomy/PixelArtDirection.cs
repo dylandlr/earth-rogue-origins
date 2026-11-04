@@ -89,7 +89,8 @@ namespace EarthRogueOrigins.PixelCreatures
                     break;
                 case CreatureArchetype.SlateNewt:
                     recipe.palette=CreaturePalette.Slate;
-                    recipe.headStyle=PartStyle.Wedge;recipe.trunkStyle=PartStyle.Slender;
+                    recipe.headStyle=PartStyle.Wedge;recipe.trunkStyle=PartStyle.Rounded;
+                    recipe.limbStyle=PartStyle.Rounded;
                     recipe.tailLength=.86f;recipe.pattern=MarkingPattern.DorsalStripe;
                     break;
                 case CreatureArchetype.PaleJuvenile:
