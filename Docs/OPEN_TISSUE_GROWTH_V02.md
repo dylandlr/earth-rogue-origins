@@ -1,3 +1,34 @@
+## v0.5 — Counterfactual controls and quantitative anatomy (committed)
+
+The third **actual Unity** sheet establishes morphological sensitivity: for
+four genotype-matched pairs, adding a developmental branch increased
+occupied area by about +60%, +258%, +302%, and +217%, measured directly
+from the PNG. Some colonies reach the grid boundary; larger area is not
+the same thing as more directed or viable structure.
+
+The previous stochastic growth implementation consumed a sequential RNG
+stream only when a cell was eligible for growth. Changing the genotype
+therefore changed subsequent random draws across the grid, contaminating
+the counterfactual. In v0.5 each birth uses a stable hash keyed by
+`(seed, tick, x, y)`: both treatments encounter the same stochastic
+field even when eligibility differs.
+
+`OpenMorphTopologyMetrics.Analyze` measures actual tissue area,
+perimeter, compactness (`4πA/P²`), fill fraction within the bounding
+box, connected components, empty holes, and boundary-touching cells.
+These are observation metrics, **not** a fitness function; a highly
+compact body is not automatically more biologically useful.
+
+The Unity audit exports these as CSV columns alongside both treatments.
+Known-shape regression tests use a hollow ring, a filled square, and
+separate edge-touching cells. The source is committed, but the revised
+Unity test suite and contact sheet have not yet been executed.
+
+**Next gate:** establish whether structural changes survive equal-growth
+budget comparisons and held-out seeds, without relying on boundary
+clipping or sheer tissue mass. Only then proceed to nutrient flux,
+cell-death, repair, and physical sensor/actuator function.
+
 ## v0.4 — Counterfactual developmental growth (committed; Unity result pending)
 
 The second **actual Unity** tissue sheet still produced eight compact
