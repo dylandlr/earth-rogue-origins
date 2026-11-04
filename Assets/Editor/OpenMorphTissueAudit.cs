@@ -35,6 +35,7 @@ namespace EarthRogueOrigins.Editor
             var csv=new StringBuilder(
                 "index,seed,genes,segments,steps,occupied,structural,contractile,sensory,transport,storage,arm,bbox_width,bbox_height,perimeter,components,holes,border_cells,compactness,fill_fraction\n");
 
+            var genomes=new OpenMorphGenome[8];
             // Four genotype-matched counterfactual pairs. Each pair has
             // identical genome state and seed except for one inserted
             // developmental branch. This directly tests whether new
@@ -60,6 +61,7 @@ namespace EarthRogueOrigins.Editor
                     });
                 }
                 genome.Validate();
+                genomes[i]=genome;
                 var field=OpenMorphTissue.Grow(genome,w,h,72);
                 var pixels=OpenMorphTissue.Render(field);
                 // Same genomes, seed and number of ticks; constrain each
@@ -150,6 +152,9 @@ namespace EarthRogueOrigins.Editor
                 UnityEngine.Object.DestroyImmediate(tex);
                 UnityEngine.Object.DestroyImmediate(budgetTex);
             }
+            // Run matched developmental budget sweep with the exact
+            // same genomes from the original contact sheets.
+            OpenMorphBudgetSweep.Export(folder,genomes);
             Debug.Log("Open tissue growth audit exported: "+folder);
         }
     }
