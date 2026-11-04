@@ -1,3 +1,11 @@
+## Creature joint integration v2.8
+- [x] Replace oval shoulder/hip caps with asymmetric root-following skin folds
+- [x] Use existing shadow/skin/highlight ramps to integrate limb joins
+- [x] Add body-proportion and pose bounds regression coverage
+- [x] Produce labeled coordinate-derived joint geometry review
+- [ ] Run Unity C# full-creature morphology export and Edit Mode tests
+- [ ] Compare actual full creature with approved concept sheet and refine skin clusters
+
 ## Whole-body grounded stance v2.7
 - [x] Add coherent one-pixel mid-stance body compression without ankle drift
 - [x] Align translucent ground shadow to inherited near-foot contact plane
