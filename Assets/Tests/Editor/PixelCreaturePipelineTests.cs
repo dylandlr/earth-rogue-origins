@@ -1216,6 +1216,63 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void StockyBodyPlanHasShorterLegsAndWiderStanceThanRunner()
+        {
+            var stocky=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+            var runner=stocky.Copy();
+            runner.trunkStyle=PartStyle.Slender;
+            // Hold inherited lengths constant to isolate the body-plan rule.
+            foreach(float legGene in new[]{0f,.25f,.5f,.75f,1f})
+            foreach(float bodyGene in new[]{0f,.5f,1f})
+            {
+                stocky.legLength=runner.legLength=legGene;
+                stocky.trunkLength=runner.trunkLength=bodyGene;
+                var stout=PixelCreatureDevelopment.Layout(stocky);
+                var slim=PixelCreatureDevelopment.Layout(runner);
+                PixelPartDescriptor sf=null,sh=null,rf=null,rh=null;
+                foreach(var part in stout)
+                {
+                    if(part.slot==PartSlot.ForeLeg && part.drawOrder==9)sf=part;
+                    if(part.slot==PartSlot.HindLeg && part.drawOrder==9)sh=part;
+                }
+                foreach(var part in slim)
+                {
+                    if(part.slot==PartSlot.ForeLeg && part.drawOrder==9)rf=part;
+                    if(part.slot==PartSlot.HindLeg && part.drawOrder==9)rh=part;
+                }
+                Assert.NotNull(sf);Assert.NotNull(sh);
+                Assert.NotNull(rf);Assert.NotNull(rh);
+                Assert.LessOrEqual(sf.extent.y,rf.extent.y);
+                Assert.LessOrEqual(sh.extent.y,rh.extent.y);
+                Assert.Greater(sh.anchor.x-sf.anchor.x,
+                    rh.anchor.x-rf.anchor.x,
+                    "Stocky fore/hind spacing should exceed the runner's");
+            }
+        }
+
+        [Test]
+        public void SquatAndRunnerRenderingsStayInsideCanvas()
+        {
+            foreach(CreatureArchetype archetype in new[]{
+                CreatureArchetype.MarshCrawler,
+                CreatureArchetype.ArmoredCrawler,
+                CreatureArchetype.ClayRunner,
+                CreatureArchetype.PaleJuvenile})
+            foreach(int phase in new[]{0,1,2,3})
+            {
+                var recipe=PixelArtDirection.Hero(archetype,2046);
+                var metrics=PixelCreatureVisualMetrics.Analyze(
+                    PixelCreaturePainter.RenderPixels(recipe,phase,false));
+                Assert.Greater(metrics.nonTransparentPixels,150);
+                Assert.Greater(metrics.dominantFraction,.9f);
+                Assert.Greater(metrics.minX,0);
+                Assert.Less(metrics.maxX,127);
+                Assert.Greater(metrics.minY,0);
+                Assert.Less(metrics.maxY,95);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
