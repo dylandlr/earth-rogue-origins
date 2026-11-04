@@ -70,6 +70,10 @@ namespace EarthRogueOrigins.PixelCreatures
                 energy=1f,lineage=0
             };
             var next=new Cell[field.cells.Length];
+            // Developmental graph topology provides a spatial morphogen
+            // field. Growth still occurs cell by cell, never by drawing
+            // the segment envelopes directly into the tissue raster.
+            var guide=OpenMorphGrowthGuide.Build(genome,width,height);
             var rng=new System.Random(genome.seed);
             for(int tick=0;tick<steps;tick++)
             {
@@ -108,7 +112,9 @@ namespace EarthRogueOrigins.PixelCreatures
                     {
                         // Occupied cells express signals according to inherited
                         // rules, rather than arbitrary named body parts.
-                        float bias=RuleBias(genome,x,y,width,height,a,b);
+                        float bias=Mathf.Max(
+                            RuleBias(genome,x,y,width,height,a,b)*.62f,
+                            guide.activation[i]*.90f);
                         a=Mathf.Clamp01(a+.12f+.10f*bias);
                         b=Mathf.Clamp01(b+.035f+.07f*(1f-bias));
                         next[i]=new Cell {
@@ -122,9 +128,11 @@ namespace EarthRogueOrigins.PixelCreatures
                     {
                         // No isolated births: new tissue requires a living
                         // neighbor and an inherited response to local signals.
-                        float bias=RuleBias(genome,x,y,width,height,a,b);
+                        float bias=Mathf.Max(
+                            RuleBias(genome,x,y,width,height,a,b)*.62f,
+                            guide.activation[i]*.90f);
                         bool canGrow=parents>0 && bestEnergy>.12f &&
-                            bias>.22f && a>.14f;
+                            bias>.19f && a>.11f;
                         // Deterministic seeded stochasticity permits distinct
                         // protrusions while retaining exact replay by seed.
                         if(canGrow && rng.NextDouble()<.23+.22*bias)
