@@ -1,3 +1,49 @@
+## v0.3 — Branch-coupled growth response (committed, pending Unity verification)
+
+The first actual Unity v0.2 contact sheet shows **eight compact tissue
+colonies rather than divergent complex anatomical structures**. Direct
+pixel analysis of that user-provided 256x96 PNG measured 210, 210, 319,
+211, 356, 418, 343 and 306 occupied cells (among eight 64x48 tiles).
+The bounding boxes range from roughly 18x17 to 26x25 pixels.
+
+### Mechanism change
+
+- `OpenMorphGrowthGuide.Build` now converts the inherited variable
+  segment graph into local regulatory concentration fields. A
+  branching mutation changes the guidance field in previously
+  inaccessible regions of the tissue plane.
+- `OpenMorphTissue.Grow` blends that graph-derived concentration with
+  the earlier chemical/spatial gene rule. New cells are **still
+  generated only next to existing cells**, with positive energy,
+  sufficient chemical concentration, and a seeded growth decision.
+  The graph does not stamp colored capsules onto the tissue image.
+- The tissue audit grows for 72 ticks (previously 40) and adds
+  expressed segment count to the CSV, for quantitative comparison
+  of branching and tissue occupancy.
+- Regression tests cover deterministic guidance, distinct signal
+  geography when a gene gains branches, and existing birth/fate
+  invariants.
+
+### Scientific limitations
+
+These are deliberately **directed growth cues** from a geometric
+genotype, not yet emergent regulatory gene networks. More elongated
+or divergent shapes do not imply physiology, viability, or the
+evolutionary discovery of a useful new body plan. The 2D cell field
+still has no differentiated mechanical forces, fluid transport,
+sustained nutrient inflow, programmed cell death, or co-evolved
+movement. The eight audit genomes are seeded mutation trajectories,
+not populations selected by survival.
+
+### Next acceptance gate
+
+Run `scripts/export-open-tissue.ps1` again and compare both raw
+Unity PNGs and their `tissue_metrics.csv`. Check that the changes
+produce shape differences, not merely larger disks. Preserve an
+unchanged founder and genotype-matched branch-addition pair in a
+future standardized counterfactual export. Inspect if growth follows
+branches *without* producing clipped or disconnected islands.
+
 # Open-ended Morphogenesis v0.2 — Local Tissue Development
 
 ## Direction
