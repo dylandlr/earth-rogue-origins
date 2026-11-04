@@ -597,6 +597,40 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void GrowthTraceReconcilesEveryAcceptedBirthAndPruning()
+        {
+            var genome=OpenMorphGenome.Founder(1902);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                length=.8f,angle=70f,repeat=2
+            });
+            foreach(bool recurrent in new[]{false,true})
+            {
+                var field=OpenMorphTissue.Grow(
+                    genome,48,36,36,400,true,recurrent);
+                Assert.AreEqual(37,field.occupiedByTick.Length);
+                Assert.AreEqual(36,field.acceptedBirthsByTick.Length);
+                Assert.AreEqual(1,field.occupiedByTick[0]);
+                int totalPruned=0;
+                for(int t=0;t<36;t++)
+                {
+                    Assert.GreaterOrEqual(field.proposedBirthsByTick[t],
+                        field.acceptedBirthsByTick[t]);
+                    Assert.AreEqual(field.occupiedByTick[t]+
+                        field.acceptedBirthsByTick[t]-
+                        field.prunedByTick[t],
+                        field.occupiedByTick[t+1],
+                        "Mass conservation of recorded cellular births "+
+                        "and pruning failed at tick "+t);
+                    totalPruned+=field.prunedByTick[t];
+                }
+                Assert.AreEqual(field.Occupied(),
+                    field.occupiedByTick[36]);
+                Assert.AreEqual(totalPruned,field.prunedCells);
+            }
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
