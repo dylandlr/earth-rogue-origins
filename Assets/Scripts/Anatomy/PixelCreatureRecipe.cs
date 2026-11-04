@@ -127,15 +127,30 @@ namespace EarthRogueOrigins.PixelCreatures
             int tailWidth=Mathf.RoundToInt(Mathf.Lerp(13,29,r.tailLength));
             int limbHeight=Mathf.RoundToInt(Mathf.Lerp(10,23,r.legLength));
             if(r.plan==CreaturePlan.Fish)
+            {
+                // The tail end is tailX + tailWidth / 2, not tailX +
+                // tailWidth. The latter pushed large caudal fins off
+                // the 128px canvas. Attach the fin within the fleshy
+                // tail tip so its polygon shares visible pixels.
+                const int fishBodyX=61,fishBodyY=50,fishTailX=94;
+                int caudalWidth=8+Mathf.RoundToInt(r.finSize*13);
+                int tailTip=fishTailX+tailWidth/2;
+                int caudalX=tailTip-Mathf.Max(3,caudalWidth/3);
+                // Fish dorsal surfaces are in the positive-Y direction.
+                // Previous y=35 placed the dorsal fin below the abdomen.
+                int dorsalY=fishBodyY+Mathf.RoundToInt(bodyDepth*.43f);
                 return new[]{
-                    P(PartSlot.Tail,r.tailStyle,94,51,tailWidth,11,0),
-                    P(PartSlot.Fin,PartStyle.Fan,94+tailWidth,51,8+Mathf.RoundToInt(r.finSize*13),15,1),
-                    P(PartSlot.Trunk,r.trunkStyle,61,50,bodyLength,bodyDepth,2),
-                    P(PartSlot.Fin,PartStyle.Fan,64,35,15,10,3),
+                    P(PartSlot.Tail,r.tailStyle,fishTailX,51,tailWidth,11,0),
+                    P(PartSlot.Fin,PartStyle.Fan,caudalX,51,caudalWidth,15,1),
+                    P(PartSlot.Trunk,r.trunkStyle,fishBodyX,fishBodyY,
+                        bodyLength,bodyDepth,2),
+                    P(PartSlot.Fin,PartStyle.Fan,64,dorsalY,15,10,3),
                     P(PartSlot.Head,r.headStyle,32,50,headWidth,bodyDepth-4,4),
                     P(PartSlot.Eye,PartStyle.Rounded,25,46,3,3,6),
-                    P(PartSlot.Markings,PartStyle.Rounded,62,50,bodyLength,bodyDepth,5)
+                    P(PartSlot.Markings,PartStyle.Rounded,62,50,
+                        bodyLength,bodyDepth,5)
                 };
+            }
             if(r.plan==CreaturePlan.Arthropod)
                 return new[]{
                     P(PartSlot.Trunk,PartStyle.Segmented,66,50,bodyLength+8,bodyDepth,1),
