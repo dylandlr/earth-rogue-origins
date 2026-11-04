@@ -1,3 +1,60 @@
+## v1.4 — Gene regulatory birth-channel causal ablation
+
+The actual v1.3 GRN growth CSVs include the new eligibility and
+division-probability columns. Recurrent/static final cell counts
+were 122/121, 173/174, 190/248 and 235/238 respectively.
+
+**Pair 3's deficit comes predominantly from direct GRN modulation,
+not absence of eligible sites**:
+- Static eligible sites: 2,796; recurrent: 2,664 (−4.7%).
+- Within recurrent development, mean division probability
+  before GRN modulation was 0.112338, falling to 0.072339 after.
+- 2,657 of 2,664 eligible opportunities were inhibited (99.7%);
+  only 7 opportunities were boosted.
+- At tick 72, local mean division chance dropped from ~0.062831
+  to ~0.007766; the deficit compounds over developmental time.
+- Other tested recurrent genomes exhibited stronger growth
+  stimulation or much less uniform inhibition.
+
+This identifies a **growth-regulatory phenotype**, not necessarily
+a bug: suppressive regulatory interactions may become useful when
+growth is expensive. It would be scientifically inappropriate to
+raise growth only for pair 3, or tune the global formula simply to
+make all four embryos the same size.
+
+### New v1.4 controlled experiment
+
+`OpenMorphGRN.BirthChannel` supports four interventions:
+`Full`, `GrowthOnly`, `BrakeOnly`, `Neutral`.
+The recurrent GRN itself, differentiated fates, organizer geometry,
+genome, seed, 72 ticks and 800-cell cap are shared. Only the
+contributions of growth and brake *to the cell division decision*
+are ablated. No special-casing organism ID or pair number.
+
+The Unity exporter adds:
+- `actual_grn_channels_pair_1.png` through
+  `actual_grn_channels_pair_4.png` (columns: Full, GrowthOnly,
+  BrakeOnly, Neutral).
+- `grn_channel_ablation_metrics.csv` with occupied cells,
+  eligible sites, division proposals and acceptances, stimulated
+  and inhibited sites, mean base/final division probability,
+  connectivity, clipping and pruning.
+
+**Interpretation**:
+- Full vs GrowthOnly estimates the contribution of the brake
+  channel in a *different developmental trajectory*.
+- Full vs BrakeOnly estimates the contribution of the growth
+  channel in a different trajectory.
+- Neutral tests the recurrent GRN's consequences when it does
+  not directly modulate division probability, but still governs
+  candidate tissue fates.
+- Because growth history changes subsequent eligibility, these
+  comparisons are dynamic interventions, not additive
+  counterfactual decompositions of a frozen state.
+
+The implementation is committed and source-reviewed. No v1.4
+Unity compilation, automated tests or renders have been run yet.
+
 ## v1.3 — Growth opportunity attribution (committed; Unity audit pending)
 
 The actual v1.2 `grn_growth_outcomes.csv` and
