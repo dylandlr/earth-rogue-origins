@@ -1,3 +1,50 @@
+## v0.7 — Multi-budget counterfactual anatomy (committed; Unity verification pending)
+
+The first actual v0.6 `actual_equal_budget_tissue.png` was uploaded and
+analyzed directly. **Every specimen occupied exactly 180 cells**,
+meaning the cap took effect. The four matched pairs had:
+
+| Pair | Common occupied cells | Only in one arm (symmetric difference) | Raw occupancy IoU |
+|---|---:|---:|---:|
+| 1 | 172 | 16 | 0.915 |
+| 2 | 171 | 18 | 0.905 |
+| 3 | 146 | 68 | 0.682 |
+| 4 | 163 | 34 | 0.827 |
+
+The evidence shows that inherited branches can alter actual anatomy
+independently of overall mass, but the magnitude is inconsistent and
+there is not yet a convincing functional appendage.
+
+The v0.7 exporter keeps the original unlimited and 180-cell output
+for backward compatibility and adds **three native C# Unity sheets**
+for limits 180, 400 and 800 cells:
+`actual_budget_180_tissue.png`, `actual_budget_400_tissue.png`,
+and `actual_budget_800_tissue.png`.
+
+`budget_sweep_metrics.csv` records, for every budget and matched pair,
+true baseline/branch occupancy, common cell count, each arm's exclusive
+cell count, union, raw intersection-over-union (Jaccard), symmetric
+difference fraction, border touching, perimeter, compactness,
+components and cavity count.
+
+The comparisons occur on the **same spatial grid** with no scale
+normalization or center registration. Common-random-number sampling
+remains keyed by seed, position and developmental tick.
+
+Interpretation gates:
+- If both variants are nearly identical at 180 but separate at
+  400/800, the original cap masked later structural divergence.
+- If shape overlap remains high across budgets, the regulatory
+  morphology itself requires improvement.
+- If specimens hit the grid edge before diverging, increase world
+  dimensions before claiming morphological novelty.
+- If one arm fails to consume the budget, report its actual cell
+  count; the cap is a maximum, not forced equal occupancy.
+- Do not use high complexity alone as a proxy for viability.
+
+**Status:** The v0.7 exporter and tests are committed. No Unity run
+or Edit Mode test has yet verified this new sweep.
+
 ## v0.6 — Equal-mass morphology counterfactual (committed, Unity result pending)
 
 The fourth real Unity tissue sheet repeats the v0.4 finding under v0.5's
