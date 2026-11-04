@@ -839,6 +839,64 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void JointSkinFoldsRemainAttachedAndInsideCanvas()
+        {
+            var recipe=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,2046);
+            foreach(float depth in new[]{0f,.5f,1f})
+            foreach(float length in new[]{0f,.5f,1f})
+            foreach(int frame in new[]{0,1,2,3})
+            {
+                recipe.trunkLength=length;
+                recipe.trunkDepth=depth;
+                var parts=PixelCreaturePoses.Layout(recipe,frame,false);
+                PixelPartDescriptor shoulder=null,hip=null,fore=null,rear=null;
+                foreach(var p in parts)
+                {
+                    if(p.slot==PartSlot.ShoulderBlend)shoulder=p;
+                    if(p.slot==PartSlot.HipBlend)hip=p;
+                    if(p.slot==PartSlot.ForeLeg&&p.drawOrder==9)fore=p;
+                    if(p.slot==PartSlot.HindLeg&&p.drawOrder==9)rear=p;
+                }
+                Assert.NotNull(shoulder);Assert.NotNull(hip);
+                Assert.NotNull(fore);Assert.NotNull(rear);
+                Assert.AreEqual(fore.anchor,shoulder.anchor);
+                Assert.AreEqual(rear.anchor,hip.anchor);
+                foreach(var fold in new[]{
+                    PixelJointTransition.Build(shoulder.anchor.x,
+                        shoulder.anchor.y,shoulder.extent.x,
+                        shoulder.extent.y,false),
+                    PixelJointTransition.Build(hip.anchor.x,
+                        hip.anchor.y,hip.extent.x,hip.extent.y,true)})
+                {
+                    Assert.GreaterOrEqual(fold.outer.Length,5);
+                    Assert.AreEqual(fold.outer.Length,fold.inner.Length);
+                    foreach(var vertex in fold.outer)
+                    {
+                        Assert.That(vertex.x,Is.InRange(0,127));
+                        Assert.That(vertex.y,Is.InRange(0,95));
+                    }
+                    foreach(var vertex in fold.inner)
+                    {
+                        Assert.That(vertex.x,Is.InRange(0,127));
+                        Assert.That(vertex.y,Is.InRange(0,95));
+                    }
+                }
+                var pixels=PixelCreaturePainter.RenderPixels(recipe,frame,false);
+                Assert.AreEqual(128*96,pixels.Length);
+            }
+        }
+
+        [Test]
+        public void ShoulderAndHipFoldsHaveDistinctDirections()
+        {
+            var shoulder=PixelJointTransition.Build(44,41,11,8,false);
+            var hip=PixelJointTransition.Build(44,41,11,8,true);
+            CollectionAssert.AreNotEqual(shoulder.outer,hip.outer);
+            Assert.AreNotEqual(shoulder.highlightEnd,hip.highlightEnd);
+            Assert.AreEqual(shoulder.outer.Length,hip.outer.Length);
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
