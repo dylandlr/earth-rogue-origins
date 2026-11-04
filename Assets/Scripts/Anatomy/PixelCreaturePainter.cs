@@ -143,7 +143,8 @@ namespace EarthRogueOrigins.PixelCreatures
             switch(d.slot)
             {
                 case PartSlot.Trunk:
-                    PaintProfile(c,PartSlot.Trunk,d.style,x,y,w,h,palette,r.baseColor);
+                    PaintProfile(c,PartSlot.Trunk,d.style,x,y,w,h,palette,r.baseColor,
+                        r.plan==CreaturePlan.Tetrapod);
                     if(d.style==PartStyle.Segmented)
                     {
                         int segments=7+Mathf.RoundToInt(r.armor*5);
@@ -412,7 +413,8 @@ namespace EarthRogueOrigins.PixelCreatures
         /// Each pixel is still an original integer-grid pixel.
         /// </summary>
         static void PaintProfile(Canvas canvas,PartSlot slot,PartStyle style,
-            int cx,int cy,int width,int height,PixelColorRamp ramp,Color32 baseColor)
+            int cx,int cy,int width,int height,PixelColorRamp ramp,Color32 baseColor,
+            bool tuckBelly=false)
         {
             int left=cx-width/2,right=cx+width/2;
             int minX=Mathf.Max(1,left-3),maxX=Mathf.Min(Width-2,right+3);
@@ -428,8 +430,10 @@ namespace EarthRogueOrigins.PixelCreatures
                 float u=(x-left)/(float)Mathf.Max(1,right-left);
                 int high=cy+Mathf.RoundToInt(
                     PixelSilhouetteTemplates.Sample(top,u)*height*.5f);
-                int low=cy+Mathf.RoundToInt(
-                    PixelSilhouetteTemplates.Sample(bottom,u)*height*.5f);
+                float lowerValue=tuckBelly && slot==PartSlot.Trunk?
+                    PixelSilhouetteTemplates.TetrapodBellyLower(style,u):
+                    PixelSilhouetteTemplates.Sample(bottom,u);
+                int low=cy+Mathf.RoundToInt(lowerValue*height*.5f);
                 for(int y=Mathf.Max(minY,low);y<=Mathf.Min(maxY,high);y++)
                     mask[y*Width+x]=true;
             }
@@ -466,8 +470,15 @@ namespace EarthRogueOrigins.PixelCreatures
                 // Pigment follows the *local* dorsal silhouette instead
                 // of a horizontal threshold that created a rectangular
                 // bright plate on the marsh crawler's back.
-                Color32 fill=y<cy-height*.12f?ramp.shadow:baseColor;
                 float u=(x-left)/(float)Mathf.Max(1,right-left);
+                float bellyValue=tuckBelly && slot==PartSlot.Trunk?
+                    PixelSilhouetteTemplates.TetrapodBellyLower(style,u):
+                    PixelSilhouetteTemplates.Sample(bottom,u);
+                int belly=cy+Mathf.RoundToInt(bellyValue*height*.5f);
+                // Underside pigment follows the lifted ventral contour,
+                // so no artificial horizontal dark bar bisects the limbs.
+                Color32 fill=(y-belly<=Mathf.Max(2,height/7))?
+                    ramp.shadow:baseColor;
                 int dorsal=cy+Mathf.RoundToInt(
                     PixelSilhouetteTemplates.Sample(top,u)*height*.5f);
                 int distanceFromBack=dorsal-y;
