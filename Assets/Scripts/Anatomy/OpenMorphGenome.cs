@@ -33,6 +33,8 @@ namespace EarthRogueOrigins.PixelCreatures
             public float growthResponse=.6f;
             public float tipResponse=.55f;
             public float inhibitionResponse=.45f;
+            // Fate response is separate from cell division and geometry.
+            public float fateResponse=.5f;
             public Gene Copy() { return (Gene)MemberwiseClone(); }
         }
 
@@ -85,7 +87,8 @@ namespace EarthRogueOrigins.PixelCreatures
                    !FiniteRange(g.pigment,0f,1f) ||
                    !FiniteRange(g.growthResponse,0f,1f) ||
                    !FiniteRange(g.tipResponse,0f,1f) ||
-                   !FiniteRange(g.inhibitionResponse,0f,1f))
+                   !FiniteRange(g.inhibitionResponse,0f,1f) ||
+                   !FiniteRange(g.fateResponse,0f,1f))
                     throw new InvalidOperationException("Invalid developmental parameter.");
             }
         }
@@ -150,6 +153,8 @@ namespace EarthRogueOrigins.PixelCreatures
                 g.tipResponse=Mathf.Clamp01(g.tipResponse+
                     (float)(rng.NextDouble()-.5)*.40f);
                 g.inhibitionResponse=Mathf.Clamp01(g.inhibitionResponse+
+                    (float)(rng.NextDouble()-.5)*.40f);
+                g.fateResponse=Mathf.Clamp01(g.fateResponse+
                     (float)(rng.NextDouble()-.5)*.40f);
             }
             else if(operation==3 && result.genes.Count>1)
