@@ -666,6 +666,70 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void GRNChannelAblationsPreserveNeutralAndDefaultBehavior()
+        {
+            var state=new OpenMorphGRN.State {
+                growth=.8f,brake=.9f,fate=.3f
+            };
+            foreach(float chance in new[]{0f,.05f,.3f,.7f,1f})
+            {
+                float full=OpenMorphGRN.ModulateGrowth(chance,state);
+                float explicitFull=OpenMorphGRN.ModulateGrowth(
+                    chance,state,OpenMorphGRN.BirthChannel.Full);
+                float neutral=OpenMorphGRN.ModulateGrowth(
+                    chance,state,OpenMorphGRN.BirthChannel.Neutral);
+                float growth=OpenMorphGRN.ModulateGrowth(
+                    chance,state,OpenMorphGRN.BirthChannel.GrowthOnly);
+                float brake=OpenMorphGRN.ModulateGrowth(
+                    chance,state,OpenMorphGRN.BirthChannel.BrakeOnly);
+                Assert.AreEqual(full,explicitFull,.000001f);
+                Assert.AreEqual(chance,neutral,.000001f);
+                Assert.That(growth,Is.InRange(0f,1f));
+                Assert.That(brake,Is.InRange(0f,1f));
+                Assert.GreaterOrEqual(growth,chance);
+                Assert.LessOrEqual(brake,chance);
+            }
+        }
+
+        [Test]
+        public void GRNChannelAblationPreservesConnectedDeterministicDevelopment()
+        {
+            var genome=OpenMorphGenome.Founder(502995);
+            var modes=new[]{
+                OpenMorphGRN.BirthChannel.Full,
+                OpenMorphGRN.BirthChannel.GrowthOnly,
+                OpenMorphGRN.BirthChannel.BrakeOnly,
+                OpenMorphGRN.BirthChannel.Neutral
+            };
+            foreach(var mode in modes)
+            {
+                var a=OpenMorphTissue.Grow(genome,48,36,40,400,true,true,mode);
+                var b=OpenMorphTissue.Grow(genome,48,36,40,400,true,true,mode);
+                Assert.AreEqual(a.Occupied(),b.Occupied());
+                Assert.AreEqual(1,
+                    OpenMorphTopologyMetrics.Analyze(a).components);
+                Assert.AreEqual(1f,OpenMorphPairMetrics.Compare(a,b).jaccard,
+                    .000001f);
+                for(int i=0;i<a.cells.Length;i++)
+                {
+                    Assert.AreEqual(a.cells[i].fate,b.cells[i].fate);
+                    Assert.AreEqual(a.cells[i].regulatoryGrowth,
+                        b.cells[i].regulatoryGrowth);
+                    Assert.AreEqual(a.cells[i].regulatoryBrake,
+                        b.cells[i].regulatoryBrake);
+                }
+                Assert.Greater(SumTest(a.eligibleSitesByTick),0);
+            }
+        }
+
+        static int SumTest(int[] values)
+        {
+            int result=0;
+            foreach(int v in values)result+=v;
+            return result;
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
