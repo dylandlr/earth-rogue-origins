@@ -217,9 +217,17 @@ namespace EarthRogueOrigins.PixelCreatures
                                 a,b,structured?organizers.distal[i]:0f,
                                 parents*.25f):new OpenMorphGRN.State();
                         if(recurrentRegulation)
+                        {
+                            // The older GRN multiplied an already-inhibited
+                            // static chance and subtracted a second brake,
+                            // often extinguishing an otherwise viable front.
+                            // Recurrent expression now modulates the same
+                            // probability around a neutral 0.5 state.
                             directionalChance=Mathf.Clamp01(
-                                directionalChance*(.25f+1.10f*birthExpression.growth)-
-                                .20f*birthExpression.brake);
+                                directionalChance+
+                                .18f*(birthExpression.growth-.5f)-
+                                .10f*(birthExpression.brake-.5f));
+                        }
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
                             births.Add(i);
