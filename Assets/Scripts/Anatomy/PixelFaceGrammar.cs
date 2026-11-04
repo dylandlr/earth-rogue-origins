@@ -47,7 +47,7 @@ namespace EarthRogueOrigins.PixelCreatures
 
             return new FaceLandmarks {
                 eye=new Vector2Int(eyeX,eyeY),
-                nostril=new Vector2Int(front+3,centerY),
+                nostril=new Vector2Int(nostrilX,nostrilY),
                 mouthStart=new Vector2Int(mouthX,mouthY),
                 mouthEnd=new Vector2Int(mouthEndX,mouthEndY),
                 cheek=new Vector2Int(centerX+Mathf.Max(1,radius/4),centerY-1),
