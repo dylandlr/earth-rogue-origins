@@ -210,6 +210,7 @@ namespace EarthRogueOrigins.Editor
             OpenMorphGRNAudit.Export(folder,genomes);
             OpenMorphGRNEdgeAudit.Export(folder,genomes);
             OpenMorphGRNTraceAudit.Export(folder,genomes);
+            OpenMorphGRNChannelAudit.Export(folder,genomes);
 
             File.AppendAllText(folder+"/provenance.txt",
                 "Budgets 180/400/800, same 72 ticks and seed within "+
