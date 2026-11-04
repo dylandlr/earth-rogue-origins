@@ -166,9 +166,19 @@ namespace EarthRogueOrigins.PixelCreatures
             const int trunkX=63,trunkY=50,headX=30,headY=51;
             int bodyLeft=trunkX-bodyLength/2;
             int bodyRight=trunkX+bodyLength/2;
-            int foreX=bodyLeft+Mathf.RoundToInt(bodyLength*.26f);
-            int rearX=bodyRight-Mathf.RoundToInt(bodyLength*.23f);
-            int rootY=trunkY-Mathf.RoundToInt(bodyDepth*.29f);
+            // Robust-bodied amphibians carry mass on short, widely
+            // spaced legs. Slender runners retain their longer stride.
+            // These stations derive only from inherited morphology; the
+            // other plans do not inherit the squat tetrapod grammar.
+            bool squat=r.trunkStyle==PartStyle.Robust;
+            if(squat)
+                limbHeight=Mathf.RoundToInt(Mathf.Lerp(9f,17f,r.legLength));
+            int foreX=bodyLeft+Mathf.RoundToInt(
+                bodyLength*(squat?.21f:.26f));
+            int rearX=bodyRight-Mathf.RoundToInt(
+                bodyLength*(squat?.18f:.23f));
+            int rootY=trunkY-Mathf.RoundToInt(
+                bodyDepth*(squat?.34f:.29f));
             int tailX=bodyRight+Mathf.Max(2,tailWidth/4);
             int rootX=bodyRight-2;
             int headRight=headX+headWidth/2;
