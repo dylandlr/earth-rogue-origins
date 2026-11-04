@@ -41,11 +41,11 @@ namespace EarthRogueOrigins.PixelCreatures
 
         public static Vector2Int[] FootToes(int rootX,int groundY,PartStyle style)
         {
-            int spread=style==PartStyle.Webbed?8:style==PartStyle.Robust?7:5;
+            int spread=style==PartStyle.Webbed?7:style==PartStyle.Robust?5:style==PartStyle.Slender?3:4;
             return new[]{
                 new Vector2Int(rootX-spread,groundY),
-                new Vector2Int(rootX-spread/2,groundY-2),
-                new Vector2Int(rootX+1,groundY-2),
+                new Vector2Int(rootX-spread/2,groundY-1),
+                new Vector2Int(rootX+1,groundY-1),
                 new Vector2Int(rootX+spread-1,groundY)
             };
         }
