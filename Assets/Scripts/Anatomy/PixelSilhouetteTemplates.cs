@@ -77,6 +77,28 @@ namespace EarthRogueOrigins.PixelCreatures
             return Mathf.Lerp(values[left],values[left+1],index-left);
         }
 
+        /// <summary>
+        /// A shallow, smooth tuck between the fore- and hind-leg stations.
+        /// Positive Y is dorsal in the sprite coordinate system: making the
+        /// normalized lower contour less negative raises the belly.
+        /// Only used on tetrapods; fish retain their aquatic contour.
+        /// </summary>
+        public static float TetrapodBellyLower(PartStyle style,float u)
+        {
+            float[] upper,lower;
+            Profile(PartSlot.Trunk,style,out upper,out lower);
+            float original=Sample(lower,u);
+            const float front=.29f,rear=.73f;
+            if(u<=front || u>=rear)return original;
+            float t=(u-front)/(rear-front);
+            float arch=Mathf.Sin(t*Mathf.PI);
+            arch*=arch;
+            float strength=style==PartStyle.Robust?.24f:
+                style==PartStyle.Slender?.13f:.19f;
+            return Mathf.Min(original+strength*arch,
+                Sample(upper,u)-.12f);
+        }
+
         public static bool Contains(PartSlot slot,PartStyle style,float u,float v)
         {
             float[] top,bottom;
