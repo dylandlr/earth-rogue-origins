@@ -365,6 +365,93 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void RegulatoryAllelesRemainHeritableAndBounded()
+        {
+            var genome=OpenMorphGenome.Founder(717);
+            for(int k=0;k<100;k++)
+            {
+                genome=genome.Mutate(107+k*71);
+                genome.Validate();
+                foreach(var gene in genome.genes)
+                {
+                    Assert.That(gene.growthResponse,Is.InRange(0f,1f));
+                    Assert.That(gene.tipResponse,Is.InRange(0f,1f));
+                    Assert.That(gene.inhibitionResponse,Is.InRange(0f,1f));
+                }
+            }
+            var copy=genome.Copy();
+            Assert.AreEqual(genome.genes.Count,copy.genes.Count);
+            for(int i=0;i<genome.genes.Count;i++)
+            {
+                Assert.AreEqual(genome.genes[i].growthResponse,
+                    copy.genes[i].growthResponse);
+                Assert.AreEqual(genome.genes[i].tipResponse,
+                    copy.genes[i].tipResponse);
+                Assert.AreEqual(genome.genes[i].inhibitionResponse,
+                    copy.genes[i].inhibitionResponse);
+            }
+        }
+
+        [Test]
+        public void RegulatoryResponseChangesWithInheritedAlleles()
+        {
+            var weak=OpenMorphGenome.Founder(99).genes[0];
+            var strong=weak.Copy();
+            weak.growthResponse=.1f;
+            weak.tipResponse=.1f;
+            weak.inhibitionResponse=.9f;
+            strong.growthResponse=.9f;
+            strong.tipResponse=.9f;
+            strong.inhibitionResponse=.1f;
+            var slow=OpenMorphRegulation.Evaluate(weak,
+                .7f,.2f,.8f,.6f,.25f,.1f);
+            var fast=OpenMorphRegulation.Evaluate(strong,
+                .7f,.2f,.8f,.6f,.25f,.1f);
+            Assert.Greater(fast.growthMultiplier,slow.growthMultiplier);
+            Assert.Greater(fast.tipBoost,slow.tipBoost);
+            Assert.Less(fast.inhibition,slow.inhibition);
+        }
+
+        [Test]
+        public void RegulatoryPerturbationIsNotAStructuralMutation()
+        {
+            var genome=OpenMorphGenome.Founder(121);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                angle=70f,repeat=2,length=.8f
+            });
+            var variant=genome.Copy();
+            foreach(var gene in variant.genes)
+            {
+                gene.growthResponse=.9f;
+                gene.tipResponse=.9f;
+                gene.inhibitionResponse=.1f;
+            }
+            Assert.AreEqual(OpenMorphDevelopment.Grow(genome).Length,
+                OpenMorphDevelopment.Grow(variant).Length);
+            var organizerA=OpenMorphOrganizers.Build(genome,48,36);
+            var organizerB=OpenMorphOrganizers.Build(variant,48,36);
+            for(int i=0;i<organizerA.activation.Length;i++)
+            {
+                Assert.AreEqual(organizerA.activation[i],
+                    organizerB.activation[i]);
+                Assert.AreEqual(organizerA.innovation[i],
+                    organizerB.innovation[i]);
+            }
+            var original=OpenMorphTissue.Grow(genome,48,36,72,800,true);
+            var changed=OpenMorphTissue.Grow(variant,48,36,72,800,true);
+            Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(
+                original).components);
+            Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(
+                changed).components);
+            Assert.That(original.Occupied(),Is.InRange(1,800));
+            Assert.That(changed.Occupied(),Is.InRange(1,800));
+            Assert.AreEqual(1f,OpenMorphPairMetrics.Compare(
+                changed,OpenMorphTissue.Grow(variant,48,36,72,800,true)
+                ).jaccard,.00001f);
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
