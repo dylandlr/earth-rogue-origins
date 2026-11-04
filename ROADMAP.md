@@ -1,3 +1,13 @@
+## Recurrent GRN growth calibration v1.2
+- [x] Inspect true v1.1 Unity GRN and signed-edge ablation screenshots: recurrent development appears strongly suppressed
+- [x] Replace compounded recurrent growth penalty with bounded neutral-preserving modulation
+- [x] Record per-tick occupied tissue, division proposals, accepted births, and pruning events
+- [x] Export developmental growth trace and per-genome arrest diagnostics from Unity
+- [x] Add neutral-modulation, range, and tick-by-tick mass reconciliation tests
+- [ ] Compile and run v1.2 Unity EditMode tests and export contact sheets / CSV
+- [ ] Quantify restored morphogenesis and isolate signed-edge effects
+- [ ] Advance to locally resource-constrained functional tissue physiology
+
 ## Recurrent gene regulatory development v1.1
 - [x] Verify fate-only v1.0 Unity experiment: 4/4 paired occupancy masks identical, tissue classifications changed
 - [x] Add six signed, heritable regulatory interactions between growth, fate and brake channels
