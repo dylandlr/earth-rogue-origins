@@ -27,8 +27,12 @@ namespace EarthRogueOrigins.Tests
             var child = DiploidGenome.Child(mother, father, new Random(42), 0f);
             for (int locus = 0; locus < DiploidGenome.Loci; ++locus)
             {
-                Assert.That(child.alleles[locus * 2], Is.AnyOf(0.1f, 0.3f));
-                Assert.That(child.alleles[locus * 2 + 1], Is.AnyOf(0.7f, 0.9f));
+                float maternal = child.alleles[locus * 2];
+                float paternal = child.alleles[locus * 2 + 1];
+                Assert.IsTrue(maternal == 0.1f || maternal == 0.3f,
+                    "Maternal allele was not inherited from either maternal copy at locus " + locus);
+                Assert.IsTrue(paternal == 0.7f || paternal == 0.9f,
+                    "Paternal allele was not inherited from either paternal copy at locus " + locus);
             }
         }
 
