@@ -160,25 +160,20 @@ namespace EarthRogueOrigins.PixelCreatures
                     P(PartSlot.Armor,PartStyle.Plated,65,39,bodyLength+5,bodyDepth,4),
                     P(PartSlot.Eye,PartStyle.Rounded,23,47,3,3,6)
                 };
-            // Attachment stations are derived from inherited trunk length
-            // and depth. Fixed world-pixel stations previously detached legs
-            // and tails from unusually short or long bodies.
-            const int trunkX=63,trunkY=50,headX=30,headY=51;
+            // Squat amphibians and cursorial runners develop distinct
+            // proportions from inherited morphology, not archetype labels.
+            var mass=PixelTetrapodMass.Resolve(r,bodyDepth,headWidth);
+            bodyDepth=mass.bodyDepth;
+            headWidth=mass.headWidth;
+            limbHeight=mass.legHeight;
+            const int trunkX=63,trunkY=50,headY=51;
+            int headX=mass.headX;
             int bodyLeft=trunkX-bodyLength/2;
             int bodyRight=trunkX+bodyLength/2;
-            // Robust-bodied amphibians carry mass on short, widely
-            // spaced legs. Slender runners retain their longer stride.
-            // These stations derive only from inherited morphology; the
-            // other plans do not inherit the squat tetrapod grammar.
-            bool squat=r.trunkStyle==PartStyle.Robust;
-            if(squat)
-                limbHeight=Mathf.RoundToInt(Mathf.Lerp(9f,17f,r.legLength));
-            int foreX=bodyLeft+Mathf.RoundToInt(
-                bodyLength*(squat?.21f:.26f));
-            int rearX=bodyRight-Mathf.RoundToInt(
-                bodyLength*(squat?.18f:.23f));
+            int foreX=bodyLeft+Mathf.RoundToInt(bodyLength*mass.foreStation);
+            int rearX=bodyRight-Mathf.RoundToInt(bodyLength*mass.rearStation);
             int rootY=trunkY-Mathf.RoundToInt(
-                bodyDepth*(squat?.34f:.29f));
+                bodyDepth*mass.rootDepthRatio);
             int tailX=bodyRight+Mathf.Max(2,tailWidth/4);
             int rootX=bodyRight-2;
             int headRight=headX+headWidth/2;
@@ -201,9 +196,9 @@ namespace EarthRogueOrigins.PixelCreatures
                 P(PartSlot.ForeLeg,r.limbStyle,foreX,rootY,12,limbHeight,9),
                 P(PartSlot.HindLeg,r.limbStyle,rearX,rootY,12,limbHeight,9),
                 P(PartSlot.ShoulderBlend,PartStyle.Rounded,foreX,rootY,
-                    squat?13:11,squat?9:8,10),
+                    mass.jointWidth,mass.jointHeight,10),
                 P(PartSlot.HipBlend,PartStyle.Rounded,rearX,rootY,
-                    squat?13:11,squat?9:8,10),
+                    mass.jointWidth,mass.jointHeight,10),
                 P(PartSlot.Eye,PartStyle.Rounded,face.eye.x,face.eye.y,3,3,12)
             };
         }
