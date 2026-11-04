@@ -223,10 +223,8 @@ namespace EarthRogueOrigins.PixelCreatures
                             // often extinguishing an otherwise viable front.
                             // Recurrent expression now modulates the same
                             // probability around a neutral 0.5 state.
-                            directionalChance=Mathf.Clamp01(
-                                directionalChance+
-                                .18f*(birthExpression.growth-.5f)-
-                                .10f*(birthExpression.brake-.5f));
+                            directionalChance=OpenMorphGRN.ModulateGrowth(
+                                directionalChance,birthExpression);
                         }
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
