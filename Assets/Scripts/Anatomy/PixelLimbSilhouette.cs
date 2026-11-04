@@ -38,6 +38,25 @@ namespace EarthRogueOrigins.PixelCreatures
             };
         }
 
+        /// <summary>
+        /// A short broken highlight confined to the upper shoulder/thigh.
+        /// Full-length light strokes made the legs read as rigid poles in
+        /// the first actual Unity contact sheets.
+        /// </summary>
+        public static Vector2Int[] ShoulderHighlight(Shape s)
+        {
+            int dy=s.root.y-s.knee.y;
+            int span=Mathf.Max(2,dy/3);
+            int dx=s.knee.x-s.root.x;
+            return new[]{
+                new Vector2Int(s.root.x-1,s.root.y),
+                new Vector2Int(
+                    s.root.x-1+Mathf.RoundToInt(
+                        dx*(span/(float)Mathf.Max(1,dy))),
+                    s.root.y-span)
+            };
+        }
+
         public static Vector2Int[] UpperPolygon(Shape s)
         {
             // An asymmetric tapered shoulder, not a cylindrical line.
