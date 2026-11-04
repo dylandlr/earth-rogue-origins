@@ -166,6 +166,51 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void TopologyMetricsDistinguishConnectedMassAndTrueCavity()
+        {
+            var f=new OpenMorphTissue.Field(12,12);
+            // Build a five-by-five ring around an internal 3x3 hole.
+            for(int y=3;y<=7;y++)
+            for(int x=3;x<=7;x++)
+            {
+                if(x!=3&&x!=7&&y!=3&&y!=7)continue;
+                f.cells[y*f.width+x].fate=OpenMorphTissue.Fate.Structural;
+            }
+            var ring=OpenMorphTopologyMetrics.Analyze(f);
+            Assert.AreEqual(16,ring.occupied);
+            Assert.AreEqual(1,ring.components);
+            Assert.AreEqual(1,ring.holes);
+            Assert.AreEqual(0,ring.borderCells);
+            Assert.AreEqual(5,ring.bboxWidth);
+            Assert.AreEqual(5,ring.bboxHeight);
+            Assert.AreEqual(32,ring.perimeter);
+            // Closing the cavity must alter topology, not just mass.
+            for(int y=4;y<=6;y++)
+            for(int x=4;x<=6;x++)
+                f.cells[y*f.width+x].fate=OpenMorphTissue.Fate.Storage;
+            var filled=OpenMorphTopologyMetrics.Analyze(f);
+            Assert.AreEqual(25,filled.occupied);
+            Assert.AreEqual(1,filled.components);
+            Assert.AreEqual(0,filled.holes);
+            Assert.AreEqual(20,filled.perimeter);
+            Assert.Greater(filled.compactness,ring.compactness);
+        }
+
+        [Test]
+        public void BoundaryTouchAndMultipleColoniesAreDetected()
+        {
+            var f=new OpenMorphTissue.Field(10,10);
+            f.cells[0].fate=OpenMorphTissue.Fate.Structural;
+            f.cells[99].fate=OpenMorphTissue.Fate.Contractile;
+            var metrics=OpenMorphTopologyMetrics.Analyze(f);
+            Assert.AreEqual(2,metrics.occupied);
+            Assert.AreEqual(2,metrics.components);
+            Assert.AreEqual(2,metrics.borderCells);
+            Assert.AreEqual(0,metrics.holes);
+            Assert.AreEqual(8,metrics.perimeter);
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
