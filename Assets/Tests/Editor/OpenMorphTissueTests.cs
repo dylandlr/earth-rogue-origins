@@ -260,6 +260,60 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void OccupancyIntersectionUnionAndJaccardAreExact()
+        {
+            var a=new OpenMorphTissue.Field(8,8);
+            var b=new OpenMorphTissue.Field(8,8);
+            a.cells[2*8+2].fate=OpenMorphTissue.Fate.Structural;
+            a.cells[2*8+3].fate=OpenMorphTissue.Fate.Structural;
+            a.cells[3*8+2].fate=OpenMorphTissue.Fate.Storage;
+            b.cells[2*8+2].fate=OpenMorphTissue.Fate.Contractile;
+            b.cells[2*8+3].fate=OpenMorphTissue.Fate.Storage;
+            b.cells[3*8+3].fate=OpenMorphTissue.Fate.Structural;
+            var delta=OpenMorphPairMetrics.Compare(a,b);
+            Assert.AreEqual(3,delta.aOccupied);
+            Assert.AreEqual(3,delta.bOccupied);
+            Assert.AreEqual(2,delta.common);
+            Assert.AreEqual(1,delta.onlyA);
+            Assert.AreEqual(1,delta.onlyB);
+            Assert.AreEqual(4,delta.union);
+            Assert.AreEqual(.5f,delta.jaccard,.00001f);
+            Assert.AreEqual(.5f,delta.symmetricDifferenceFraction,.00001f);
+            Assert.AreEqual(0,
+                OpenMorphPairMetrics.Compare(a,a).onlyB);
+            Assert.AreEqual(1f,
+                OpenMorphPairMetrics.Compare(a,a).jaccard,.00001f);
+        }
+
+        [Test]
+        public void EqualBudgetMorphologiesAreDeterministicAcrossBudgetSweep()
+        {
+            var a=OpenMorphGenome.Founder(820);
+            var b=a.Copy();
+            b.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,repeat=2,
+                attachX=.6f,angle=75f,length=.85f,width=.15f
+            });
+            foreach(int limit in new[]{180,400,800})
+            {
+                var baseline=OpenMorphTissue.Grow(a,64,48,72,limit);
+                var branched=OpenMorphTissue.Grow(b,64,48,72,limit);
+                var repeated=OpenMorphTissue.Grow(b,64,48,72,limit);
+                var metrics=OpenMorphPairMetrics.Compare(baseline,branched);
+                var replay=OpenMorphPairMetrics.Compare(branched,repeated);
+                Assert.That(metrics.aOccupied,Is.InRange(1,limit));
+                Assert.That(metrics.bOccupied,Is.InRange(1,limit));
+                Assert.AreEqual(1f,replay.jaccard,.00001f);
+                Assert.AreEqual(0,replay.onlyA);
+                Assert.AreEqual(0,replay.onlyB);
+                Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(
+                    baseline).components);
+                Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(
+                    branched).components);
+            }
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
