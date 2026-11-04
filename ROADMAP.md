@@ -1,3 +1,12 @@
+## Creature gait v2.6
+- [x] Preserve fixed leg roots while adding independently lifted swing feet
+- [x] Alternate foreground fore/hind support through four walk poses
+- [x] Add support continuity and ankle-lift regression tests
+- [x] Add authoritative C# walk-strip export and per-frame joint CSV
+- [ ] Run Unity Editor to capture and review the actual walk strip
+- [ ] Add terrain-height foot planting, body weight shift and toe bend
+- [ ] Validate against the approved original concept-art character proportions
+
 ## Procedural limb art v2.5
 - [x] Add shoulder-rooted bent limb silhouettes with defined knee and ankle joints
 - [x] Shade rear legs more narrowly and darkly for spatial depth
