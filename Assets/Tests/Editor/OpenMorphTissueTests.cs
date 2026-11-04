@@ -631,6 +631,41 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void GrowthOpportunityLedgerSeparatesRegulatoryEffectsFromEligibility()
+        {
+            var genome=OpenMorphGenome.Founder(502995);
+            foreach(bool recurrent in new[]{false,true})
+            {
+                var field=OpenMorphTissue.Grow(
+                    genome,48,36,30,400,true,recurrent);
+                Assert.AreEqual(30,field.eligibleSitesByTick.Length);
+                int totalEligible=0;
+                for(int t=0;t<30;t++)
+                {
+                    int eligible=field.eligibleSitesByTick[t];
+                    totalEligible+=eligible;
+                    Assert.GreaterOrEqual(eligible,field.proposedBirthsByTick[t]);
+                    Assert.GreaterOrEqual(field.baseChanceSumByTick[t],0f);
+                    Assert.GreaterOrEqual(field.finalChanceSumByTick[t],0f);
+                    Assert.LessOrEqual(field.baseChanceSumByTick[t],
+                        eligible+.0001f);
+                    Assert.LessOrEqual(field.finalChanceSumByTick[t],
+                        eligible+.0001f);
+                    Assert.LessOrEqual(field.inhibitedSitesByTick[t]+
+                        field.boostedSitesByTick[t],eligible);
+                    if(!recurrent)
+                    {
+                        Assert.AreEqual(field.baseChanceSumByTick[t],
+                            field.finalChanceSumByTick[t]);
+                        Assert.AreEqual(0,field.inhibitedSitesByTick[t]);
+                        Assert.AreEqual(0,field.boostedSitesByTick[t]);
+                    }
+                }
+                Assert.Greater(totalEligible,0);
+            }
+        }
+
+        [Test]
         public void InvalidSimulationBoundsAreRejected()
         {
             var genome=OpenMorphGenome.Founder(3);
