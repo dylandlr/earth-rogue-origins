@@ -353,6 +353,13 @@ namespace EarthRogueOrigins.Tests
             var again=OpenMorphTissue.Grow(genome,64,48,72,800,true);
             Assert.That(first.Occupied(),Is.InRange(1,800));
             Assert.AreEqual(1,OpenMorphTopologyMetrics.Analyze(first).components);
+            Assert.AreEqual(first.prunedCells,again.prunedCells);
+            Assert.That(first.prunedCells,Is.InRange(0,72));
+            foreach(var cell in first.cells)
+            {
+                if(cell.fate==OpenMorphTissue.Fate.Empty)continue;
+                Assert.GreaterOrEqual(cell.organizerInnovation,0);
+            }
             Assert.AreEqual(1f,
                 OpenMorphPairMetrics.Compare(first,again).jaccard,.00001f);
         }
