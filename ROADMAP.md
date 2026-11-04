@@ -1,3 +1,12 @@
+## Procedural limb art v2.5
+- [x] Add shoulder-rooted bent limb silhouettes with defined knee and ankle joints
+- [x] Shade rear legs more narrowly and darkly for spatial depth
+- [x] Retain deterministic walking/swimming offsets without moving limb roots
+- [x] Add knee bounds, far-side depth and inherited length tests
+- [x] Review actual numeric limb geometry in a separate, clearly labeled technical image
+- [ ] Capture complete organism PNGs with the authoritative Unity C# renderer
+- [ ] Improve weight transfer, feet contacting ground, and integrated belly junctions
+
 ## Creature silhouette fidelity v2.4
 - [x] Use inherited trunk geometry to anchor limb roots, tail root and neck bridge
 - [x] Author 13-station asymmetric rounded, robust and slender dorsal and belly contours
