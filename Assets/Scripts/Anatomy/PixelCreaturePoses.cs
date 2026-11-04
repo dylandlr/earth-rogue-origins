@@ -25,7 +25,7 @@ namespace EarthRogueOrigins.PixelCreatures
                 var p=new PixelPartDescriptor {
                     slot=src.slot,style=src.style,anchor=src.anchor,
                     extent=src.extent,drawOrder=src.drawOrder,
-                    mirrorGroup=src.mirrorGroup
+                    mirrorGroup=src.mirrorGroup,footLift=src.footLift
                 };
                 // Preserve joint root position. The pose offset is applied to
                 // each appendage's distal end by the painter, never by moving
@@ -36,6 +36,18 @@ namespace EarthRogueOrigins.PixelCreatures
                     int stride=phase==1?3:phase==2?0:-3;
                     if(swimming)stride=phase==1?2:phase==3?-2:0;
                     p.mirrorGroup=stride*sign;
+                    // Fore and hind support alternate; the far-side limbs
+                    // counterphase their near-side partner. At every phase
+                    // at least one limb retains a planted ground contact.
+                    if(!swimming)
+                    {
+                        bool frontSwing=phase==1;
+                        bool rearSwing=phase==3;
+                        bool lift=p.slot==PartSlot.ForeLeg?frontSwing:rearSwing;
+                        if(p.drawOrder<2)lift=!lift && phase!=2;
+                        p.footLift=lift?2:0;
+                    }
+                    else p.footLift=1;
                 }
                 else if(p.slot==PartSlot.Tail ||
                         (p.slot==PartSlot.Fin && recipe.plan==CreaturePlan.Fish &&
