@@ -23,8 +23,15 @@ namespace EarthRogueOrigins.Editor
                 DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
             Directory.CreateDirectory(folder);
             var board=new Color32[w*4*h*2];
+            var equalBudgetBoard=new Color32[w*4*h*2];
+            var budgetCsv=new StringBuilder(
+                "index,seed,arm,cell_budget,occupied,perimeter,compactness,components,holes,border_cells,bbox_width,bbox_height\n");
             var background=new Color32(31,38,36,255);
-            for(int i=0;i<board.Length;i++)board[i]=background;
+            for(int i=0;i<board.Length;i++)
+            {
+                board[i]=background;
+                equalBudgetBoard[i]=background;
+            }
             var csv=new StringBuilder(
                 "index,seed,genes,segments,steps,occupied,structural,contractile,sensory,transport,storage,arm,bbox_width,bbox_height,perimeter,components,holes,border_cells,compactness,fill_fraction\n");
 
@@ -55,6 +62,12 @@ namespace EarthRogueOrigins.Editor
                 genome.Validate();
                 var field=OpenMorphTissue.Grow(genome,w,h,72);
                 var pixels=OpenMorphTissue.Render(field);
+                // Same genomes, seed and number of ticks; constrain each
+                // organism to equal maximum tissue mass for shape analysis.
+                const int sharedBudget=180;
+                var budgetField=OpenMorphTissue.Grow(genome,w,h,72,sharedBudget);
+                var budgetPixels=OpenMorphTissue.Render(budgetField);
+                var budgetTopology=OpenMorphTopologyMetrics.Analyze(budgetField);
                 int col=i%4,row=1-i/4;
                 int minX=w,minY=h,maxX=-1,maxY=-1;
                 for(int y=0;y<h;y++)
@@ -67,6 +80,25 @@ namespace EarthRogueOrigins.Editor
                     minY=Math.Min(minY,y);maxY=Math.Max(maxY,y);
                 }
                 var topology=OpenMorphTopologyMetrics.Analyze(field);
+                for(int y=0;y<h;y++)
+                for(int x=0;x<w;x++)
+                {
+                    var pixel=budgetPixels[y*w+x];
+                    if(pixel.a!=0)
+                        equalBudgetBoard[(row*h+y)*(w*4)+col*w+x]=pixel;
+                }
+                budgetCsv.Append(i).Append(',').Append(seed).Append(',')
+                    .Append((i%2)==0?"baseline":"added_branch").Append(',')
+                    .Append(sharedBudget).Append(',')
+                    .Append(budgetTopology.occupied).Append(',')
+                    .Append(budgetTopology.perimeter).Append(',')
+                    .Append(budgetTopology.compactness.ToString("F5",
+                        System.Globalization.CultureInfo.InvariantCulture)).Append(',')
+                    .Append(budgetTopology.components).Append(',')
+                    .Append(budgetTopology.holes).Append(',')
+                    .Append(budgetTopology.borderCells).Append(',')
+                    .Append(budgetTopology.bboxWidth).Append(',')
+                    .Append(budgetTopology.bboxHeight).AppendLine();
                 csv.Append(i).Append(',').Append(seed).Append(',')
                     .Append(genome.genes.Count).Append(',')
                     .Append(OpenMorphDevelopment.Grow(genome).Length).Append(',')
@@ -90,6 +122,10 @@ namespace EarthRogueOrigins.Editor
                         System.Globalization.CultureInfo.InvariantCulture))
                     .AppendLine();
             }
+            var budgetTex=new Texture2D(w*4,h*2,TextureFormat.RGBA32,false);
+            budgetTex.filterMode=FilterMode.Point;
+            budgetTex.SetPixels32(equalBudgetBoard);
+            budgetTex.Apply(false,false);
             var tex=new Texture2D(w*4,h*2,TextureFormat.RGBA32,false);
             tex.filterMode=FilterMode.Point;
             tex.SetPixels32(board);
@@ -99,6 +135,9 @@ namespace EarthRogueOrigins.Editor
                 File.WriteAllBytes(folder+"/actual_tissue_growth.png",
                     tex.EncodeToPNG());
                 File.WriteAllText(folder+"/tissue_metrics.csv",csv.ToString());
+                File.WriteAllBytes(folder+"/actual_equal_budget_tissue.png",
+                    budgetTex.EncodeToPNG());
+                File.WriteAllText(folder+"/equal_budget_metrics.csv",budgetCsv.ToString());
                 File.WriteAllText(folder+"/provenance.txt",
                     "Unity C# OpenMorphGenome -> OpenMorphTissue.Grow -> Render\n"+
                     "Diagnostic 2D tissue growth; four matched baseline/added-branch pairs.\n"+
@@ -106,7 +145,11 @@ namespace EarthRogueOrigins.Editor
                     "morphology metrics include clipping and cavities.\n"+
                     "NOT biological tissues, organs, viability or an evolved ecosystem.\n");
             }
-            finally {UnityEngine.Object.DestroyImmediate(tex);}
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(tex);
+                UnityEngine.Object.DestroyImmediate(budgetTex);
+            }
             Debug.Log("Open tissue growth audit exported: "+folder);
         }
     }
