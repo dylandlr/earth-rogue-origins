@@ -1,3 +1,13 @@
+## Evolvable regulatory morphology v0.9
+- [x] Review actual v0.8 organizer contact sheet and metrics: 8/8 connected, no border contact, weak pruning and persistent mass confounding
+- [x] Add heritable bounded growth/tip/inhibition regulation coefficients to each developmental gene
+- [x] Express local regulatory response from active organizer, chemical signals, neighboring tissue and growth stage
+- [x] Export regulation-only same-topology/same-seed Unity counterfactual image and CSV
+- [x] Add allele inheritance, perturbation, boundedness and deterministic replay tests
+- [ ] Run Unity compilation, EditMode tests and review actual v0.9 regulation-only phenotype sheet
+- [ ] Separate same-mass morphological novelty from size differences in each counterfactual
+- [ ] Introduce conserved nutrient flux, functional death/repair and dynamic cell-fate regulation
+
 ## Structured morphogenesis v0.8
 - [x] Derive continuous axial, distal-tip, activation and inhibition organizers from heritable structural genes
 - [x] Track organizer innovation on developed tissue without predefined animal body-part tags
