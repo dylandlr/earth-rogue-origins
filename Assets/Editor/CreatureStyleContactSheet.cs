@@ -103,11 +103,11 @@ namespace EarthRogueOrigins.Editor
             texture.SetPixels32(sheet);texture.Apply(false,false);
             try
             {
-                File.WriteAllBytes(Folder+"/actual_csharp_full_creatures.png",
+                File.WriteAllBytes(outputFolder+"/actual_csharp_full_creatures.png",
                     texture.EncodeToPNG());
-                File.WriteAllText(Folder+"/visual_metrics.csv",report.ToString());
-                File.WriteAllText(Folder+"/qa_failures.txt",failures.ToString());
-                File.WriteAllText(Folder+"/provenance.txt",
+                File.WriteAllText(outputFolder+"/visual_metrics.csv",report.ToString());
+                File.WriteAllText(outputFolder+"/qa_failures.txt",failures.ToString());
+                File.WriteAllText(outputFolder+"/provenance.txt",
                     "Engine: Unity C# PixelCreaturePainter.RenderPixels\n"+
                     "Seed: 2046\nPixel format: 128x96 point-filtered RGBA32\n"+
                     "This is actual generator output, not AI concept art.\n");
