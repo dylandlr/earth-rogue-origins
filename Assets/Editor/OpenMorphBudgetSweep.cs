@@ -139,6 +139,73 @@ namespace EarthRogueOrigins.Editor
             }
             finally { UnityEngine.Object.DestroyImmediate(organizedTexture); }
 
+            // Regulation-only counterfactual: each genome is copied with
+            // topology, dimensions, chemistry and random seed unchanged.
+            // Only heritable growth/tip/inhibitory response alleles vary.
+            var regBoard=new Color32[Width*4*Height*2];
+            var regCsv=new StringBuilder(
+                "pair,seed,original_cells,regulatory_cells,common_cells,jaccard,original_border,regulatory_border,original_components,regulatory_components,original_pruned,regulatory_pruned\n");
+            for(int i=0;i<regBoard.Length;i++)regBoard[i]=bg;
+            for(int pair=0;pair<4;pair++)
+            {
+                var originalGenome=genomes[pair*2];
+                var alteredGenome=originalGenome.Copy();
+                foreach(var gene in alteredGenome.genes)
+                {
+                    gene.growthResponse=Mathf.Clamp01(
+                        gene.growthResponse+.26f);
+                    gene.tipResponse=Mathf.Clamp01(
+                        gene.tipResponse+.30f);
+                    gene.inhibitionResponse=Mathf.Clamp01(
+                        gene.inhibitionResponse-.25f);
+                }
+                alteredGenome.Validate();
+                var source=OpenMorphTissue.Grow(
+                    originalGenome,Width,Height,72,800,true);
+                var variant=OpenMorphTissue.Grow(
+                    alteredGenome,Width,Height,72,800,true);
+                var overlap=OpenMorphPairMetrics.Compare(source,variant);
+                var sourceShape=OpenMorphTopologyMetrics.Analyze(source);
+                var variantShape=OpenMorphTopologyMetrics.Analyze(variant);
+                regCsv.Append(pair+1).Append(',').Append(originalGenome.seed).Append(',')
+                    .Append(sourceShape.occupied).Append(',')
+                    .Append(variantShape.occupied).Append(',')
+                    .Append(overlap.common).Append(',')
+                    .Append(Format(overlap.jaccard)).Append(',')
+                    .Append(sourceShape.borderCells).Append(',')
+                    .Append(variantShape.borderCells).Append(',')
+                    .Append(sourceShape.components).Append(',')
+                    .Append(variantShape.components).Append(',')
+                    .Append(source.prunedCells).Append(',')
+                    .Append(variant.prunedCells).AppendLine();
+                foreach(var arm in new[]{0,1})
+                {
+                    var pixels=OpenMorphTissue.Render(arm==0?source:variant);
+                    int index=pair*2+arm;
+                    int col=index%4,row=1-index/4;
+                    for(int y=0;y<Height;y++)
+                    for(int x=0;x<Width;x++)
+                    {
+                        var pixel=pixels[y*Width+x];
+                        if(pixel.a!=0)
+                            regBoard[(row*Height+y)*(Width*4)+col*Width+x]=pixel;
+                    }
+                }
+            }
+            var regTex=new Texture2D(Width*4,Height*2,
+                TextureFormat.RGBA32,false);
+            regTex.filterMode=FilterMode.Point;
+            regTex.SetPixels32(regBoard);
+            regTex.Apply(false,false);
+            try
+            {
+                File.WriteAllBytes(folder+"/actual_regulatory_counterfactual.png",
+                    regTex.EncodeToPNG());
+                File.WriteAllText(folder+"/regulatory_counterfactual_metrics.csv",
+                    regCsv.ToString());
+            }
+            finally { UnityEngine.Object.DestroyImmediate(regTex); }
+
             File.AppendAllText(folder+"/provenance.txt",
                 "Budgets 180/400/800, same 72 ticks and seed within "+
                 "each pair. No scale normalization; pairwise "+
