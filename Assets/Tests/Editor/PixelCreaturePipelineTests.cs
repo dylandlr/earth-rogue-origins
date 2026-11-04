@@ -1073,6 +1073,57 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void TetrapodBellyIsRaisedOnlyBetweenLimbStations()
+        {
+            foreach(PartStyle style in new[]{
+                PartStyle.Rounded,PartStyle.Robust,PartStyle.Slender})
+            {
+                float[] upper,lower;
+                PixelSilhouetteTemplates.Profile(
+                    PartSlot.Trunk,style,out upper,out lower);
+                foreach(float u in new[]{0f,.1f,.25f,.29f,.73f,.9f,1f})
+                {
+                    float original=PixelSilhouetteTemplates.Sample(lower,u);
+                    Assert.That(PixelSilhouetteTemplates.TetrapodBellyLower(
+                        style,u),Is.EqualTo(original).Within(.0001f));
+                }
+                float middle=PixelSilhouetteTemplates.TetrapodBellyLower(
+                    style,.51f);
+                Assert.Greater(middle,
+                    PixelSilhouetteTemplates.Sample(lower,.51f)+.1f);
+                for(int step=0;step<=100;step++)
+                {
+                    float u=step/100f;
+                    float low=PixelSilhouetteTemplates.TetrapodBellyLower(
+                        style,u);
+                    float high=PixelSilhouetteTemplates.Sample(upper,u);
+                    Assert.Less(low,high);
+                    Assert.That(low,Is.InRange(-1f,1f));
+                }
+            }
+        }
+
+        [Test]
+        public void BellyRefinementDoesNotDisconnectTetrapodSprites()
+        {
+            foreach(CreatureArchetype archetype in new[]{
+                CreatureArchetype.MarshCrawler,CreatureArchetype.ClayRunner,
+                CreatureArchetype.SlateNewt,CreatureArchetype.PaleJuvenile,
+                CreatureArchetype.ArmoredCrawler})
+            foreach(float depth in new[]{0f,.5f,1f})
+            {
+                var recipe=PixelArtDirection.Hero(archetype,2046);
+                recipe.trunkDepth=depth;
+                var metrics=PixelCreatureVisualMetrics.Analyze(
+                    PixelCreaturePainter.RenderPixels(recipe));
+                Assert.Greater(metrics.nonTransparentPixels,150);
+                Assert.Greater(metrics.dominantFraction,.9f,
+                    archetype+" disconnected with belly depth "+depth);
+                Assert.Less(metrics.maxX,127);
+            }
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
