@@ -1,3 +1,45 @@
+## v0.9 — Heritable local regulatory response (committed; Unity result pending)
+
+The actual v0.8 structured growth render and `organized_800_metrics.csv`
+show all eight colonies connected, zero boundary cells, and 38 total
+pruning events. Growth remains strongly size-biased across branch
+variants: organized baseline sizes were 117, 174, 277, and 250 cells,
+compared with 316, 436, 586, and 800 for matched added-branch genomes.
+This verifies controlled spatial growth, not functional organogenesis.
+
+### First evolvable regulatory layer
+
+- `OpenMorphGenome.Gene` now inherits `growthResponse`,
+  `tipResponse` and `inhibitionResponse` in [0,1].
+  Parameter mutation can modify all three independently of adding
+  anatomical branches.
+- `OpenMorphRegulation` maps the local active organizer's gene, current
+  chemical signals, neighbor crowding, and developmental stage
+  into proliferation, distal tip stimulation, and inhibitory responses.
+- The optional structured tissue growth path uses these responses;
+  legacy growth remains the unchanged control. Regulatory responses
+  are bounded and deterministic.
+- A new real Unity contact sheet `actual_regulatory_counterfactual.png`
+  shows four matched **same-topology, same-seed** pairs. Only regulatory
+  alleles change, while 72 ticks and an 800-cell cap remain fixed.
+- `regulatory_counterfactual_metrics.csv` records occupied cells,
+  Jaccard overlap, border contact, components, and pruning per arm.
+  The current perturbation changes three regulatory coefficients
+  together, so a future single-allele ablation is still required.
+
+The new regulation is an initial hand-designed response equation
+with evolvable coefficients; it is **not** yet a full recurrent GRN,
+biological signaling network, physiological metabolism or learned
+cell fate specification.
+
+### Verification
+
+Run `scripts/export-open-tissue.ps1` after pulling the latest
+commit. Inspect the new regulatory-only contact sheet and CSV.
+Treat large size changes as confounding, not automatically anatomical
+novelty. The source has been committed, but Unity compilation,
+EditMode tests and the v0.9 render have not yet been verified.
+
 # v0.8 Structured Morphogenesis — Organizers, Tips, Inhibition and Pruning
 
 ## Evidence motivating the change
