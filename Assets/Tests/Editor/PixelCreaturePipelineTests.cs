@@ -783,6 +783,62 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void MidStanceBodyCompressionMaintainsGroundContact()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,314);
+            foreach(float length in new[]{0f,.5f,1f})
+            foreach(float depth in new[]{0f,.5f,1f})
+            {
+                r.trunkLength=length;r.trunkDepth=depth;
+                var neutral=PixelCreaturePoses.Layout(r,0,false);
+                var squat=PixelCreaturePoses.Layout(r,2,false);
+                PixelPartDescriptor trunk0=null,trunk2=null;
+                foreach(var p in neutral)if(p.slot==PartSlot.Trunk)trunk0=p;
+                foreach(var p in squat)if(p.slot==PartSlot.Trunk)trunk2=p;
+                Assert.NotNull(trunk0);Assert.NotNull(trunk2);
+                Assert.AreEqual(trunk0.anchor.y-1,trunk2.anchor.y);
+                for(int i=0;i<neutral.Length;i++)
+                {
+                    var a=neutral[i];var b=squat[i];
+                    Assert.AreEqual(a.slot,b.slot);
+                    if(a.slot!=PartSlot.ForeLeg&&a.slot!=PartSlot.HindLeg)continue;
+                    var original=PixelLimbSilhouette.Build(
+                        a.anchor.x,a.anchor.y,a.extent.y,a.style,0,
+                        a.slot==PartSlot.ForeLeg,a.drawOrder<2);
+                    var lowered=PixelLimbSilhouette.Build(
+                        b.anchor.x,b.anchor.y,b.extent.y,b.style,0,
+                        b.slot==PartSlot.ForeLeg,b.drawOrder<2,b.footLift);
+                    Assert.AreEqual(original.ankle.y,lowered.ankle.y,
+                        "Compression shifted ground contact.");
+                    Assert.AreEqual(original.root.y-1,lowered.root.y);
+                }
+            }
+        }
+
+        [Test]
+        public void GroundShadowTracksInheritedLegLength()
+        {
+            var r=PixelArtDirection.Hero(CreatureArchetype.MarshCrawler,650);
+            r.legLength=0f;
+            var shortLegs=PixelCreaturePainter.RenderGroundShadowPixels(r);
+            r.legLength=1f;
+            var longLegs=PixelCreaturePainter.RenderGroundShadowPixels(r);
+            int sumShort=0,countShort=0,sumLong=0,countLong=0;
+            for(int y=0;y<96;y++)
+            for(int x=0;x<128;x++)
+            {
+                int i=y*128+x;
+                if(shortLegs[i].a>0){sumShort+=y;countShort++;}
+                if(longLegs[i].a>0){sumLong+=y;countLong++;}
+            }
+            Assert.Greater(countShort,50);
+            Assert.Greater(countLong,50);
+            Assert.Greater(sumShort/(float)countShort,
+                sumLong/(float)countLong+4f,
+                "Short-legged creature shadow should sit higher on the canvas.");
+        }
+
+        [Test]
         public void LayerIndexMustBeInRange()
         {
             var r=PixelCreatureRecipe.Founder(CreaturePlan.Fish,4);
