@@ -14,7 +14,7 @@ $otherEditors=@(Get-CimInstance Win32_Process -Filter "Name = 'Unity.exe'" -Erro
     Where-Object {
         $cmd=$_.CommandLine
         $cmd -and (
-            $cmd.Replace('/','\\').IndexOf($project,[StringComparison]::OrdinalIgnoreCase) -ge 0
+            $cmd.Replace('/','\').IndexOf($project,[StringComparison]::OrdinalIgnoreCase) -ge 0
         )
     })
 if($otherEditors.Count -gt 0){
