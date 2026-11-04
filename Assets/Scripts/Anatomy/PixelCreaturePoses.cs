@@ -27,9 +27,19 @@ namespace EarthRogueOrigins.PixelCreatures
                     extent=src.extent,drawOrder=src.drawOrder,
                     mirrorGroup=src.mirrorGroup,footLift=src.footLift
                 };
-                // Preserve joint root position. The pose offset is applied to
-                // each appendage's distal end by the painter, never by moving
-                // the attachment anchor away from the body.
+                // At mid-stance the entire body settles by one logical
+                // pixel. Shortening the legs by the same amount keeps their
+                // contact points on the identical ground plane rather than
+                // translating the whole creature through the terrain.
+                if(!swimming && phase==2 && recipe.plan==CreaturePlan.Tetrapod)
+                {
+                    p.anchor=new Vector2Int(p.anchor.x,p.anchor.y-1);
+                    if(p.slot==PartSlot.ForeLeg || p.slot==PartSlot.HindLeg)
+                        p.extent=new Vector2Int(p.extent.x,
+                            Mathf.Max(5,p.extent.y-1));
+                }
+                // All other gait motion bends distal anatomy while retaining
+                // the attachment stations of the current body pose.
                 if(p.slot==PartSlot.ForeLeg || p.slot==PartSlot.HindLeg)
                 {
                     int sign=p.slot==PartSlot.ForeLeg?1:-1;
