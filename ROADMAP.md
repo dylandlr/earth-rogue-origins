@@ -1,3 +1,14 @@
+## Local developmental tissues v0.2
+- [x] Add deterministic bounded 2D signaling and neighbor-constrained cellular growth
+- [x] Support candidate structural, contractile, sensory, transport and storage tissue fates
+- [x] Make tissue activation depend on localized heritable growth responses
+- [x] Export eight true Unity C# tissue growth experiments with fate statistics
+- [x] Add replay, neighbor-born tissue and fate accounting regression tests
+- [ ] Compile and execute the Unity v0.2 tissue exporter and Edit Mode suite
+- [ ] Couple structural genome parent topology to tissue growth lineage and spatial activation
+- [ ] Track development event logs, cell death/repair and resource conservation
+- [ ] Add genuine 3D topology, mechanical properties and co-evolved sensors/actuators
+
 ## Open-ended developmental morphology v0.1
 - [x] Replace fixed anatomical labels in the experimental pathway with variable-topology growth genes
 - [x] Deterministic parent-linked branching, mirroring, repetition and bounded decoding
