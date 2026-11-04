@@ -1,3 +1,15 @@
+## Open-ended developmental morphology v0.1
+- [x] Replace fixed anatomical labels in the experimental pathway with variable-topology growth genes
+- [x] Deterministic parent-linked branching, mirroring, repetition and bounded decoding
+- [x] Add/remove/reconnect structural mutations plus continuous shape mutations
+- [x] Rasterize experimental morphologies with actual C# and add an eight-genome Unity export
+- [x] Add tests for topology evolution, reproducibility, growth caps and distinct rendered phenotypes
+- [ ] Run Unity export and Edit Mode tests for the new open-morphology gallery
+- [ ] Grow differentiated tissues from local gene-expression fields (not skeletal capsules alone)
+- [ ] Connect generated sensors, actuators, metabolism, mass and energy budgets
+- [ ] Co-evolve controllers and morphology, then evaluate viability in ecosystems
+- [ ] Retire legacy category constraints when open morphology meets simulation acceptance gates
+
 ## Full-creature visual QA v2.9
 - [x] Compute connected pixels, geometry bounds, colors and aspect ratio on final rasterized sprites
 - [x] Add authentic C# 8-archetype contact sheet and individual transparent PNG export
