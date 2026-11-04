@@ -111,6 +111,7 @@ namespace EarthRogueOrigins.PixelCreatures
         public Vector2Int extent;
         public int drawOrder;
         public int mirrorGroup;
+        public int footLift; // Visual gait displacement; attachment root is unchanged.
     }
 
     public static class PixelCreatureDevelopment
