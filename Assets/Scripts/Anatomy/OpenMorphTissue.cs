@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EarthRogueOrigins.PixelCreatures
@@ -58,8 +59,10 @@ namespace EarthRogueOrigins.PixelCreatures
         /// existing tissue and spends a bounded internal energy reserve.
         /// </summary>
         public static Field Grow(OpenMorphGenome genome,
-            int width=64,int height=48,int steps=32)
+            int width=64,int height=48,int steps=32,
+            int maxCells=int.MaxValue)
         {
+            if(maxCells<1)throw new ArgumentOutOfRangeException(nameof(maxCells));
             if(genome==null)throw new ArgumentNullException(nameof(genome));
             if(steps<0 || steps>256)throw new ArgumentOutOfRangeException(nameof(steps));
             genome.Validate();
@@ -78,6 +81,10 @@ namespace EarthRogueOrigins.PixelCreatures
             // paired even when a mutation changes how many births are eligible.
             for(int tick=0;tick<steps;tick++)
             {
+                // Collect proposed daughter cells, then apply a fair
+                // whole-organism tissue budget after all local rules run.
+                var births=new List<int>();
+                int existing=field.Occupied();
                 for(int y=0;y<height;y++)
                 for(int x=0;x<width;x++)
                 {
@@ -153,6 +160,8 @@ namespace EarthRogueOrigins.PixelCreatures
                         float directionalChance=Mathf.Clamp01(
                             .10f+.19f*bias+.38f*guideStrength);
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
+                        {
+                            births.Add(i);
                             next[i]=new Cell {
                                 fate=ChooseFate(genome,x,y,width,height,a,b),
                                 signalA=Mathf.Clamp01(a+.18f),
@@ -160,9 +169,31 @@ namespace EarthRogueOrigins.PixelCreatures
                                     bestEnergy*.86f+.09f*guideStrength),
                                 lineage=lineage
                             };
+                        }
                         else next[i]=new Cell {
                             fate=Fate.Empty,signalA=a,signalB=b
                         };
+                    }
+                }
+                // When the remaining budget is smaller than proposed
+                // births, rank only proposals using a fixed cell/tick hash.
+                // Avoid row-scan bias that would consistently favor the
+                // upper-left side of a developmental field.
+                int allowance=Math.Max(0,maxCells-existing);
+                if(births.Count>allowance)
+                {
+                    births.Sort((left,right)=>
+                    {
+                        float a=Noise(genome.seed^0x51F15E,tick,left%width,left/width);
+                        float b=Noise(genome.seed^0x51F15E,tick,right%width,right/width);
+                        int order=a.CompareTo(b);
+                        return order!=0?order:left.CompareTo(right);
+                    });
+                    for(int k=allowance;k<births.Count;k++)
+                    {
+                        int rejected=births[k];
+                        next[rejected].fate=Fate.Empty;
+                        next[rejected].energy=0f;
                     }
                 }
                 Array.Copy(next,field.cells,next.Length);
