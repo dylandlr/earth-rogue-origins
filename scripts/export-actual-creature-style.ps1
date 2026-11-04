@@ -30,10 +30,28 @@ Remove-Item -LiteralPath $log,$sheet,$csv -ErrorAction SilentlyContinue
 Write-Host "Launching Unity Editor: $UnityEditor"
 Write-Host "Project: $project"
 Write-Host "Log: $log"
-& $UnityEditor -batchmode -nographics -quit -projectPath $project -logFile $log -executeMethod EarthRogueOrigins.Editor.CreatureStyleContactSheet.Run
-$exitCode=$LASTEXITCODE
+# Wait for the actual Unity GUI process to finish initialization.
+$stdout=Join-Path $output 'unity-stdout.txt'
+$stderr=Join-Path $output 'unity-stderr.txt'
+Remove-Item -LiteralPath $stdout,$stderr -ErrorAction SilentlyContinue
+$argsUnity=@(
+    '-batchmode','-nographics','-quit',
+    '-projectPath', ('"' + $project + '"'),
+    '-logFile', ('"' + $log + '"'),
+    '-executeMethod','EarthRogueOrigins.Editor.CreatureStyleContactSheet.Run'
+)
+$process=Start-Process -FilePath $UnityEditor -ArgumentList $argsUnity -Wait -PassThru `
+    -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+$exitCode=$process.ExitCode
+Write-Host "Unity process PID: $($process.Id) | Exit code: $exitCode"
 if(-not (Test-Path -LiteralPath $log)){
-    throw "Unity exited ($exitCode) without creating a fresh log. Close the GUI Editor for this project and rerun."
+    Write-Host "Unity did not write its Editor log. Startup stdout/stderr follow:"
+    if(Test-Path $stdout){Get-Content -LiteralPath $stdout -Tail 60 | Out-Host}
+    if(Test-Path $stderr){Get-Content -LiteralPath $stderr -Tail 60 | Out-Host}
+    Write-Host "Other Unity processes:"
+    Get-CimInstance Win32_Process -Filter "Name = 'Unity.exe'" -ErrorAction SilentlyContinue |
+        Select-Object ProcessId,CommandLine | Format-List | Out-Host
+    throw "Unity exited ($exitCode) without a fresh Editor log; the export method was not confirmed to run. Try opening the project via Unity Hub."
 }
 if($exitCode -ne 0 -or -not (Test-Path -LiteralPath $sheet) -or -not (Test-Path -LiteralPath $csv)){
     Write-Host "Unity exit code: $exitCode"
