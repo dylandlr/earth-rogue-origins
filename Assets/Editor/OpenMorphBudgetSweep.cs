@@ -88,7 +88,7 @@ namespace EarthRogueOrigins.Editor
             // The only changed variable is developmental organization.
             var structuredBoard=new Color32[Width*4*Height*2];
             var organizedCsv=new StringBuilder(
-                "index,seed,arm,mode,occupied,border_cells,components,holes,perimeter,compactness,legacy_vs_organized_iou\n");
+                "index,seed,arm,mode,occupied,border_cells,components,holes,perimeter,compactness,legacy_vs_organized_iou,pruned_cells,active_organizers\n");
             for(int i=0;i<structuredBoard.Length;i++)
                 structuredBoard[i]=bg;
             for(int i=0;i<8;i++)
@@ -108,6 +108,10 @@ namespace EarthRogueOrigins.Editor
                     if(pixel.a!=0)
                         structuredBoard[(row*Height+y)*(Width*4)+col*Width+x]=pixel;
                 }
+                var activeOrganizers=new System.Collections.Generic.HashSet<int>();
+                foreach(var cell in structured.cells)
+                    if(cell.fate!=OpenMorphTissue.Fate.Empty)
+                        activeOrganizers.Add(cell.organizerInnovation);
                 organizedCsv.Append(i).Append(',').Append(genomes[i].seed).Append(',')
                     .Append((i%2)==0?"baseline":"added_branch").Append(',')
                     .Append("organized").Append(',')
@@ -117,7 +121,9 @@ namespace EarthRogueOrigins.Editor
                     .Append(metrics.holes).Append(',')
                     .Append(metrics.perimeter).Append(',')
                     .Append(Format(metrics.compactness)).Append(',')
-                    .Append(Format(delta.jaccard)).AppendLine();
+                    .Append(Format(delta.jaccard)).Append(',')
+                    .Append(structured.prunedCells).Append(',')
+                    .Append(activeOrganizers.Count).AppendLine();
             }
             var organizedTexture=new Texture2D(Width*4,Height*2,
                 TextureFormat.RGBA32,false);
