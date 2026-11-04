@@ -48,6 +48,18 @@ namespace EarthRogueOrigins.PixelCreatures
             };
         }
 
+        /// <summary>
+        /// Adjusts an already organization-limited cell-division chance.
+        /// A neutral network (growth=brake=.5) leaves it unchanged.
+        /// This avoids multiplying two separate inhibition systems.
+        /// </summary>
+        public static float ModulateGrowth(float baseChance,State state)
+        {
+            return Mathf.Clamp01(Mathf.Clamp01(baseChance)+
+                .18f*(Mathf.Clamp01(state.growth)-.5f)-
+                .10f*(Mathf.Clamp01(state.brake)-.5f));
+        }
+
         public static OpenMorphTissue.Fate Differentiate(State state)
         {
             float x=Mathf.Clamp01(state.fate);
