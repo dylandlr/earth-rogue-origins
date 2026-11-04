@@ -1,3 +1,14 @@
+## Structured morphogenesis v0.8
+- [x] Derive continuous axial, distal-tip, activation and inhibition organizers from heritable structural genes
+- [x] Track organizer innovation on developed tissue without predefined animal body-part tags
+- [x] Add opt-in tip-biased growth and lateral inhibition, preserving the v0.7 control
+- [x] Add conservative leaf pruning with connectivity-preserving neighbor checks
+- [x] Export actual organized 800-cell tissue contact sheet and diagnostic CSV alongside legacy control
+- [x] Add deterministic organizer and structured tissue-growth regression tests
+- [ ] Compile and run v0.8 Unity EditMode tests and validate true-organized morphology
+- [ ] Replace fixed organizer coefficients with learned/evolved local gene regulation
+- [ ] Add resource conservation, functional tissue physics and ecology-based viability
+
 ## Local developmental tissues v0.2
 - [x] Add deterministic bounded 2D signaling and neighbor-constrained cellular growth
 - [x] Support candidate structural, contractile, sensory, transport and storage tissue fates
