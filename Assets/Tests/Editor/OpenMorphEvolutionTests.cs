@@ -64,6 +64,61 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void ExpressedGuidanceUsesActualDevelopmentCoordinates()
+        {
+            var genome=OpenMorphGenome.Founder(402);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                length=.85f,angle=70f,repeat=2,mirror=true
+            });
+            var field=OpenMorphTissue.Grow(
+                genome,48,36,36,360,true,true);
+            var metrics=OpenMorphPhenotypeMetrics.Analyze(genome,field);
+            Assert.AreEqual(field.Occupied(),metrics.occupied);
+            Assert.Greater(metrics.expressedGuidanceCells,0);
+            Assert.Greater(metrics.supportedTissueCells,0);
+            Assert.AreEqual(metrics.occupied,
+                metrics.supportedTissueCells+
+                metrics.tissueOutsideGuidance);
+            Assert.That(metrics.coverageJaccard,Is.InRange(0f,1f));
+            Assert.That(metrics.supportedTissueFraction,Is.InRange(0f,1f));
+        }
+
+        [Test]
+        public void PhenotypeNoveltyDetectsIdenticalAndDifferentTissue()
+        {
+            var genome=OpenMorphGenome.Founder(407);
+            var a=OpenMorphTissue.Grow(genome,32,24,22,200,true,true);
+            var b=OpenMorphTissue.Grow(genome,32,24,22,200,true,true);
+            var c=new OpenMorphTissue.Field(32,24);
+            c.cells[0].fate=OpenMorphTissue.Fate.Structural;
+            float identical=OpenMorphPhenotypeMetrics.Novelty(
+                a,new[]{b});
+            float different=OpenMorphPhenotypeMetrics.Novelty(
+                a,new[]{c});
+            Assert.AreEqual(0f,identical,.000001f);
+            Assert.Greater(different,identical);
+        }
+
+        [Test]
+        public void QualityDiversityScoresAndAncestryReplay()
+        {
+            var first=OpenMorphEvolution.Evolve(112,2,4);
+            var again=OpenMorphEvolution.Evolve(112,2,4);
+            for(int i=0;i<first.evaluated.Count;i++)
+            {
+                var a=first.evaluated[i];
+                var b=again.evaluated[i];
+                Assert.AreEqual(a.novelty,b.novelty);
+                Assert.AreEqual(a.selectionScore,b.selectionScore);
+                Assert.AreEqual(a.bodyGuidanceCoverage,b.bodyGuidanceCoverage);
+                Assert.AreEqual(a.parentId,b.parentId);
+                Assert.That(a.novelty,Is.InRange(0f,1f));
+                Assert.That(a.selectionScore,Is.InRange(0f,1f));
+            }
+        }
+
+        [Test]
         public void PopulationConstraintsAreEnforced()
         {
             Assert.Throws<System.ArgumentOutOfRangeException>(()=>
