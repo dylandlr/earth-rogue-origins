@@ -30,7 +30,9 @@ namespace EarthRogueOrigins.Editor
             Directory.CreateDirectory(folder);
             var result=OpenMorphEvolution.Evolve();
             var csv=new StringBuilder(
-                "generation,id,parent_id,seed,genes,segments,occupied,scarce_survival,moderate_survival,fitness,diversity,novelty,selection_score,guide_coverage,supported_tissue_cells\n");
+                "generation,id,parent_id,seed,genes,segments,occupied,scarce_survival,moderate_survival,fitness,diversity,novelty,selection_score,guide_coverage,supported_tissue_cells,expressed_branches,unexpressed_branches\n");
+            var branches=new StringBuilder(
+                "generation,id,innovation,guided_cells,occupied_cells,expression_fraction,expressed\n");
             var champions=new StringBuilder(
                 "generation,id,parent_id,genes,segments,occupied,fitness,scarce_survival,moderate_survival\n");
             foreach(var animal in result.evaluated)
@@ -49,7 +51,9 @@ namespace EarthRogueOrigins.Editor
                     .Append(N(animal.novelty)).Append(',')
                     .Append(N(animal.selectionScore)).Append(',')
                     .Append(N(animal.bodyGuidanceCoverage)).Append(',')
-                    .Append(animal.supportedTissueCells).AppendLine();
+                    .Append(animal.supportedTissueCells).Append(',')
+                    .Append(animal.expressedBranches).Append(',')
+                    .Append(animal.unexpressedBranches).AppendLine();
             }
             foreach(var animal in result.champions)
                 champions.Append(animal.generation).Append(',')
@@ -80,6 +84,17 @@ namespace EarthRogueOrigins.Editor
             foreach(var animal in result.evaluated)
             {
                 if(animal.generation!=final)continue;
+                var expressionReport=OpenMorphBranchExpression.Analyze(
+                    animal.genome,animal.tissue);
+                foreach(var gene in expressionReport.genes)
+                    branches.Append(animal.generation).Append(',')
+                        .Append(animal.id).Append(',')
+                        .Append(gene.innovation).Append(',')
+                        .Append(gene.guidedCells).Append(',')
+                        .Append(gene.occupiedCells).Append(',')
+                        .Append(N(gene.expressionFraction)).Append(',')
+                        .Append(gene.expressed?"true":"false")
+                        .AppendLine();
                 var pixels=OpenMorphTissue.Render(animal.tissue);
                 var geometry=OpenMorphRasterizer.Render(animal.genome);
                 var guidance=OpenMorphOrganizers.Build(animal.genome,
@@ -152,6 +167,8 @@ namespace EarthRogueOrigins.Editor
                     alignmentTex.EncodeToPNG());
                 File.WriteAllText(folder+"/population.csv",csv.ToString());
                 File.WriteAllText(folder+"/champions.csv",champions.ToString());
+                File.WriteAllText(folder+"/branch_expression.csv",
+                    branches.ToString());
                 File.WriteAllText(folder+"/provenance.txt",
                     "Native Unity C# developmental tissue and recurrent GRN.\n"+
                     "Seed="+result.seed+" generations="+result.generations+
