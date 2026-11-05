@@ -32,7 +32,7 @@ $latest=Get-ChildItem -LiteralPath $root -Directory -Filter 'run-*' |
 if(-not $latest){
     throw "Unity exited but produced no new emergent experiment directory. Inspect $log"
 }
-foreach($file in @('actual_emergent_generation.png','population.csv','champions.csv','provenance.txt')){
+foreach($file in @('actual_emergent_generation.png','actual_emergent_structures.png','population.csv','champions.csv','provenance.txt')){
     if(-not (Test-Path -LiteralPath (Join-Path $latest.FullName $file))){
         throw "Incomplete emergent experiment: missing $file in $($latest.FullName)"
     }
@@ -47,6 +47,7 @@ if($genomes.Count -ne 8){
 }
 Write-Host "Verified real Unity experiment: $($latest.FullName)"
 Write-Host "Upload: $(Join-Path $latest.FullName 'actual_emergent_generation.png')"
+Write-Host "Upload: $(Join-Path $latest.FullName 'actual_emergent_structures.png')"
 Write-Host "Upload: $(Join-Path $latest.FullName 'population.csv')"
 Write-Host "Upload: $(Join-Path $latest.FullName 'champions.csv')"
 Write-Host "These are experimental 2D tissue morphologies, not finished animated creatures."
