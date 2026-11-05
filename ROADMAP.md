@@ -1,3 +1,17 @@
+## Integrated emergent creature generation v2.0 — now the main development track
+- [x] Connect variable-topology genomes, recurrent developmental tissue, nutrient survival, parent selection and mutation
+- [x] Run a deterministic four-generation, eight-individual experimental population
+- [x] Export genuine selected tissue and genome-derived body graph galleries from Unity
+- [x] Record all 32 evaluated individuals, ancestry, survival and diversity measurements
+- [x] Archive final-generation genome instructions as JSON
+- [x] Add repeatability, ancestry, connectivity and scoring regression tests
+- [x] Add one fast dedicated Unity export command independent of legacy audits
+- [ ] Run and verify the first complete Unity generation and tests
+- [ ] Implement shared-world resource competition and naturalistic reproduction
+- [ ] Couple conserved resource allocation to developmental division and living tissue maintenance
+- [ ] Express working sensors/actuators, movement and ecological interactions from evolved bodies
+- [ ] Build continuous playable Unity ecosystem visualization and long-running lineage tracking
+
 ## Finite-resource tissue maintenance v1.5
 - [x] Verify v1.4 signed GRN channel effects and retain inhibitory phenotypes
 - [x] Add frozen-tissue nutrient uptake from a finite environmental pool with external replenishment
