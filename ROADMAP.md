@@ -1,3 +1,15 @@
+## Finite-resource tissue maintenance v1.5
+- [x] Verify v1.4 signed GRN channel effects and retain inhibitory phenotypes
+- [x] Add frozen-tissue nutrient uptake from a finite environmental pool with external replenishment
+- [x] Implement conservative local transfer, storage capacity and tissue-specific maintenance
+- [x] Add cell death on repeated maintenance deficits with conservation-ledger receipts
+- [x] Compare pair 3 and pair 4 Full/Neutral developmental morphologies under scarce/moderate/rich nutrients
+- [x] Export real Unity 4×3 resource heatmap, survival metrics and time-series traces
+- [x] Add deterministic nutrient conservation, starvation and resource-parameter tests
+- [ ] Verify Unity compilation, EditMode tests, conservation residuals and real resource images
+- [ ] Introduce resource coupling during morphogenesis (no free cell energy), not merely after development
+- [ ] Derive functional feeding, transport, sensory and actuator effects and ecological fitness
+
 ## GRN channel attribution v1.4
 - [x] Analyze verified v1.3 opportunities: pair 3 inhibited on 2,657/2,664 eligible sites, mean division chance 11.23% to 7.23%
 - [x] Retain inhibitory phenotypes rather than tuning an individual genotype
