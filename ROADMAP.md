@@ -1,3 +1,16 @@
+## Expressed anatomy and quality-diversity v2.1
+- [x] Analyze actual v2.0 population: mean proxy fitness increases, but 5/8 final genomes have a single gene
+- [x] Add morphology novelty using nearest-neighbor phenotype occupancy distance, not gene count
+- [x] Preserve highest-fitness champion and select morphologically distinct parents for mutation
+- [x] Measure actual tissue expression against inherited organizer fields on the same grid
+- [x] Export aligned expression audit alongside original tissue and presentation-scaled structural images
+- [x] Archive new novelty, selection and guidance-expression metrics per individual
+- [x] Add deterministic novelty, expression and ancestry tests
+- [ ] Compile and execute Unity v2.1 EditMode tests and integrated export
+- [ ] Confirm morphological diversity increases without collapsing survival proxy
+- [ ] Couple conserved energy to growth/division and make tissue functions dynamically useful
+- [ ] Build shared-world reproduction, sensing, actuation, and resource competition
+
 ## Integrated emergent creature generation v2.0 — now the main development track
 - [x] Connect variable-topology genomes, recurrent developmental tissue, nutrient survival, parent selection and mutation
 - [x] Run a deterministic four-generation, eight-individual experimental population
