@@ -1,3 +1,14 @@
+## Expressed branch selection v2.2
+- [x] Analyze true v2.1 Unity run: mean fitness rose 0.6333 to 0.8781 while mean phenotype novelty fell 0.2852 to 0.1905
+- [x] Attribute developed tissue to actual inherited organizer innovations on the tissue coordinate grid
+- [x] Remove free complexity rewards for unexpressed fan-diagram segments
+- [x] Preserve the champion and a viable high-novelty parent during generation selection
+- [x] Export per-gene expression counts and expanded population CSV
+- [x] Add development/genotype expression and determinism regression tests
+- [ ] Compile Unity, run v2.2 experiment and verify retention of distinct body phenotypes
+- [ ] Couple mechanical actuation and ongoing nutrient flow to development and movement
+- [ ] Evaluate behavior and reproduction in a shared biome instead of fixed-score proxies
+
 ## Expressed anatomy and quality-diversity v2.1
 - [x] Analyze actual v2.0 population: mean proxy fitness increases, but 5/8 final genomes have a single gene
 - [x] Add morphology novelty using nearest-neighbor phenotype occupancy distance, not gene count
