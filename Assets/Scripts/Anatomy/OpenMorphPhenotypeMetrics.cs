@@ -66,7 +66,7 @@ namespace EarthRogueOrigins.PixelCreatures
             var distances=new List<float>();
             foreach(var other in reference)
             {
-                if(other==null || Object.ReferenceEquals(other,subject))
+                if(other==null || System.Object.ReferenceEquals(other,subject))
                     continue;
                 distances.Add(1f-OpenMorphPairMetrics.Compare(subject,other).jaccard);
             }
