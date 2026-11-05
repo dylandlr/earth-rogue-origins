@@ -20,6 +20,8 @@ namespace EarthRogueOrigins.PixelCreatures
             public float novelty,selectionScore,bodyGuidanceCoverage;
             public int supportedTissueCells;
             public int expressedBranches,unexpressedBranches;
+            public int causalBranches;
+            public float strongestBranchEffect;
             public OpenMorphTissue.Field tissue;
         }
 
@@ -91,8 +93,13 @@ namespace EarthRogueOrigins.PixelCreatures
                     // Never reward unexpressed decorative structure.
                     var expression=OpenMorphBranchExpression.Analyze(
                         genome,tissue);
+                    // Geometric overlap was not causal expression.
+                    // A branch earns credit only if disabling it changes
+                    // the developed tissue with the random seed fixed.
+                    var causal=OpenMorphCausalBranches.Analyze(
+                        genome,tissue,DevelopmentSteps,MaxTissueCells);
                     float functionalStructure=Mathf.Clamp01(
-                        expression.expressedNonRootGenes/3f);
+                        causal.activeBranches/3f);
                     item.fitness=
                         .42f*item.scarceSurvival+
                         .28f*item.moderateSurvival+
@@ -105,6 +112,8 @@ namespace EarthRogueOrigins.PixelCreatures
                     item.expressedBranches=expression.expressedNonRootGenes;
                     item.unexpressedBranches=expression.nonRootGenes-
                         expression.expressedNonRootGenes;
+                    item.causalBranches=causal.activeBranches;
+                    item.strongestBranchEffect=causal.greatestChangedFraction;
                     if(occupied<8)item.fitness*=.15f;
                     cohort.Add(item);
                     run.evaluated.Add(item);
