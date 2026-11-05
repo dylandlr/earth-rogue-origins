@@ -19,6 +19,7 @@ namespace EarthRogueOrigins.PixelCreatures
             public float fitness,scarceSurvival,moderateSurvival,diversity;
             public float novelty,selectionScore,bodyGuidanceCoverage;
             public int supportedTissueCells;
+            public int expressedBranches,unexpressedBranches;
             public OpenMorphTissue.Field tissue;
         }
 
@@ -87,17 +88,23 @@ namespace EarthRogueOrigins.PixelCreatures
                     // reward maintained tissue under two environments,
                     // and retain an explicit diversity measurement.
                     float biomass=Mathf.Clamp01(occupied/55f);
-                    float complexity=Mathf.Clamp01(
-                        (segments-1)/6f);
+                    // Never reward unexpressed decorative structure.
+                    var expression=OpenMorphBranchExpression.Analyze(
+                        genome,tissue);
+                    float functionalStructure=Mathf.Clamp01(
+                        expression.expressedNonRootGenes/3f);
                     item.fitness=
                         .42f*item.scarceSurvival+
                         .28f*item.moderateSurvival+
                         .20f*biomass+
-                        .10f*complexity;
+                        .10f*functionalStructure;
                     var expressed=OpenMorphPhenotypeMetrics.Analyze(
                         genome,tissue);
                     item.bodyGuidanceCoverage=expressed.coverageJaccard;
                     item.supportedTissueCells=expressed.supportedTissueCells;
+                    item.expressedBranches=expression.expressedNonRootGenes;
+                    item.unexpressedBranches=expression.nonRootGenes-
+                        expression.expressedNonRootGenes;
                     if(occupied<8)item.fitness*=.15f;
                     cohort.Add(item);
                     run.evaluated.Add(item);
@@ -138,6 +145,23 @@ namespace EarthRogueOrigins.PixelCreatures
                 int poolSize=Math.Max(2,populationSize/2);
                 var selectedParents=new List<Individual> {cohort[0]};
                 const float minimumNovelDistance=.22f;
+                // Reserve one place for the most novel sufficiently
+                // viable organism. This protects an exploratory lineage
+                // even when it ranks lower under survival-heavy scoring.
+                Individual noveltyParent=null;
+                foreach(var candidate in cohort)
+                {
+                    if(candidate.fitness<cohort[0].fitness*.55f)continue;
+                    if(noveltyParent==null ||
+                        candidate.novelty>noveltyParent.novelty ||
+                        (candidate.novelty==noveltyParent.novelty &&
+                         candidate.id<noveltyParent.id))
+                        noveltyParent=candidate;
+                }
+                if(noveltyParent!=null &&
+                    noveltyParent!=cohort[0] &&
+                    selectedParents.Count<poolSize)
+                    selectedParents.Add(noveltyParent);
                 foreach(var candidate in bySelection)
                 {
                     if(selectedParents.Count>=poolSize)break;
