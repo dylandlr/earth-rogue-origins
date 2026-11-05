@@ -176,6 +176,73 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void AblationRemovesDescendantsWithoutChangingAncestorSeed()
+        {
+            var g=OpenMorphGenome.Founder(724);
+            g.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                angle=60f,length=.9f,width=.2f
+            });
+            g.genes.Add(new OpenMorphGenome.Gene {
+                innovation=2,parentInnovation=1,
+                angle=-35f,length=.7f,width=.15f
+            });
+            g.genes.Add(new OpenMorphGenome.Gene {
+                innovation=3,parentInnovation=0,
+                angle=-60f,length=.6f,width=.12f
+            });
+            var knockout=OpenMorphCausalBranches.Ablate(g,1);
+            knockout.Validate();
+            Assert.AreEqual(g.seed,knockout.seed);
+            Assert.AreEqual(2,knockout.genes.Count);
+            Assert.AreEqual(0,knockout.genes[0].innovation);
+            Assert.AreEqual(3,knockout.genes[1].innovation);
+            Assert.AreEqual(4,g.genes.Count);
+            Assert.Throws<System.ArgumentException>(()=>
+                OpenMorphCausalBranches.Ablate(g,0));
+        }
+
+        [Test]
+        public void CausalBranchAccountingUsesCounterfactualOccupancy()
+        {
+            var g=OpenMorphGenome.Founder(903);
+            g.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,angle=75f,
+                length=.9f,width=.2f,repeat=2,mirror=true
+            });
+            var tissue=OpenMorphTissue.Grow(
+                g,48,36,36,360,true,true);
+            var report=OpenMorphCausalBranches.Analyze(
+                g,tissue,36,360);
+            Assert.AreEqual(1,report.totalBranches);
+            var knockout=OpenMorphCausalBranches.Ablate(g,1);
+            var ablated=OpenMorphTissue.Grow(
+                knockout,48,36,36,360,true,true);
+            var delta=OpenMorphPairMetrics.Compare(tissue,ablated);
+            Assert.AreEqual(delta.onlyA+delta.onlyB,
+                report.branches[0].changedCells);
+            Assert.AreEqual(delta.jaccard,
+                report.branches[0].occupancyJaccard,.000001f);
+            Assert.AreEqual(delta.symmetricDifferenceFraction,
+                report.branches[0].changedFraction,.000001f);
+            Assert.AreEqual(report.branches[0].changedFraction>=.035f,
+                report.branches[0].morphologicallyActive);
+        }
+
+        [Test]
+        public void NoNonRootGenesMeansNoCausalBranchCredit()
+        {
+            var g=OpenMorphGenome.Founder(104);
+            var tissue=OpenMorphTissue.Grow(
+                g,32,24,20,160,true,true);
+            var report=OpenMorphCausalBranches.Analyze(
+                g,tissue,20,160);
+            Assert.AreEqual(0,report.totalBranches);
+            Assert.AreEqual(0,report.activeBranches);
+            Assert.AreEqual(0f,report.greatestChangedFraction);
+        }
+
+        [Test]
         public void PopulationConstraintsAreEnforced()
         {
             Assert.Throws<System.ArgumentOutOfRangeException>(()=>
