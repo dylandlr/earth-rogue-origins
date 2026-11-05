@@ -30,7 +30,7 @@ namespace EarthRogueOrigins.Editor
             Directory.CreateDirectory(folder);
             var result=OpenMorphEvolution.Evolve();
             var csv=new StringBuilder(
-                "generation,id,parent_id,seed,genes,segments,occupied,scarce_survival,moderate_survival,fitness,diversity\n");
+                "generation,id,parent_id,seed,genes,segments,occupied,scarce_survival,moderate_survival,fitness,diversity,novelty,selection_score,guide_coverage,supported_tissue_cells\n");
             var champions=new StringBuilder(
                 "generation,id,parent_id,genes,segments,occupied,fitness,scarce_survival,moderate_survival\n");
             foreach(var animal in result.evaluated)
@@ -45,7 +45,11 @@ namespace EarthRogueOrigins.Editor
                     .Append(N(animal.scarceSurvival)).Append(',')
                     .Append(N(animal.moderateSurvival)).Append(',')
                     .Append(N(animal.fitness)).Append(',')
-                    .Append(N(animal.diversity)).AppendLine();
+                    .Append(N(animal.diversity)).Append(',')
+                    .Append(N(animal.novelty)).Append(',')
+                    .Append(N(animal.selectionScore)).Append(',')
+                    .Append(N(animal.bodyGuidanceCoverage)).Append(',')
+                    .Append(animal.supportedTissueCells).AppendLine();
             }
             foreach(var animal in result.champions)
                 champions.Append(animal.generation).Append(',')
@@ -63,11 +67,13 @@ namespace EarthRogueOrigins.Editor
             const int tileW=128,tileH=96;
             var board=new Color32[4*tileW*2*tileH];
             var structures=new Color32[4*tileW*2*tileH];
+            var alignment=new Color32[4*tileW*2*tileH];
             var background=new Color32(31,38,36,255);
             for(int i=0;i<board.Length;i++)
             {
                 board[i]=background;
                 structures[i]=background;
+                alignment[i]=background;
             }
             int final=result.generations-1;
             int slot=0;
@@ -76,6 +82,8 @@ namespace EarthRogueOrigins.Editor
                 if(animal.generation!=final)continue;
                 var pixels=OpenMorphTissue.Render(animal.tissue);
                 var geometry=OpenMorphRasterizer.Render(animal.genome);
+                var guidance=OpenMorphOrganizers.Build(animal.genome,
+                    animal.tissue.width,animal.tissue.height);
                 int col=slot%4,row=1-slot/4;
                 for(int y=0;y<tileH;y++)
                 for(int x=0;x<tileW;x++)
@@ -88,14 +96,26 @@ namespace EarthRogueOrigins.Editor
                 for(int x=0;x<animal.tissue.width;x++)
                 {
                     var pixel=pixels[y*animal.tissue.width+x];
-                    if(pixel.a==0)continue;
+                    bool present=pixel.a!=0;
+                    bool guided=guidance.activation[
+                        y*animal.tissue.width+x]>=.25f;
+                    if(!present&&!guided)continue;
                     // Nearest-neighbor doubling, centered on a native
                     // 128x96 tile (tissue field 48x36 => 96x72).
                     int startX=col*tileW+16+x*2;
                     int startY=row*tileH+12+y*2;
                     for(int yy=0;yy<2;yy++)
                     for(int xx=0;xx<2;xx++)
-                        board[(startY+yy)*tileW*4+startX+xx]=pixel;
+                    {
+                        int index=(startY+yy)*tileW*4+startX+xx;
+                        if(present)board[index]=pixel;
+                        // White=matched tissue/guidance; magenta=tissue
+                        // outside inherited organizer; cyan=unused cue.
+                        alignment[index]=present&&guided?
+                            new Color32(230,231,215,255):
+                            present?new Color32(207,99,180,255):
+                            new Color32(76,183,198,255);
+                    }
                 }
                 var snapshot=new GenomeRecord {
                     id=animal.id,generation=animal.generation,
@@ -112,6 +132,11 @@ namespace EarthRogueOrigins.Editor
                 TextureFormat.RGBA32,false);
             tex.filterMode=FilterMode.Point;
             tex.SetPixels32(board);tex.Apply(false,false);
+            var alignmentTex=new Texture2D(tileW*4,tileH*2,
+                TextureFormat.RGBA32,false);
+            alignmentTex.filterMode=FilterMode.Point;
+            alignmentTex.SetPixels32(alignment);
+            alignmentTex.Apply(false,false);
             var geometryTex=new Texture2D(tileW*4,tileH*2,
                 TextureFormat.RGBA32,false);
             geometryTex.filterMode=FilterMode.Point;
@@ -123,12 +148,20 @@ namespace EarthRogueOrigins.Editor
                     tex.EncodeToPNG());
                 File.WriteAllBytes(folder+"/actual_emergent_structures.png",
                     geometryTex.EncodeToPNG());
+                File.WriteAllBytes(folder+"/actual_expression_alignment.png",
+                    alignmentTex.EncodeToPNG());
                 File.WriteAllText(folder+"/population.csv",csv.ToString());
                 File.WriteAllText(folder+"/champions.csv",champions.ToString());
                 File.WriteAllText(folder+"/provenance.txt",
                     "Native Unity C# developmental tissue and recurrent GRN.\n"+
                     "Seed="+result.seed+" generations="+result.generations+
                     " population="+result.populationSize+"; no species templates.\n"+
+                    "White=organizer and tissue overlap; magenta=unguided "+
+                    "tissue; cyan=unexpressed growth guidance. "+
+                    "The presentation-fitted structural PNG is NOT "+
+                    "in the same coordinate frame as the tissue.\n"+
+                    "Quality-diversity parent selection retains the "+
+                    "highest raw fitness champion.\n"+
                     "Experimental survival-weighted selection; NOT emergent "+
                     "locomotion, reproduction in an ecosystem or a complete organism.\n");
             }
@@ -136,6 +169,7 @@ namespace EarthRogueOrigins.Editor
             {
                 UnityEngine.Object.DestroyImmediate(tex);
                 UnityEngine.Object.DestroyImmediate(geometryTex);
+                UnityEngine.Object.DestroyImmediate(alignmentTex);
             }
             Debug.Log("Emergent generation audit exported: "+folder);
         }
