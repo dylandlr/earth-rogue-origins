@@ -119,6 +119,63 @@ namespace EarthRogueOrigins.Tests
         }
 
         [Test]
+        public void BranchEvidenceReconcilesWithActualOccupiedTissue()
+        {
+            var genome=OpenMorphGenome.Founder(1123);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                length=.85f,width=.15f,angle=80f,repeat=2
+            });
+            var tissue=OpenMorphTissue.Grow(
+                genome,48,36,36,360,true,true);
+            var report=OpenMorphBranchExpression.Analyze(genome,tissue);
+            Assert.AreEqual(2,report.genes.Length);
+            Assert.AreEqual(1,report.nonRootGenes);
+            Assert.That(report.nonRootExpressionFraction,Is.InRange(0f,1f));
+            foreach(var evidence in report.genes)
+            {
+                Assert.GreaterOrEqual(evidence.guidedCells,
+                    evidence.occupiedCells);
+                Assert.That(evidence.expressionFraction,Is.InRange(0f,1f));
+                if(evidence.expressed)
+                    Assert.GreaterOrEqual(evidence.occupiedCells,4);
+            }
+            Assert.GreaterOrEqual(report.unusedGuidanceCells,0);
+        }
+
+        [Test]
+        public void UnexpressedGenesDoNotReceiveFunctionalStructureCredit()
+        {
+            var genome=OpenMorphGenome.Founder(81);
+            genome.genes.Add(new OpenMorphGenome.Gene {
+                innovation=1,parentInnovation=0,
+                length=.85f,width=.1f,angle=75f
+            });
+            var seedOnly=new OpenMorphTissue.Field(48,36);
+            seedOnly.cells[18*48+24].fate=OpenMorphTissue.Fate.Structural;
+            var report=OpenMorphBranchExpression.Analyze(
+                genome,seedOnly);
+            Assert.AreEqual(1,report.nonRootGenes);
+            Assert.AreEqual(0,report.expressedNonRootGenes);
+            Assert.AreEqual(0f,report.nonRootExpressionFraction);
+        }
+
+        [Test]
+        public void IntegratedEvolutionReportsBranchExpressionConsistently()
+        {
+            var run=OpenMorphEvolution.Evolve(902,2,4);
+            foreach(var animal in run.evaluated)
+            {
+                var report=OpenMorphBranchExpression.Analyze(
+                    animal.genome,animal.tissue);
+                Assert.AreEqual(report.expressedNonRootGenes,
+                    animal.expressedBranches);
+                Assert.AreEqual(report.nonRootGenes,
+                    animal.expressedBranches+animal.unexpressedBranches);
+            }
+        }
+
+        [Test]
         public void PopulationConstraintsAreEnforced()
         {
             Assert.Throws<System.ArgumentOutOfRangeException>(()=>
