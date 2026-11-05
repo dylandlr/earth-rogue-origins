@@ -17,6 +17,8 @@ namespace EarthRogueOrigins.PixelCreatures
             public OpenMorphGenome genome;
             public int id,generation,parentId,genes,segments,occupied;
             public float fitness,scarceSurvival,moderateSurvival,diversity;
+            public float novelty,selectionScore,bodyGuidanceCoverage;
+            public int supportedTissueCells;
             public OpenMorphTissue.Field tissue;
         }
 
@@ -92,24 +94,30 @@ namespace EarthRogueOrigins.PixelCreatures
                         .28f*item.moderateSurvival+
                         .20f*biomass+
                         .10f*complexity;
+                    var expressed=OpenMorphPhenotypeMetrics.Analyze(
+                        genome,tissue);
+                    item.bodyGuidanceCoverage=expressed.coverageJaccard;
+                    item.supportedTissueCells=expressed.supportedTissueCells;
                     if(occupied<8)item.fitness*=.15f;
                     cohort.Add(item);
                     run.evaluated.Add(item);
                 }
+                // Phenotype-distance based novelty, not genome counts.
+                // Include historical tissue to discourage convergence on
+                // the same high-fitness shape over multiple generations.
+                var references=new List<OpenMorphTissue.Field>();
+                foreach(var previous in run.evaluated)
+                    references.Add(previous.tissue);
                 foreach(var item in cohort)
                 {
-                    // Observable genome/phenotype diversity proxy.
-                    // This is NOT an open-ended novelty metric.
-                    float sum=0f;
-                    foreach(var other in cohort)
-                    {
-                        if(other==item)continue;
-                        sum+=Mathf.Abs(item.occupied-other.occupied)/
-                            (float)MaxTissueCells;
-                        sum+=Mathf.Abs(item.segments-other.segments)/
-                            (float)OpenMorphGenome.MaxDevelopedNodes;
-                    }
-                    item.diversity=sum/Math.Max(1,cohort.Count-1);
+                    // The current individual is excluded by reference.
+                    item.novelty=OpenMorphPhenotypeMetrics.Novelty(
+                        item.tissue,references,3);
+                    item.diversity=item.novelty;
+                    // Keep raw survival-proxy fitness separate from the
+                    // explicit quality-diversity parent selection score.
+                    item.selectionScore=.78f*item.fitness+
+                        .22f*item.novelty;
                 }
                 cohort.Sort((a,b)=>{
                     int score=b.fitness.CompareTo(a.fitness);
@@ -119,17 +127,50 @@ namespace EarthRogueOrigins.PixelCreatures
                 run.champions.Add(cohort[0]);
                 if(generation==generations-1)break;
 
-                // Elitism plus mutation from the best half. The entire
-                // history is retained and immutable; offspring mutate
-                // independent genome copies with deterministic seeds.
-                int pool=Math.Max(2,populationSize/2);
+                // Preserve the best raw-fitness champion. Build a
+                // second pool ranked by quality+phenotypic novelty,
+                // enforcing a minimum shape distance when possible.
+                var bySelection=new List<Individual>(cohort);
+                bySelection.Sort((a,b)=>{
+                    int cmp=b.selectionScore.CompareTo(a.selectionScore);
+                    return cmp!=0?cmp:a.id.CompareTo(b.id);
+                });
+                int poolSize=Math.Max(2,populationSize/2);
+                var selectedParents=new List<Individual> {cohort[0]};
+                const float minimumNovelDistance=.22f;
+                foreach(var candidate in bySelection)
+                {
+                    if(selectedParents.Count>=poolSize)break;
+                    bool distinct=true;
+                    foreach(var selected in selectedParents)
+                    {
+                        float distance=1f-OpenMorphPairMetrics.Compare(
+                            candidate.tissue,selected.tissue).jaccard;
+                        if(distance<minimumNovelDistance)
+                        {
+                            distinct=false;break;
+                        }
+                    }
+                    if(distinct)selectedParents.Add(candidate);
+                }
+                // Keep a complete parent pool when the population is
+                // genuinely homogeneous; do not invent diversity.
+                foreach(var candidate in bySelection)
+                {
+                    if(selectedParents.Count>=poolSize)break;
+                    if(!selectedParents.Contains(candidate))
+                        selectedParents.Add(candidate);
+                }
                 genomes=new List<OpenMorphGenome>();
                 parents=new List<int>();
                 genomes.Add(cohort[0].genome.Copy());
                 parents.Add(cohort[0].id);
                 for(int i=1;i<populationSize;i++)
                 {
-                    var parent=cohort[random.Next(pool)];
+                    // Round-robin ensures distinct selected parents are
+                    // actually represented, instead of being starved out
+                    // by repeated sampling of a single champion.
+                    var parent=selectedParents[(i-1)%selectedParents.Count];
                     var offspring=parent.genome.Mutate(
                         random.Next(1,int.MaxValue));
                     if(i%3==0)
