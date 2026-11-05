@@ -62,15 +62,28 @@ namespace EarthRogueOrigins.Editor
             // the visually appealing or highest-scoring individuals.
             const int tileW=128,tileH=96;
             var board=new Color32[4*tileW*2*tileH];
+            var structures=new Color32[4*tileW*2*tileH];
             var background=new Color32(31,38,36,255);
-            for(int i=0;i<board.Length;i++)board[i]=background;
+            for(int i=0;i<board.Length;i++)
+            {
+                board[i]=background;
+                structures[i]=background;
+            }
             int final=result.generations-1;
             int slot=0;
             foreach(var animal in result.evaluated)
             {
                 if(animal.generation!=final)continue;
                 var pixels=OpenMorphTissue.Render(animal.tissue);
+                var geometry=OpenMorphRasterizer.Render(animal.genome);
                 int col=slot%4,row=1-slot/4;
+                for(int y=0;y<tileH;y++)
+                for(int x=0;x<tileW;x++)
+                {
+                    var geomPixel=geometry[y*tileW+x];
+                    if(geomPixel.a!=0)
+                        structures[(row*tileH+y)*tileW*4+col*tileW+x]=geomPixel;
+                }
                 for(int y=0;y<animal.tissue.height;y++)
                 for(int x=0;x<animal.tissue.width;x++)
                 {
@@ -99,10 +112,17 @@ namespace EarthRogueOrigins.Editor
                 TextureFormat.RGBA32,false);
             tex.filterMode=FilterMode.Point;
             tex.SetPixels32(board);tex.Apply(false,false);
+            var geometryTex=new Texture2D(tileW*4,tileH*2,
+                TextureFormat.RGBA32,false);
+            geometryTex.filterMode=FilterMode.Point;
+            geometryTex.SetPixels32(structures);
+            geometryTex.Apply(false,false);
             try
             {
                 File.WriteAllBytes(folder+"/actual_emergent_generation.png",
                     tex.EncodeToPNG());
+                File.WriteAllBytes(folder+"/actual_emergent_structures.png",
+                    geometryTex.EncodeToPNG());
                 File.WriteAllText(folder+"/population.csv",csv.ToString());
                 File.WriteAllText(folder+"/champions.csv",champions.ToString());
                 File.WriteAllText(folder+"/provenance.txt",
@@ -112,7 +132,11 @@ namespace EarthRogueOrigins.Editor
                     "Experimental survival-weighted selection; NOT emergent "+
                     "locomotion, reproduction in an ecosystem or a complete organism.\n");
             }
-            finally {UnityEngine.Object.DestroyImmediate(tex);}
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(tex);
+                UnityEngine.Object.DestroyImmediate(geometryTex);
+            }
             Debug.Log("Emergent generation audit exported: "+folder);
         }
 
