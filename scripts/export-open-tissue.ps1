@@ -47,7 +47,10 @@ $required=@(
     'actual_tissue_growth.png',
     'tissue_metrics.csv',
     'grn_growth_trace.csv',
-    'grn_growth_outcomes.csv'
+    'grn_growth_outcomes.csv',
+    'actual_resource_survival.png',
+    'resource_survival_metrics.csv',
+    'resource_survival_trace.csv'
 )
 foreach($filename in $required){
     $path=Join-Path $latest.FullName $filename
@@ -87,6 +90,15 @@ $png=Join-Path $latest.FullName 'actual_tissue_growth.png'
 $csv=Join-Path $latest.FullName 'tissue_metrics.csv'
 Write-Host "Verified current run: $($latest.FullName)"
 Write-Host "Verified GRN diagnostic schema: v1.3"
+$resourceHeader=Get-Content -LiteralPath (Join-Path $latest.FullName 'resource_survival_metrics.csv') -TotalCount 1
+foreach($field in @('conservation_error','unmet_maintenance','surviving_cells','harvested')){
+    if($field -notin ($resourceHeader -split ',')){
+        throw "Missing v1.5 resource field '$field' in current Unity run: $($latest.FullName)"
+    }
+}
+Write-Host "Verified resource maintenance schema: v1.5"
+Write-Host "Upload: $(Join-Path $latest.FullName 'actual_resource_survival.png')"
+Write-Host "Upload: $(Join-Path $latest.FullName 'resource_survival_metrics.csv')"
 Write-Host "Upload: $outcomes"
 Write-Host "Upload: $trace"
 Write-Host "Actual C# tissue growth image: $png"
