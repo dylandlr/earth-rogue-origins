@@ -29,7 +29,7 @@ namespace EarthRogueOrigins.Editor
                 OpenMorphGRN.BirthChannel.Neutral
             };
             var csv=new StringBuilder(
-                "pair,seed,mode,climate,initial_cells,surviving_cells,deaths,initial_energy,external_added,harvested,consumed,discarded,remaining_energy,remaining_pool,unmet_maintenance,conservation_error,transport_cells,storage_cells\n");
+                "pair,seed,mode,climate,initial_cells,surviving_cells,deaths,survival_fraction,maintenance_per_initial_cell,harvest_per_initial_cell,initial_energy,external_added,harvested,consumed,discarded,remaining_energy,remaining_pool,unmet_maintenance,conservation_error,transport_cells,storage_cells\n");
             var timeline=new StringBuilder(
                 "pair,mode,climate,tick,living_cells,cell_energy,external_pool\n");
             var board=new Color32[W*4*H*3];
@@ -52,6 +52,12 @@ namespace EarthRogueOrigins.Editor
                             .Append(trial.initialCells).Append(',')
                             .Append(trial.livingCells).Append(',')
                             .Append(trial.deaths).Append(',')
+                            .Append(Format(trial.livingCells/(float)
+                                Math.Max(1,trial.initialCells))).Append(',')
+                            .Append(Format(trial.consumed/
+                                Math.Max(1,trial.initialCells))).Append(',')
+                            .Append(Format(trial.harvested/
+                                Math.Max(1,trial.initialCells))).Append(',')
                             .Append(Format(trial.initialEnergy)).Append(',')
                             .Append(Format(trial.externalAdded)).Append(',')
                             .Append(Format(trial.harvested)).Append(',')
