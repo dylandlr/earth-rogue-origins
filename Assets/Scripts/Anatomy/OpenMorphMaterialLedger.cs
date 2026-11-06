@@ -61,6 +61,31 @@ namespace EarthRogueOrigins.PixelCreatures
             biomass[index]+=cellBiomass;
         }
 
+        /// <summary>Funds an adjacent daughter from parent reserve. Positive biomass marks occupancy in this assay.</summary>
+        public bool TryDivide(int x, int y, int daughterX, int daughterY,
+            double daughterBiomass, double divisionWaste)
+        {
+            CheckNonnegative(daughterBiomass, nameof(daughterBiomass));
+            CheckNonnegative(divisionWaste, nameof(divisionWaste));
+            if (daughterBiomass == 0)
+                throw new ArgumentOutOfRangeException(nameof(daughterBiomass));
+
+            int parent = Index(x, y);
+            int daughter = Index(daughterX, daughterY);
+            if (Math.Abs(x - daughterX) + Math.Abs(y - daughterY) != 1)
+                return false;
+
+            double cost = daughterBiomass + divisionWaste;
+            if (biomass[parent] <= 0 || biomass[daughter] != 0 ||
+                reserve[daughter] != 0 || reserve[parent] < cost)
+                return false;
+
+            reserve[parent] -= cost;
+            biomass[daughter] = daughterBiomass;
+            waste[parent] += divisionWaste;
+            return true;
+        }
+
         public double TotalMaterial()
         {
             double total=0;
