@@ -6,6 +6,28 @@ namespace EarthRogueOrigins.Tests
 {
     public sealed class OpenMorphMaterialLedgerTests
     {
+        [TestCase(0)]
+        [TestCase(4)]
+        public void RecurrentGrowthAccountsForProposals(int supply)
+        {
+            var field=OpenMorphTissue.Grow(OpenMorphGenome.Founder(3452),
+                32,32,64,structured:true,recurrentRegulation:true,
+                fundedDivision:true,nutrientPerSite:supply);
+            Assert.AreEqual(1d+1024*supply,field.material.TotalMaterial(),1e-8);
+            int accepted=0,proposals=0;
+            foreach(int count in field.acceptedBirthsByTick)accepted+=count;
+            foreach(int count in field.proposedBirthsByTick)proposals+=count;
+            Assert.Greater(proposals,0);
+            Assert.AreEqual(proposals,field.divisionAttempts.Count);
+            Assert.AreEqual(accepted,field.divisionAttempts.FindAll(a=>a.outcome=="funded").Count);
+            Assert.AreEqual(1+accepted-field.prunedCells,field.Occupied());
+            if(supply==0)Assert.AreEqual(0,accepted);
+            else Assert.Greater(accepted,0);
+            for(int i=0;i<field.cells.Length;i++)
+                Assert.AreEqual(field.cells[i].fate!=OpenMorphTissue.Fate.Empty,
+                    field.material.biomass[i]>0);
+        }
+
         [Test]
         public void DivisionPaysForDaughterAndWaste()
         {
