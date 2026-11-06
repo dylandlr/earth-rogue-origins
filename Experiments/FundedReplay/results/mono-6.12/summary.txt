@@ -1,0 +1,1 @@
+seed=1548701035 width=64 height=48 steps=36 cap=360 nutrient_per_site=4 first_different_decision_tick=23 intact_sites=101 knockout_sites=113 intact_only=0 knockout_only=12
