@@ -7,6 +7,34 @@ namespace EarthRogueOrigins.Tests
     public sealed class OpenMorphMaterialLedgerTests
     {
         [Test]
+        public void DivisionPaysForDaughterAndWaste()
+        {
+            var ledger = new OpenMorphMaterialLedger(3, 3);
+            ledger.Seed(1, 1, 0, 3, 1);
+            Assert.IsTrue(ledger.TryDivide(1, 1, 2, 1, 2, 1));
+            int parent = ledger.Index(1, 1);
+            Assert.AreEqual(0d, ledger.reserve[parent]);
+            Assert.AreEqual(1d, ledger.waste[parent]);
+            Assert.AreEqual(1d, ledger.biomass[parent]);
+            Assert.AreEqual(2d, ledger.biomass[ledger.Index(2, 1)]);
+            Assert.AreEqual(4d, ledger.TotalMaterial());
+        }
+
+        [TestCase(2, 0)]
+        [TestCase(3, 1)]
+        public void UnfundedOrOccupiedDivisionLeavesPoolsUntouched(int reserve, int occupant)
+        {
+            var ledger = new OpenMorphMaterialLedger(3, 3);
+            ledger.Seed(1, 1, 0, reserve, 1);
+            ledger.Seed(2, 1, 5, 0, occupant);
+            var pools = new[] { ledger.nutrient, ledger.reserve, ledger.biomass, ledger.waste };
+            var snapshots = Array.ConvertAll(pools, pool => (double[])pool.Clone());
+            Assert.IsFalse(ledger.TryDivide(1, 1, 2, 1, 2, 1));
+            for (int i = 0; i < pools.Length; i++)
+                CollectionAssert.AreEqual(snapshots[i], pools[i]);
+        }
+
+        [Test]
         public void UptakeGrowthAndMaintenanceTransferButDoNotCreateMaterial()
         {
             var m=new OpenMorphMaterialLedger(4,4);
