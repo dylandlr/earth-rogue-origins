@@ -31,10 +31,19 @@ namespace EarthRogueOrigins.PixelCreatures
             public float regulatoryGrowth,regulatoryFate,regulatoryBrake;
         }
 
+        public struct DivisionAttempt
+        {
+            public int tick, parentX, parentY, daughterX, daughterY;
+            public double reserveBefore;
+            public string outcome;
+        }
+
         public sealed class Field
         {
             public readonly int width,height;
             public readonly Cell[] cells;
+            public OpenMorphMaterialLedger material;
+            public List<DivisionAttempt> divisionAttempts;
             public int steps;
             public int prunedCells;
             // Observed development history, including the initial seed.
@@ -76,7 +85,8 @@ namespace EarthRogueOrigins.PixelCreatures
             int maxCells=int.MaxValue,bool structured=false,
             bool recurrentRegulation=false,
             OpenMorphGRN.BirthChannel birthChannel=
-                OpenMorphGRN.BirthChannel.Full)
+                OpenMorphGRN.BirthChannel.Full,
+            bool fundedDivision=false, double nutrientPerSite=4)
         {
             if(maxCells<1)throw new ArgumentOutOfRangeException(nameof(maxCells));
             if(recurrentRegulation && !structured)
@@ -100,6 +110,16 @@ namespace EarthRogueOrigins.PixelCreatures
                 fate=Fate.Structural,signalA=1f,signalB=.15f,
                 energy=1f,lineage=0
             };
+            int[] parentSite=null;
+            if(fundedDivision)
+            {
+                field.material=new OpenMorphMaterialLedger(width,height);
+                field.divisionAttempts=new List<DivisionAttempt>();
+                parentSite=new int[field.cells.Length];
+                for(int i=0;i<field.cells.Length;i++)
+                    field.material.Seed(i%width,i/width,nutrientPerSite,0,i==origin?1:0);
+            }
+            var proposalSignal=fundedDivision?new float[field.cells.Length]:null;
             var next=new Cell[field.cells.Length];
             // Developmental graph topology provides a spatial morphogen
             // field. Growth still occurs cell by cell, never by drawing
@@ -117,6 +137,19 @@ namespace EarthRogueOrigins.PixelCreatures
                 // whole-organism tissue budget after all local rules run.
                 var births=new List<int>();
                 int existing=field.Occupied();
+                if(fundedDivision)
+                {
+                    field.material.Diffuse(.1,1);
+                    for(int i=0;i<field.cells.Length;i++)
+                    {
+                        if(field.cells[i].fate==Fate.Empty)continue;
+                        // One material unit of uptake per occupied site per tick.
+                        double uptake=Math.Min(1,field.material.nutrient[i]);
+                        field.material.nutrient[i]-=uptake;
+                        field.material.reserve[i]+=uptake;
+                        field.cells[i].energy=(float)Math.Min(1,field.material.reserve[i]);
+                    }
+                }
                 for(int y=0;y<height;y++)
                 for(int x=0;x<width;x++)
                 {
@@ -143,6 +176,7 @@ namespace EarthRogueOrigins.PixelCreatures
                             if(other.energy>bestEnergy)
                             {
                                 bestEnergy=other.energy;
+                                if(fundedDivision)parentSite[i]=ny*width+nx;
                                 lineage=other.lineage;
                                 parentRegulation=new OpenMorphGRN.State {
                                     growth=other.regulatoryGrowth,
@@ -184,7 +218,7 @@ namespace EarthRogueOrigins.PixelCreatures
                             // roots and connected active tissue recover energy.
                             // This is deliberately NOT a conserved metabolism
                             // model; that is a separate simulation milestone.
-                            energy=Mathf.Clamp01(current.energy-.018f+
+                            energy=fundedDivision?current.energy:Mathf.Clamp01(current.energy-.018f+
                                 .028f*bias+.025f*guide.activation[i]+
                                 .015f*(parents>0?nearbyEnergy/parents:0f)),
                             lineage=current.lineage,
@@ -208,7 +242,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         // branch-front cells advance at low morphogen levels;
                         // only connected, energy-bearing tissue can divide.
                         float guideStrength=guide.activation[i];
-                        bool canGrow=parents>0 && bestEnergy>.08f &&
+                        bool canGrow=parents>0 && (fundedDivision || bestEnergy>.08f) &&
                             ((guideStrength>.24f && a>.035f) ||
                              (bias>.19f && a>.11f));
                         // Deterministic seeded stochasticity permits distinct
@@ -260,6 +294,7 @@ namespace EarthRogueOrigins.PixelCreatures
                         if(canGrow && Noise(genome.seed,tick,x,y)<directionalChance)
                         {
                             births.Add(i);
+                            if(fundedDivision)proposalSignal[i]=a;
                             next[i]=new Cell {
                                 fate=recurrentRegulation?
                                     OpenMorphGRN.Differentiate(birthExpression):structured?
@@ -290,7 +325,7 @@ namespace EarthRogueOrigins.PixelCreatures
                 int allowance=Math.Max(0,maxCells-existing);
                 field.proposedBirthsByTick[tick]=births.Count;
                 field.acceptedBirthsByTick[tick]=Math.Min(births.Count,allowance);
-                if(births.Count>allowance)
+                if(fundedDivision || births.Count>allowance)
                 {
                     births.Sort((left,right)=>
                     {
@@ -299,7 +334,35 @@ namespace EarthRogueOrigins.PixelCreatures
                         int order=a.CompareTo(b);
                         return order!=0?order:left.CompareTo(right);
                     });
-                    for(int k=allowance;k<births.Count;k++)
+                    if(fundedDivision)
+                    {
+                        int accepted=0;
+                        foreach(int site in births)
+                        {
+                            int parent=parentSite[site];
+                            double before=field.material.reserve[parent];
+                            string outcome;
+                            if(accepted>=allowance)outcome="cell_cap";
+                            else if(field.material.TryDivide(parent%width,parent/width,
+                                site%width,site/width,1,.25))
+                            {
+                                outcome="funded";
+                                accepted++;
+                                next[site].energy=0;
+                            }
+                            else outcome="insufficient_reserve";
+                            field.divisionAttempts.Add(new DivisionAttempt {
+                                tick=tick,parentX=parent%width,parentY=parent/width,
+                                daughterX=site%width,daughterY=site/width,
+                                reserveBefore=before,outcome=outcome
+                            });
+                            if(outcome!="funded")
+                                next[site]=new Cell { signalA=proposalSignal[site],
+                                    signalB=next[site].signalB };
+                        }
+                        field.acceptedBirthsByTick[tick]=accepted;
+                    }
+                    else for(int k=allowance;k<births.Count;k++)
                     {
                         int rejected=births[k];
                         next[rejected].fate=Fate.Empty;
@@ -339,12 +402,22 @@ namespace EarthRogueOrigins.PixelCreatures
                     }
                     if(candidate>=0)
                     {
+                        if(fundedDivision)
+                        {
+                            var ledger=field.material;
+                            ledger.waste[candidate]+=ledger.reserve[candidate]+ledger.biomass[candidate];
+                            ledger.reserve[candidate]=0;
+                            ledger.biomass[candidate]=0;
+                        }
                         next[candidate].fate=Fate.Empty;
                         next[candidate].energy=0f;
                         field.prunedCells++;
                         field.prunedByTick[tick]++;
                     }
                 }
+                if(fundedDivision)
+                    for(int i=0;i<next.Length;i++)
+                        next[i].energy=(float)Math.Min(1,field.material.reserve[i]);
                 Array.Copy(next,field.cells,next.Length);
                 field.steps++;
                 field.occupiedByTick[tick+1]=field.Occupied();
