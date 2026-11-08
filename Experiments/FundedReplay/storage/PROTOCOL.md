@@ -1,0 +1,9 @@
+# Costed physical storage prototype
+
+Exploratory reuse of seeds701-724; no selection or confirmation. Separate physical capacity C from uptake target G. Diffusion uses concentration mass/C. Incoming flux is proportionally limited by receiver free space measured before diffusion; outgoing flux remains donor-safe because C>=1 and edge conductance<=0.2. This conservative limiter may underuse space vacated simultaneously and is an explicit numerical assumption.
+
+Four prespecified conditions: baseline C1/G1; enlarged C10/G1; enlarged C10/G10; costed C10/G10. The first three have zero incremental storage cost; the last pays construction0.1*(C-1) per initial cell from the external budget and storage maintenance0.0001*(C-1) per living cell per step. Construction remains in a sealed material ledger after death. Storage maintenance and basal maintenance are served proportionally from available food; cumulative starvation uses the fractional shortfall of their combined demand.
+
+Use boundary supply ratio1.5, reserve0.3/cell, budget14.7*N,720 steps,basal demand0.01,damage threshold30. Transport ordinary/paid as before. All conditions share the same initial total budget. Report final survival and alive-time plus resource ledgers, paired comparisons to baseline within each transport arm. Four directions averaged within seed; bootstrap10000,RNG711, exploratory/unadjusted. No tuning or biological calibration.
+
+Physical storage is modeled as dilution volume for this prototype; alternative concentration laws are not equivalent. Thus C10/G10 does not replicate the earlier larger uptake gate. No claim of improvement across different models. Verify mass conservation, capacity bounds, concentration equilibrium, costs and uptake gating. No evolution, reproduction, Unity integration or candidate promotion.
