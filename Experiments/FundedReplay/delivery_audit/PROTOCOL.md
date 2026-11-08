@@ -1,0 +1,5 @@
+# Boundary delivery diagnosis
+
+Exploratory reuse of inspected seeds701-724. Fixed normalized benchmark: boundary access, potential uptake1.5*N*0.01, reserve0.3/cell, budget14.7*N,720 steps,demand0.01,threshold30. Compare uptake saturation limits1 and10 with ordinary/paid transport. The limit affects new uptake only, not diffusion-delivered resources. Both rate ceiling and resource budget unchanged; actual acquisition may differ. No model selection or fresh confirmation claim.
+
+Audit initial four-neighbor reachability from original boundary source sites. This is a static graph, not reachability after deaths. Primary descriptive comparison is final survival at cap10 minus cap1, per seed averaging directions, separately for ordinary and paid transport. Also report alive cell-time, acquisition and paid-minus-ordinary contrasts. Bootstrap10000,RNG711; exploratory unadjusted intervals. Reproduce cap1 prior metrics to1e-10. Larger storage is a mechanistic intervention, not a claimed biological improvement or evolved adaptation.
