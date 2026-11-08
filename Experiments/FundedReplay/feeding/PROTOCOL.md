@@ -1,0 +1,7 @@
+# Equal offered food and longer horizons
+
+Exploratory follow-up on inspected developmental seeds601-624, retained morphology. No new holdout claim or selection. Demand0.01, cumulative starvation threshold30, conductance and upkeep unchanged. Compare ordinary versus paid transport within each tissue and four source directions.
+
+Offer exactly100 units during steps1-180: upfront100 at step1; six pulses100/6 at steps1,31,61,91,121,151; gradual100/180 each step1-180. Follow to720 with no further food. Original extremal source sites remain fixed. Each installment splits equally among original source sites: dead-site portions enter an inaccessible-food ledger, with no redirection or later recovery. Thus total offered food is equal, absorbed food need not be. Report inaccessible food and remaining food explicitly.
+
+Primary descriptive measure: normalized alive cell-time through720. Secondary snapshots180,360,720 for survival fraction and resource ledgers. Paired means and bootstrap95% intervals10000 resamples,RNG711, averaging directions within seed. No promotion criterion or multiplicity-adjusted claims. Validate upfront180 against prior per-seed outcomes. Every step: offered to date = living resource + dead resource + consumed maintenance + transport upkeep + inaccessible food. Tests cover schedule sums, starvation before delayed feeding and conservation. Initialization and irreversible damage are model assumptions, not biology.

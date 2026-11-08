@@ -1,0 +1,7 @@
+{
+  "conditions": 96,
+  "below_maintenance_capacity": 95,
+  "min_supply_demand_ratio": 0.08333333333333334,
+  "median_supply_demand_ratio": 0.21052631578947367,
+  "max_supply_demand_ratio": 1.0
+}

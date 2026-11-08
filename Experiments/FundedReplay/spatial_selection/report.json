@@ -1,0 +1,31 @@
+{
+  "winner": [
+    0,
+    -1,
+    0.9,
+    4
+  ],
+  "means": {
+    "selected": 7.665734798765648,
+    "prior": 7.8899571080454365,
+    "disabled": 6.938393074861062
+  },
+  "comparisons": {
+    "prior": {
+      "mean_delta": -0.224222309279789,
+      "positive_seeds": 4,
+      "bootstrap_95_percent": [
+        -0.9199909388496301,
+        0.5916957005890862
+      ]
+    },
+    "disabled": {
+      "mean_delta": 0.7273417239045855,
+      "positive_seeds": 24,
+      "bootstrap_95_percent": [
+        0.4978967716571419,
+        1.0065279439359178
+      ]
+    }
+  }
+}

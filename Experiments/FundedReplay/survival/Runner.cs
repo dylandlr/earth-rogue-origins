@@ -1,0 +1,9 @@
+using System;using System.IO;using EarthRogueOrigins.PixelCreatures;class Runner {static void Main(string[] args){var g=new OpenMorphGenome();
+g.genes.Add(new OpenMorphGenome.Gene(){innovation=0,parentInnovation=-1,repeat=2,mirror=true,attachX=0.0f,attachY=0.0f,angle=-11.716939926147461f,length=0.3854850232601166f,width=0.19291023910045624f,bend=0.25714147090911865f,rigidity=0.75f,pigment=0.46846434473991394f,growthResponse=0.628908097743988f,tipResponse=0.4889870285987854f,inhibitionResponse=0.6348798274993896f,fateResponse=0.3314022123813629f,growthToFate=0.25960883498191833f,fateToGrowth=-0.15000000596046448f,growthToBrake=0.10000000149011612f,brakeToGrowth=-0.30000001192092896f,fateToBrake=0.10000000149011612f,brakeToFate=-0.20000000298023224f});
+g.genes.Add(new OpenMorphGenome.Gene(){innovation=1,parentInnovation=0,repeat=1,mirror=false,attachX=0.5445297956466675f,attachY=0.4361311197280884f,angle=-20.304780960083008f,length=0.17374570667743683f,width=0.04786087945103645f,bend=0.25714147090911865f,rigidity=0.75f,pigment=0.4139969050884247f,growthResponse=0.508878767490387f,tipResponse=0.4189871549606323f,inhibitionResponse=0.8171179294586182f,fateResponse=0.47125017642974854f,growthToFate=0.25960883498191833f,fateToGrowth=-0.15000000596046448f,growthToBrake=0.10000000149011612f,brakeToGrowth=-0.30000001192092896f,fateToBrake=0.07514894008636475f,brakeToFate=-0.20000000298023224f});
+Directory.CreateDirectory("maps");
+for(int seed=int.Parse(args[0]);seed<=int.Parse(args[1]);seed++)foreach(float response in new[]{.9f}){
+var m=g.Copy();m.seed=seed;if(response>=0)m.genes[1].fateResponse=response;
+var field=OpenMorphTissue.Grow(m,64,48,36,360,true,true,fundedDivision:true,nutrientPerSite:4);
+using(var w=new StreamWriter("maps/"+seed+"_"+response+".txt")){foreach(var c in field.cells)w.Write((int)c.fate);}
+}}}

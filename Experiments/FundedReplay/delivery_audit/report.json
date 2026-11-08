@@ -1,0 +1,94 @@
+{
+  "all_initial_cells_reachable": true,
+  "fully_reachable_cases": 96,
+  "cases": 96,
+  "mean_initial_reachable_fraction": 1.0,
+  "means": [
+    {
+      "capacity": 1,
+      "enabled": 0,
+      "final_alive": 0.13636725915745182,
+      "alive_time": 0.21350733980860845,
+      "acquired": 107.26970678534518,
+      "upkeep": 0.0
+    },
+    {
+      "capacity": 1,
+      "enabled": 1,
+      "final_alive": 0.14867352538770837,
+      "alive_time": 0.22396590809831182,
+      "acquired": 118.08582282641255,
+      "upkeep": 2.167958333333326
+    },
+    {
+      "capacity": 10,
+      "enabled": 0,
+      "final_alive": 0.4469676285833925,
+      "alive_time": 0.49406567179971544,
+      "acquired": 543.9608724504873,
+      "upkeep": 0.0
+    },
+    {
+      "capacity": 10,
+      "enabled": 1,
+      "final_alive": 0.48309838440841785,
+      "alive_time": 0.5267420541846332,
+      "acquired": 591.9208516318853,
+      "upkeep": 5.929687499999974
+    }
+  ],
+  "comparisons": {
+    "0": {
+      "final_alive": {
+        "delta": 0.3106003694259407,
+        "positive_seeds": 24,
+        "ci95": [
+          0.2998750233772492,
+          0.32074847985397725
+        ]
+      },
+      "alive_time": {
+        "delta": 0.28055833199110697,
+        "positive_seeds": 24,
+        "ci95": [
+          0.27071619380194606,
+          0.28978822482359495
+        ]
+      },
+      "acquired": {
+        "delta": 436.69116566514214,
+        "positive_seeds": 24,
+        "ci95": [
+          416.56192184341256,
+          456.1990949304816
+        ]
+      }
+    },
+    "1": {
+      "final_alive": {
+        "delta": 0.3344248590207095,
+        "positive_seeds": 24,
+        "ci95": [
+          0.32305968905699034,
+          0.3458224054571385
+        ]
+      },
+      "alive_time": {
+        "delta": 0.3027761460863214,
+        "positive_seeds": 24,
+        "ci95": [
+          0.29233022027834504,
+          0.3132839688281614
+        ]
+      },
+      "acquired": {
+        "delta": 473.83502880547275,
+        "positive_seeds": 24,
+        "ci95": [
+          452.21010737303,
+          494.54734075378536
+        ]
+      }
+    }
+  }
+}

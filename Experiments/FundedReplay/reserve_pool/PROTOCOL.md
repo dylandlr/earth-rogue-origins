@@ -1,0 +1,3 @@
+# Separate reserve pool prototype
+Exploratory reuse of701-724, no selection. Mobile volume/capacity and uptake target stay1. Optional immobile pool capacity9, initially empty. After uptake, deposit up to0.05/step from mobile excess above0.5; withdraw up to0.05/step when mobile below0.2. Disjoint thresholds prevent cycling. Transfer costs are drawn from the donating pool. Dead cells sequester both pools.
+Compare baseline, free pool, costed pool. Costed: construction0.1/unit capacity,maintenance0.0001/unit capacity/step,transfer loss0.01/unit moved. Same budget14.7N,reserve0.3 mobile/cell,ratio1.5,720 steps,threshold30. Report all conditions; bootstrap descriptive. No biological calibration or fresh confirmation. No retuning.

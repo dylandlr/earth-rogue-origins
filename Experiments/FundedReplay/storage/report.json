@@ -1,0 +1,126 @@
+{
+  "means": [
+    {
+      "condition": "baseline",
+      "enabled": 0,
+      "final_alive": 0.13636725915745182,
+      "alive_time": 0.21350733980860845,
+      "acquired": 107.26970678534518,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "baseline",
+      "enabled": 1,
+      "final_alive": 0.14867352538770837,
+      "alive_time": 0.22396590809831182,
+      "acquired": 118.08582282641255,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "costed",
+      "enabled": 0,
+      "final_alive": 0.091458713188455,
+      "alive_time": 0.16523066535692932,
+      "acquired": 131.03553777281215,
+      "construction": 95.40000000000002,
+      "storage_cost": 8.659072890742056
+    },
+    {
+      "condition": "costed",
+      "enabled": 1,
+      "final_alive": 0.10092536576734353,
+      "alive_time": 0.17352851208526454,
+      "acquired": 141.88265787684855,
+      "construction": 95.40000000000002,
+      "storage_cost": 9.250239934274772
+    },
+    {
+      "condition": "storage_gate",
+      "enabled": 0,
+      "final_alive": 0.09905084036706151,
+      "alive_time": 0.17568815171815744,
+      "acquired": 130.23415734456393,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "storage_gate",
+      "enabled": 1,
+      "final_alive": 0.10808196043266538,
+      "alive_time": 0.18294807119418743,
+      "acquired": 140.85974482704137,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "storage_only",
+      "enabled": 0,
+      "final_alive": 0.04563114128494423,
+      "alive_time": 0.12653261013471517,
+      "acquired": 35.7390306127126,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "storage_only",
+      "enabled": 1,
+      "final_alive": 0.04563114128494423,
+      "alive_time": 0.12565632773618393,
+      "acquired": 36.39135793019048,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    }
+  ],
+  "comparisons": {
+    "storage_only-0": {
+      "delta": -0.09073611787250757,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.10019694732549189,
+        -0.08208828087560482
+      ]
+    },
+    "storage_gate-0": {
+      "delta": -0.0373164187903903,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.04380535966056403,
+        -0.03134742210129689
+      ]
+    },
+    "costed-0": {
+      "delta": -0.0449085459689968,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.05117881862843274,
+        -0.03911340171789809
+      ]
+    },
+    "storage_only-1": {
+      "delta": -0.10304238410276412,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.11437773935683039,
+        -0.09241217150435903
+      ]
+    },
+    "storage_gate-1": {
+      "delta": -0.04059156495504298,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.04726745653016514,
+        -0.034255695695815686
+      ]
+    },
+    "costed-1": {
+      "delta": -0.04774815962036482,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.05473860988462865,
+        -0.040847056797401395
+      ]
+    }
+  }
+}

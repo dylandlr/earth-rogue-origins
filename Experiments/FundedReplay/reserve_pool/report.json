@@ -1,0 +1,92 @@
+{
+  "means": [
+    {
+      "condition": "baseline",
+      "enabled": 0,
+      "final_alive": 0.13636725915745182,
+      "alive_time": 0.21350733980860845,
+      "acquired": 107.26970678534518,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "baseline",
+      "enabled": 1,
+      "final_alive": 0.14867352538770837,
+      "alive_time": 0.22396590809831182,
+      "acquired": 118.08582282641255,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "costed_pool",
+      "enabled": 0,
+      "final_alive": 0.12670861990094456,
+      "alive_time": 0.20000024422558768,
+      "acquired": 134.75943178426914,
+      "construction": 95.40000000000002,
+      "storage_cost": 11.124587435957162
+    },
+    {
+      "condition": "costed_pool",
+      "enabled": 1,
+      "final_alive": 0.1360260139251105,
+      "alive_time": 0.20831782430069898,
+      "acquired": 145.16194539168632,
+      "construction": 95.40000000000002,
+      "storage_cost": 11.71451696318482
+    },
+    {
+      "condition": "free_pool",
+      "enabled": 0,
+      "final_alive": 0.13340546432092215,
+      "alive_time": 0.20977054597293088,
+      "acquired": 131.47563960998923,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    },
+    {
+      "condition": "free_pool",
+      "enabled": 1,
+      "final_alive": 0.142578179893409,
+      "alive_time": 0.21766493716083732,
+      "acquired": 141.5499878413565,
+      "construction": 0.0,
+      "storage_cost": 0.0
+    }
+  ],
+  "comparisons": {
+    "free_pool-0": {
+      "delta": -0.002961794836529662,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.004441028259937982,
+        -0.0017099476261539974
+      ]
+    },
+    "costed_pool-0": {
+      "delta": -0.009658639256507234,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.011573508137607165,
+        -0.007967173203172225
+      ]
+    },
+    "free_pool-1": {
+      "delta": -0.006095345494299342,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.007494247352500899,
+        -0.00493255140575967
+      ]
+    },
+    "costed_pool-1": {
+      "delta": -0.012647511462597882,
+      "positive_seeds": 0,
+      "ci95": [
+        -0.014715195817318928,
+        -0.010667038525923718
+      ]
+    }
+  }
+}
